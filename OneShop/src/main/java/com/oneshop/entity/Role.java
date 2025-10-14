@@ -1,8 +1,29 @@
 package com.oneshop.entity;
 
-public enum Role {
-    ADMIN, 
-    USER, 
-    VENDOR, 
-    SHIPPER
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+@Data
+@Entity
+@Table(name = "roles")
+@NoArgsConstructor
+@AllArgsConstructor
+public class Role {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RoleName name;
+
+    public enum RoleName {
+        ADMIN,
+        USER,
+        VENDOR,
+        SHIPPER
+    }
 }
