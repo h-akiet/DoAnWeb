@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "otps")
+@Table(name = "OTPS")
 public class Otp {
 
     @Id

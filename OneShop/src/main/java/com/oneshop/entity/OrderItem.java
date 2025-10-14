@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "order_items")
+@Table(name = "ORDER_ITEMS")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
