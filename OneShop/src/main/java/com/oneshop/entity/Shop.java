@@ -16,12 +16,10 @@ public class Shop {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long shopId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vendor_id", nullable = false)
-    private User vendor;
-
     @Column(name = "shop_name", length = 150, nullable = false)
     private String shopName;
 
-    // ... (các trường khác)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vendor_id", nullable = false)
+    private User vendor;
 }
