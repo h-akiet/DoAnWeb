@@ -378,61 +378,70 @@
             </div>
         </div>
         <div class="copyright">
-            <span class="footer__text"> &copy; Bản quyền thuộc về <a class="footer__link" href="#"> Phương Giang</a></span>
+            <span class="footer__text"> &copy; Bản quyền thuộc về <a class="footer__link" href="#"> Nhóm 6</a></span>
         </div>
     </div>
     <div class="ModalForm">
         <div class="modal" id="my-Register">
-            <a href="#" class="overlay-close"></a>
-            <div class="authen-modal register">
-                <h3 class="authen-modal__title">Đăng Kí</h3>
-                <div class="form-group">
-                    <label for="account" class="form-label">Họ Tên</label>
-                    <input id="account" name="account" type="text" class="form-control">
-                    <span class="form-message">Không hợp lệ !</span>
-                </div>
-                <div class="form-group">
-                    <label for="password" class="form-label">Tài khoản Email *</label>
-                    <input id="password" name="password" type="text" class="form-control">
-                    <span class="form-message"></span>
-                </div>
-                <div class="form-group">
-                    <label for="password" class="form-label">Mật khẩu *</label>
-                    <input id="password" name="password" type="text" class="form-control">
-                    <span class="form-message"></span>
-                </div>
-                <div class="form-group">
-                    <label for="password" class="form-label">Nhập lại mật khẩu *</label>
-                    <input id="password" name="password" type="text" class="form-control">
-                    <span class="form-message"></span>
-                </div>
-                <div class="authen__btns">
-                    <div class="btn btn--default">Đăng Kí</div>
-                </div>
+    <a href="#" class="overlay-close"></a>
+    <div class="authen-modal register">
+        <h3 class="authen-modal__title">Đăng Kí</h3>
+        <!-- Thêm thông báo lỗi -->
+        <div id="registerError" class="alert alert-danger" role="alert" style="display: none;"></div>
+        <form id="registerForm" method="post">
+            <div class="form-group">
+                <label for="fullName" class="form-label">Họ Tên</label>
+                <input id="fullName" name="fullName" type="text" class="form-control" required>
+                <span class="form-message"></span>
             </div>
-        </div>
-        <div class=" modal" id="my-Login">
-            <a href="#" class="overlay-close"></a>
-            <div class="authen-modal login">
-                <h3 class="authen-modal__title">Đăng Nhập</h3>
-                <div class="form-group">
-                    <label for="account" class="form-label">Địa chỉ email *</label>
-                    <input id="account" name="account" type="text" class="form-control">
-                    <span class="form-message">Tài khoản không chính xác !</span>
-                </div>
-                <div class="form-group">
-                    <label for="password" class="form-label">Mật khẩu *</label>
-                    <input id="password" name="password" type="text" class="form-control">
-                    <span class="form-message"></span>
-                </div>
-                <div class="authen__btns">
-                    <div class="btn btn--default">Đăng Nhập</div>
-                    <input type="checkbox" class="authen-checkbox">
-                    <label class="form-label">Ghi nhớ mật khẩu</label>
-                </div>
-                <a class="authen__link">Quên mật khẩu ?</a>
+            <div class="form-group">
+                <label for="email" class="form-label">Tài khoản Email *</label>
+                <input id="email" name="email" type="email" class="form-control" required>
+                <span class="form-message"></span>
             </div>
-        </div>
+            <div class="form-group">
+                <label for="password" class="form-label">Mật khẩu *</label>
+                <input id="password" name="password" type="password" class="form-control" required>
+                <span class="form-message"></span>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword" class="form-label">Nhập lại mật khẩu *</label>
+                <input id="confirmPassword" name="confirmPassword" type="password" class="form-control" required>
+                <span class="form-message"></span>
+            </div>
+            <div class="authen__btns">
+                <button type="submit" class="btn btn--default">Đăng Kí</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="my-Login">
+    <a href="#" class="overlay-close"></a>
+    <div class="authen-modal login">
+        <h3 class="authen-modal__title">Đăng Nhập</h3>
+        <!-- Thêm thông báo lỗi -->
+        <div id="loginError" class="alert alert-danger" role="alert" style="display: none;"></div>
+        <form id="loginForm" method="post">
+            <div class="form-group">
+                <label for="account" class="form-label">Địa chỉ email *</label>
+                <input id="account" name="account" type="email" class="form-control" required>
+                <span class="form-message"></span>
+            </div>
+            <div class="form-group">
+                <label for="password" class="form-label">Mật khẩu *</label>
+                <input id="password" name="password" type="password" class="form-control" required>
+                <span class="form-message"></span>
+            </div>
+            <div class="authen__btns">
+                <button type="submit" class="btn btn--default">Đăng Nhập</button>
+                <input type="checkbox" class="authen-checkbox" name="remember-me">
+                <label class="form-label">Ghi nhớ mật khẩu</label>
+            </div>
+        </form>
+        <a class="authen__link" href="/forgot">Quên mật khẩu ?</a>
+    </div>
+</div>
         <div class="up-top" id="upTop" onclick="goToTop()">
             <i class="fas fa-chevron-up"></i>
         </div>
@@ -441,6 +450,60 @@
     
     <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/assets/js/commonscript.js}"></script>
+    <script>
+    $(document).ready(function() {
+        // Xử lý form đăng ký
+        $('#registerForm').submit(function(e) {
+            e.preventDefault(); // Ngăn reload trang
+            $('#registerError').hide(); // Ẩn lỗi cũ
+            var formData = $(this).serialize();
+            $.ajax({
+                type: 'POST',
+                url: '/api/auth/signup',
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        window.location.href = response.redirect; // Chuyển trang nếu thành công
+                    } else {
+                        $('#registerError').text(response.message).show(); // Hiển thị lỗi trong modal đăng ký
+                    }
+                },
+                error: function() {
+                    $('#registerError').text('Có lỗi xảy ra!').show();
+                }
+            });
+        });
+
+        // Xử lý form đăng nhập
+        $('#loginForm').submit(function(e) {
+            e.preventDefault(); // Ngăn reload trang
+            $('#loginError').hide(); // Ẩn lỗi cũ
+            var formData = $(this).serialize();
+            $.ajax({
+                type: 'POST',
+                url: '/login',
+                data: formData,
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest"); // Đánh dấu AJAX
+                },
+                success: function(response) {
+                    if (response.success) {
+                        window.location.href = response.redirect; // Chuyển trang nếu thành công
+                    } else {
+                        $('#loginError').text(response.message).show(); // Hiển thị lỗi trong modal đăng nhập
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 401) {
+                        $('#loginError').text('Tài khoản hoặc mật khẩu không chính xác!').show();
+                    } else {
+                        $('#loginError').text('Có lỗi xảy ra!').show();
+                    }
+                }
+            });
+        });
+    });
+</script>
 </body>
 
 </html>
