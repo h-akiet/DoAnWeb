@@ -40,4 +40,9 @@ public class HomeController {
     public String product() {
         return "guest/product";
     }
+    
+    @GetMapping("/pay-customer")
+    public String pay_customer() {
+        return "user/pay";
+    }
 }
