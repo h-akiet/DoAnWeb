@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ProductVariant {
 
-    @Id
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long variantId;
 
@@ -21,11 +21,24 @@ public class ProductVariant {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Column(length = 100, nullable = false)
+    private String name; // <-- BỔ SUNG: Tên biến thể, ví dụ: "Màu: Đỏ Ruby"
+
     @Column(length = 50, unique = true)
     private String sku;
 
     @Column(precision = 12, scale = 2, nullable = false)
-    private BigDecimal price;
+    private BigDecimal price; // Giá bán của biến thể
 
-    // ... (các trường khác)
+    @Column(name = "original_price", precision = 12, scale = 2)
+    private BigDecimal originalPrice; // <-- BỔ SUNG: Giá gốc của biến thể
+
+    @Column(nullable = false)
+    private int stock; // <-- BỔ SUNG: Tồn kho của riêng biến thể này
+
+    @Column(name = "image_url")
+    private String imageUrl; // <-- BỔ SUNG: Ảnh đại diện cho biến thể
+
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true; 
 }

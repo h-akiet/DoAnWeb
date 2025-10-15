@@ -8,6 +8,8 @@ import com.oneshop.entity.Product;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findBySalesCountGreaterThanOrderBySalesCountDesc(int minSales);
+    List<Product> findTop6ByOrderBySalesCountDesc();
+    List<Product> findTop6ByOrderByProductIdDesc();
 
     @Query("SELECT p FROM Product p WHERE (?1 IS NULL OR p.name LIKE %?1%) " +
            "AND (?2 IS NULL OR p.category.id = ?2) " +

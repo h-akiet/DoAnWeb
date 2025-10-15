@@ -1,64 +1,49 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thanh Toán</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
-    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
-    <link rel="stylesheet" th:href="@{/assets/css/library.css}">
-    <link rel="stylesheet" th:href="@{/assets/owlCarousel/assets/owl.carousel.min.css}">
-    <link rel="stylesheet" th:href="@{/assets/owlCarousel/assets/owl.theme.default.min.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
-    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/pay.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" xintegrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <link rel="stylesheet" href="./assets/css/library.css">
+    <link rel="stylesheet" href="./assets/css/common.css">
+    <link rel="stylesheet" type="text/css" href="./assets/css/pay.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script th:src="@{/assets/owlCarousel/owl.carousel.min.js}"></script>
 </head>
 
 <body>
     <div class="header scrolling" id="myHeader">
         <div class="grid wide">
             <div class="header__top">
-                <div class="navbar-icon">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-                <a th:href="@{/}" class="header__logo">
-                    <img th:src="@{/assets/logo.png}" alt="">
-                </a>
+                <div class="navbar-icon"><span></span><span></span><span></span></div>
+                <a th:href="@{/}" class="header__logo"><img th:src="@{/assets/logo.png}" alt="Logo"></a>
                 <div class="header__search">
                     <div class="header__search-wrap">
-                        <input type="text" class="header__search-input" placeholder="Tìm kiếm">
-                        <a class="header__search-icon" href="#">
-                            <i class="fas fa-search"></i>
-                        </a>
+                        <input type="text" class="header__search-input" placeholder="Tìm kiếm sản phẩm...">
+                        <a class="header__search-icon" href="#"><i class="fas fa-search"></i></a>
                     </div>
                 </div>
                 <div class="header__account">
                     <a href="#my-Login" class="header__account-login">Đăng Nhập</a>
                     <a href="#my-Register" class="header__account-register">Đăng Kí</a>
                 </div>
-                <div class="header__cart have" href="#">
+                <div class="header__cart have">
                     <i class="fas fa-shopping-basket"></i>
-                    <div class="header__cart-amount">
-                        3
-                    </div>
+                    <div class="header__cart-amount">3</div>
                     <div class="header__cart-wrap">
                         <ul class="order__list">
                             <li class="item-order">
                                 <div class="order-wrap">
-                                    <a th:href="@{/product}" class="order-img">
-                                        <img th:src="@{/assets/img/product/product1.jpg}" alt="">
-                                    </a>
+                                    <a th:href="@{/product}" class="order-img"><img th:src="@{/assets/img/product/product1.jpg}" alt=""></a>
                                     <div class="order-main">
-                                        <a th:href="@{/product}" class="order-main-name">Áo sơ mi  caro kèm belt caro kèm belt Áo sơ mi caro kèm belt</a>
+                                        <a th:href="@{/product}" class="order-main-name">Sản phẩm mẫu trong giỏ</a>
                                         <div class="order-main-price">2 x 45,000 ₫</div>
                                     </div>
-                                    <a th:href="@{/product}" class="order-close"><i class="far fa-times-circle"></i></a>
+                                    <a href="#" class="order-close"><i class="far fa-times-circle"></i></a>
                                 </div>
                             </li>
                         </ul>
@@ -71,169 +56,124 @@
         </div>
         <div class="header__nav">
             <ul class="header__nav-list">
-                <li class="header__nav-item index">
-                    <a th:href="@{/}" class="header__nav-link">Trang chủ</a>
-                </li>
-                <li class="header__nav-item">
-                    <a href="#" class="header__nav-link">Giới Thiệu</a>
-                </li>
-                <li class="header__nav-item">
-                    <a th:href="@{/list-product}" class="header__nav-link">Sản Phẩm</a>
-                </li>
-                <li class="header__nav-item">
-                    <a th:href="@{/news}" class="header__nav-link">Tin Tức</a>
-                </li>
-                <li class="header__nav-item">
-                    <a th:href="@{/contact}" class="header__nav-link">Liên Hệ</a>
-                </li>
+                <li class="header__nav-item index"><a th:href="@{/}" class="header__nav-link">Trang chủ</a></li>
+                <li class="header__nav-item"><a th:href="@{/list-product}" class="header__nav-link">Sản Phẩm</a></li>
+                <li class="header__nav-item"><a th:href="@{/news}" class="header__nav-link">Tin Tức</a></li>
+                <li class="header__nav-item"><a th:href="@{/contact}" class="header__nav-link">Liên Hệ</a></li>
             </ul>
         </div>
     </div>
+
     <div class="main">
         <div class="grid wide">
             <div class="row">
                 <div class="col l-7 m-12 s-12">
                     <div class="pay-information">
                         <div class="pay__heading">Thông tin thanh toán</div>
-                        <div class="form-group">
-                            <label for="fullname" class="form-label">Họ Tên *</label>
-                            <input id="fullname" name="fullname" type="text" class="form-control">
-                            <span class="form-message"></span>
+                        <p class="shipping-address-title">
+                            <i class="fas fa-map-marker-alt icon-primary"></i> Địa chỉ giao hàng
+                        </p>
+                        <div class="selected-address-summary">
+                            <div>
+                                <span class="recipient-info" id="currentRecipient">NHÓM 6 <span class="default-tag">Mặc định</span></span>
+                                <div class="address-text" id="currentAddressDetail">Số 1 Võ Văn Ngân, Thủ Đức, TP. Hồ Chí Minh</div>
+                            </div>
+                            <button class="btn-change-address" id="btnChangeAddress">Thay Đổi</button>
                         </div>
-                        <div class="form-group">
-                            <label for="address" class="form-label">Địa chỉ *</label>
-                            <input id="address" name="address" type="text" class="form-control">
-                            <span class="form-message"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="city" class="form-label">Tỉnh / Thành phố *</label>
-                            <input id="city" name="city" type="text" class="form-control">
-                            <span class="form-message"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="email" class="form-label">Email *</label>
-                            <input id="email" name="email" type="text" class="form-control">
-                            <span class="form-message"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="phone" class="form-label">Số điện thoại *</label>
-                            <input id="phone" name="phone" type="text" class="form-control">
-                            <span class="form-message"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="note" class="form-label">Ghi chú cho đơn hàng</label>
-                            <textarea class="form-control" name="note" id="note" cols="30" rows="10"></textarea>
+                        <hr class="divider">
+                        <div class="payment-method-area">
+                            <h3 class="pay__heading-sub">Phương thức Thanh toán</h3>
+                            <div class="payment-item">
+                                <input type="radio" id="pay-cod" name="payment-method" value="cod" checked>
+                                <label for="pay-cod"><i class="fas fa-truck"></i> <span>Thanh toán khi nhận hàng (COD)</span></label>
+                            </div>
+                            <div class="payment-item">
+                                <input type="radio" id="pay-bank" name="payment-method" value="bank">
+                                <label for="pay-bank"><i class="fas fa-credit-card"></i> <span>Thanh toán online (Thẻ/Chuyển khoản)</span></label>
+                            </div>
                         </div>
                     </div>
                 </div>
+
                 <div class="col l-5 m-12 s-12">
                     <div class="pay-order">
                         <div class="pay__heading">Đơn hàng của bạn</div>
+                        <div class="order-items-list">
+                            <div class="order-item">
+                                <img th:src="@{/assets/img/product/product1.jpg}" alt="Product" class="order-item-img">
+                                <div class="order-item-info">
+                                    <p class="order-item-name">Sữa Rửa Mặt CeraVe Sạch Sâu</p>
+                                    <p class="order-item-qty">Số lượng: 1</p>
+                                </div>
+                                <p class="order-item-price">326.000 ₫</p>
+                            </div>
+                            <div class="order-item">
+                                <img th:src="@{/assets/img/product/product2.jpg}" alt="Product" class="order-item-img">
+                                <div class="order-item-info">
+                                    <p class="order-item-name">Nước Hoa Hồng Klairs Không Mùi</p>
+                                    <p class="order-item-qty">Số lượng: 2</p>
+                                </div>
+                                <p class="order-item-price">440.000 ₫</p>
+                            </div>
+                        </div>
+                        <hr class="divider-light">
+                        <div class="voucher-section">
+                            <input type="text" placeholder="Nhập mã giảm giá" class="voucher-input">
+                            <button class="btn-apply-voucher">Áp dụng</button>
+                        </div>
+                        <hr class="divider-light">
                         <div class="pay-info">
-                            <div class="main__pay-text">Azrouel dress variable</div>
-                            <div class="main__pay-price">1,120,000 ₫</div>
+                            <div class="main__pay-text">Tạm tính</div>
+                            <div class="main__pay-price">766.000 ₫</div>
                         </div>
                         <div class="pay-info">
-                            <div class="main__pay-text">Azrouel dress variable</div>
-                            <div class="main__pay-amount">3</div>
-                            <div class="main__pay-price">1,120,000 ₫</div>
+                            <div class="main__pay-text">Phí vận chuyển</div>
+                            <div class="main__pay-price">Miễn phí</div>
                         </div>
-                        <div class="pay-info">
-                            <div class="main__pay-text special">Giao hàng</div>
-                            <div class="main__pay-text">Giao hàng miễn phí</div>
+                        <hr class="divider-light">
+                        <div class="pay-info total-summary">
+                            <div class="main__pay-text">Tổng cộng</div>
+                            <div class="main__pay-price final-price">766.000 ₫</div>
                         </div>
-                        <div class="pay-info">
-                            <div class="main__pay-text special">Tổng thành tiền</div>
-                            <div class="main__pay-price">1,120,000 ₫</div>
-                        </div>
-                        <button class="btn btn--default">Đặt hàng</button>
+                        <button class="btn btn--default orange w-100 mt-20">ĐẶT HÀNG</button>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
+    
     <div class="footer">
         <div class="grid wide">
             <div class="row">
                 <div class="col l-3 m-6 s-12">
                     <h3 class="footer__title">Menu</h3>
                     <ul class="footer__list">
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Trang điểm</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Chăm sóc da</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Chăm sóc tóc</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Nước hoa</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Chăm sóc toàn thân </a>
-                        </li>
+                        <li class="footer__item"><a href="#" class="footer__link">Trang điểm</a></li>
+                        <li class="footer__item"><a href="#" class="footer__link">Chăm sóc da</a></li>
+                        <li class="footer__item"><a href="#" class="footer__link">Chăm sóc tóc</a></li>
                     </ul>
                 </div>
                 <div class="col l-3 m-6 s-12">
                     <h3 class="footer__title">Hỗ trợ khách hàng</h3>
                     <ul class="footer__list">
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Hướng dẫn mua hàng</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Giải đáp thắc mắc</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Chính sách mua hàng</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Chính sách đổi trả</a>
-                        </li>
+                        <li class="footer__item"><a href="#" class="footer__link">Hướng dẫn mua hàng</a></li>
+                        <li class="footer__item"><a href="#" class="footer__link">Chính sách đổi trả</a></li>
                     </ul>
                 </div>
                 <div class="col l-3 m-6 s-12">
                     <h3 class="footer__title">Liên hệ</h3>
                     <ul class="footer__list">
-                        <li class="footer__item">
-                            <span class="footer__text">
-                                    <i class="fas fa-map-marked-alt"></i> 319 C16 Lý Thường Kiệt, Phường 15, Quận 11, Tp.HCM
-                                </span>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">
-                                <i class="fas fa-phone"></i> 076 922 0162
-                            </a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">
-                                <i class="fas fa-envelope"></i> phuonggiang150@gmail.com
-                            </a>
-                        </li>
-                        <li class="footer__item">
-                            <div class="social-group">
-                                <a href="#" class="social-item"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#" class="social-item"><i class="fab fa-twitter"></i></a>
-                                <a href="#" class="social-item"><i class="fab fa-pinterest-p"></i></a>
-                                <a href="#" class="social-item"><i class="fab fa-invision"></i></a>
-                                <a href="#" class="social-item"><i class="fab fa-youtube"></i></a>
-                            </div>
-                        </li>
+                        <li class="footer__item"><span class="footer__text"><i class="fas fa-map-marked-alt"></i> Số 1 Võ Văn Ngân, Thủ Đức, TP. Hồ Chí Minh</span></li>
+                        <li class="footer__item"><a href="mailto:2311xxxx@student.hcmute.edu.vn" class="footer__link"><i class="fas fa-envelope"></i> 2311xxxx@student.hcmute.edu.vn</a></li>
                     </ul>
                 </div>
                 <div class="col l-3 m-6 s-12">
-                    <h3 class="footer__title">Đăng kí</h3>
+                    <h3 class="footer__title">Đăng kí nhận tin</h3>
                     <ul class="footer__list">
-                        <li class="footer__item">
-                            <span class="footer__text">Đăng ký để nhận được được thông tin ưu đãi mới nhất từ chúng tôi.</span>
-                        </li>
+                        <li class="footer__item"><span class="footer__text">Nhận thông tin ưu đãi mới nhất.</span></li>
                         <li class="footer__item">
                             <div class="send-email">
-                                <input class="send-email__input" type="email" placeholder="Nhập Email...">
-                                <a href="#" class="send-email__link">
-                                    <i class="fas fa-paper-plane"></i>
-                                </a>
+                                <input class="send-email__input" type="email" placeholder="Nhập Email..."><a href="#" class="send-email__link"><i class="fas fa-paper-plane"></i></a>
                             </div>
                         </li>
                     </ul>
@@ -367,5 +307,5 @@
     });
 </script>
 </body>
-
 </html>
+

@@ -1638,7 +1638,6 @@ textarea.form-control {
     opacity: 1;
 }
 
-/* Submenu bên trong (nếu có) */
 .category-submenu {
     position: absolute;
     left: 100%;
@@ -1676,5 +1675,45 @@ textarea.form-control {
     color: #667eea;
 }
 
+/* Rating Section */
+.product__rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
 
-/* ========== KẾT THÚC STYLE CHO MENU DANH MỤC DẠNG DROPDOWN ========== */
+.rating-stars {
+    display: flex;
+    gap: 2px;
+}
+
+.rating-stars i {
+    font-size: 12px;
+    color: #ffa500;
+}
+
+.rating-stars i.empty {
+    color: #ddd;
+}
+
+.rating-count {
+    font-size: 12px;
+    color: #666;
+    font-weight: 400;
+}
+
+/* Sold Count */
+.product__sold {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.product__sold i {
+    font-size: 12px;
+    color: #999;
+}
