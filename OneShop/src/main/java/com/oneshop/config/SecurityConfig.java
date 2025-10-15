@@ -91,9 +91,10 @@ public class SecurityConfig {
             // Phân quyền truy cập
             .authorizeHttpRequests(auth -> auth
                 // Cho phép truy cập công khai
+            	.requestMatchers("/assets/**","/", "/webjars/**").permitAll() 
                 .requestMatchers("/", "/home", "/login", "/register",
                                 "/verify-otp", "/forgot", "/reset-password",
-                                "/api/auth/**", "/error", "/search").permitAll()
+                                "/api/auth/**", "/error", "/search", "/*").permitAll()
                 // Cho phép tài nguyên tĩnh và JSP
                 .requestMatchers("/WEB-INF/decorators/**",
                                 "/css/**", "/js/**", "/images/**", "/static/**").permitAll()
