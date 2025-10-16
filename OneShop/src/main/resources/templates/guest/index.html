@@ -1,566 +1,662 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trang chủ</title>
-<link rel="preconnect" href="https://fonts.gstatic.com">
-<link
-	href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap"
-	rel="stylesheet">
-<link rel="stylesheet"
-	href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
-	integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
-	crossorigin="anonymous" />
-<link rel="stylesheet"
-	th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
-<link rel="stylesheet" th:href="@{/assets/css/library.css}">
-<link th:href="@{/assets/owlCarousel/assets/owl.carousel.min.css}"
-	rel="stylesheet" />
-<link rel="stylesheet" th:href="@{/assets/css/common.css}">
-<link th:href="@{/assets/css/home.css}" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/assets/css/library.css}">
+    <link th:href="@{/assets/owlCarousel/assets/owl.carousel.min.css}" rel="stylesheet" />
+    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+    <link th:href="@{/assets/css/home.css}" rel="stylesheet" />
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script th:src="@{/assets/owlCarousel/owl.carousel.min.js}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:src="@{/assets/owlCarousel/owl.carousel.min.js}"></script>
 
+    <style>
+        /* CSS cho phần đánh giá và đã bán */
+        .product__rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 2px;
+        }
+
+        .rating-stars i {
+            font-size: 12px;
+            color: #ffa500;
+        }
+
+        .rating-stars i.empty {
+            color: #ddd;
+        }
+
+        .rating-count {
+            font-size: 12px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        /* === PHẦN CODE TỪ NHÁNH main ĐÃ ĐƯỢC GIỮ LẠI === */
+        .product__sold {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .product__sold i {
+            font-size: 11px;
+            color: #999;
+        }
+    </style>
 </head>
 
 <body>
-	<div class="header scrolling" id="myHeader">
-		<div class="grid wide">
-			<div class="header__top">
-				<div class="navbar-icon">
-					<span></span> <span></span> <span></span>
-				</div>
-				<a th:href="@{/}" class="header__logo"> <img
-					th:src="@{/assets/logo.png}" alt="">
-				</a>
-				<div class="header__search">
-					<div class="header__search-wrap">
-						<input type="text" class="header__search-input"
-							placeholder="Tìm kiếm"> <a class="header__search-icon"
-							href="#"> <i class="fas fa-search"></i>
-						</a>
-					</div>
-				</div>
-				<div class="header__account">
-					<a href="#my-Login" class="header__account-login">Đăng Nhập</a> <a
-						href="#my-Register" class="header__account-register">Đăng Kí</a>
-				</div>
-				<div class="header__cart have" href="#">
-					<i class="fas fa-shopping-basket"></i>
-					<div class="header__cart-amount">3</div>
-					<div class="header__cart-wrap">
-						<ul class="order__list">
-							<li class="item-order">
-								<div class="order-wrap">
-									<a th:href="@{/product}" class="order-img"> <img
-										th:src="@{/assets/img/product/product1.jpg}" alt="">
-									</a>
-									<div class="order-main">
-										<a th:href="@{/product}" class="order-main-name">Áo sơ mi
-											caro kèm belt caro kèm belt Áo sơ mi caro kèm belt</a>
-										<div class="order-main-price">2 x 45,000 ₫</div>
-									</div>
-									<a th:href="@{/product}" class="order-close"><i
-										class="far fa-times-circle"></i></a>
-								</div>
-							</li>
-						</ul>
-						<div class="total-money">Tổng cộng: 120.000đ</div>
-						<a th:href="@{/cart}" class="btn btn--default cart-btn">Xem
-							giỏ hàng</a> <a th:href="@{/pay}"
-							class="btn btn--default cart-btn orange">Thanh toán</a>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="header__nav">
-			<ul class="header__nav-list">
-				<li class="header__nav-item index"><a th:href="@{/}"
-					class="header__nav-link">Trang chủ</a></li>
-				<li class="header__nav-item"><a href="#"
-					class="header__nav-link">Giới Thiệu</a></li>
-				<li class="header__nav-item has-dropdown-menu"><a
-					th:href="@{/list-product}" class="header__nav-link">Sản Phẩm</a>
-					<div class="category-menu">
-						<div class="category-menu__header">
-							<span>DANH MỤC SẢN PHẨM</span>
-						</div>
-						<ul class="category-menu__list">
-							<li class="category-menu__item"><a href="#"
-								class="category-menu__link"> <span
-									class="category-menu__icon icon-makeup"><i
-										class="fas fa-palette"></i></span> <span class="category-menu__text">Trang
-										điểm</span> <i class="fas fa-chevron-right category-menu__arrow"></i>
-							</a>
-								<div class="category-submenu">
-									<div class="category-submenu__item">Son môi</div>
-									<div class="category-submenu__item">Phấn mắt</div>
-									<div class="category-submenu__item">Mascara</div>
-									<div class="category-submenu__item">Kem nền</div>
-									<div class="category-submenu__item">Phấn phủ</div>
-								</div></li>
-							<li class="category-menu__item"><a href="#"
-								class="category-menu__link"> <span
-									class="category-menu__icon icon-skincare"><i
-										class="fas fa-spa"></i></span> <span class="category-menu__text">Chăm
-										sóc da mặt</span> <i
-									class="fas fa-chevron-right category-menu__arrow"></i>
-							</a>
-								<div class="category-submenu">
-									<div class="category-submenu__item">Sữa rửa mặt</div>
-									<div class="category-submenu__item">Toner</div>
-									<div class="category-submenu__item">Serum</div>
-									<div class="category-submenu__item">Kem dưỡng</div>
-									<div class="category-submenu__item">Mặt nạ</div>
-								</div></li>
-							<li class="category-menu__item"><a href="#"
-								class="category-menu__link"> <span
-									class="category-menu__icon icon-bodycare"><i
-										class="fas fa-hand-holding-heart"></i></span> <span
-									class="category-menu__text">Chăm sóc cơ thể</span> <i
-									class="fas fa-chevron-right category-menu__arrow"></i>
-							</a></li>
-							<li class="category-menu__item"><a href="#"
-								class="category-menu__link"> <span
-									class="category-menu__icon icon-haircare"><i
-										class="fas fa-cut"></i></span> <span class="category-menu__text">Chăm
-										sóc tóc & da đầu</span> <i
-									class="fas fa-chevron-right category-menu__arrow"></i>
-							</a></li>
-							<li class="category-menu__item"><a href="#"
-								class="category-menu__link"> <span
-									class="category-menu__icon icon-nails"><i
-										class="fas fa-hand-sparkles"></i></span> <span
-									class="category-menu__text">Chăm sóc cá nhân</span> <i
-									class="fas fa-chevron-right category-menu__arrow"></i>
-							</a></li>
-							<li class="category-menu__item"><a href="#"
-								class="category-menu__link"> <span
-									class="category-menu__icon icon-perfume"><i
-										class="fas fa-spray-can"></i></span> <span
-									class="category-menu__text">Nước hoa</span> <i
-									class="fas fa-chevron-right category-menu__arrow"></i>
-							</a></li>
-						</ul>
-					</div></li>
-				<li class="header__nav-item"><a th:href="@{/news}"
-					class="header__nav-link">Tin Tức</a></li>
-				<li class="header__nav-item"><a th:href="@{/contact}"
-					class="header__nav-link">Liên Hệ</a></li>
-			</ul>
-		</div>
-	</div>
-	<div class="main">
-		<div class="main__slice">
-			<div class="slider">
-				<div class="slide active"
-					th:style="'background-image:url(' + @{/assets/img/slider/slide-6.jpg} + ')'">
-					<div class="container">
-						<div class="caption">
-							<h1>Giảm giá 30%</h1>
-							<p>Giảm giá cực sốc trong tháng 6!</p>
-							<a th:href="@{/list-product}" class="btn btn--default">Xem
-								ngay</a>
-						</div>
-					</div>
-				</div>
-				<div class="slide"
-					th:style="'background-image:url(' + @{/assets/img/slider/slide-4.jpg} + ')'">
-					<div class="container">
-						<div class="caption">
-							<h1>Giảm giá 30%</h1>
-							<p>Giảm giá cực sốc trong tháng 6!</p>
-							<a th:href="@{/list-product}" class="btn btn--default">Xem
-								ngay</a>
-						</div>
-					</div>
-				</div>
-				<div class="slide"
-					th:style="'background-image:url(' + @{/assets/img/slider/slide-5.jpg} + ')'">
-					<div class="container">
-						<div class="caption">
-							<h1>Giảm giá 30%</h1>
-							<p>Giảm giá cực sốc trong tháng 6!</p>
-							<a th:href="@{/list-product}" class="btn btn--default">Xem
-								ngay</a>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="controls">
-				<div class="prev">
-					<i class="fas fa-chevron-left"></i>
-				</div>
-				<div class="next">
-					<i class="fas fa-chevron-right"></i>
-				</div>
-			</div>
-			<div class="indicator"></div>
-		</div>
-		<div class="main__tabnine">
-			<div class="grid wide">
-				<div class="tabs">
-					<div class="tab-item active">Bán Chạy</div>
-					<div class="tab-item">Giá tốt</div>
-					<div class="tab-item">Mới Nhập</div>
-					<div class="line"></div>
-				</div>
-				<div class="tab-content">
-					<div class="tab-pane active">
-						<div class="row">
-							<div class="col l-2 m-4 s-6">
-								<div class="product">
-									<div class="product__avt"
-										th:style="'background-image: url(' + @{/assets/img/product/product1.jpg} + ');'">
-									</div>
-									<div class="product__info">
-										<h3 class="product__name">Kem dưỡng da NestPlae</h3>
-										<div class="product__price">
-											<div class="price__old">300.000 đ</div>
-											<div class="price__new">
-												200.000 <span class="price__unit">đ</span>
-											</div>
-										</div>
-										<div class="product__sale">
-											<span class="product__sale-percent">24%</span> <span
-												class="product__sale-text">Giảm</span>
-										</div>
-									</div>
-									<a th:href="@{/product}" class="viewDetail">Xem chi tiết</a> <a
-										th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
-								</div>
-							</div>
-							<div class="col l-2 m-4 s-6">
-								<div class="product">
-									<div class="product__avt"
-										th:style="'background-image: url(' + @{/assets/img/product/product5.jpg} + ');'">
-									</div>
-									<div class="product__info">
-										<h3 class="product__name">Kem dưỡng da NestPlae</h3>
-										<div class="product__price">
-											<div class="price__old">300.000 đ</div>
-											<div class="price__new">
-												200.000 <span class="price__unit">đ</span>
-											</div>
-										</div>
-									</div>
-									<a th:href="@{/product}" class="viewDetail">Xem chi tiết</a> <a
-										th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
-								</div>
-							</div>
-							<div class="col l-2 m-4 s-6">
-								<div class="product">
-									<div class="product__avt"
-										th:style="'background-image: url(' + @{/assets/img/product/product2.jpg} + ');'">
-									</div>
-									<div class="product__info">
-										<h3 class="product__name">Kem dưỡng da NestPlae</h3>
-										<div class="product__price">
-											<div class="price__old">300.000 đ</div>
-											<div class="price__new">
-												200.000 <span class="price__unit">đ</span>
-											</div>
-										</div>
-									</div>
-									<a th:href="@{/product}" class="viewDetail">Xem chi tiết</a> <a
-										th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
-								</div>
-							</div>
-							<div class="col l-2 m-4 s-6">
-								<div class="product">
-									<div class="product__avt"
-										th:style="'background-image: url(' + @{/assets/img/product/product3.jpg} + ');'">
-									</div>
-									<div class="product__info">
-										<h3 class="product__name">Kem dưỡng da NestPlae</h3>
-										<div class="product__price">
-											<div class="price__old">300.000 đ</div>
-											<div class="price__new">
-												200.000 <span class="price__unit">đ</span>
-											</div>
-										</div>
-									</div>
-									<a th:href="@{/product}" class="viewDetail">Xem chi tiết</a> <a
-										th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
-								</div>
-							</div>
-							<div class="col l-2 m-4 s-6">
-								<div class="product">
-									<div class="product__avt"
-										th:style="'background-image: url(' + @{/assets/img/product/product6.jpg} + ');'">
-									</div>
-									<div class="product__info">
-										<h3 class="product__name">Kem dưỡng da NestPlae</h3>
-										<div class="product__price">
-											<div class="price__old">300.000 đ</div>
-											<div class="price__new">
-												200.000 <span class="price__unit">đ</span>
-											</div>
-										</div>
-									</div>
-									<a th:href="@{/product}" class="viewDetail">Xem chi tiết</a> <a
-										th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
-								</div>
-							</div>
-							<div class="col l-2 m-4 s-6">
-								<div class="product">
-									<div class="product__avt"
-										th:style="'background-image: url(' + @{/assets/img/product/product4.jpg} + ');'">
-									</div>
-									<div class="product__info">
-										<h3 class="product__name">Kem dưỡng da NestPlae</h3>
-										<div class="product__price">
-											<div class="price__old">300.000 đ</div>
-											<div class="price__new">
-												200.000 <span class="price__unit">đ</span>
-											</div>
-										</div>
-									</div>
-									<a th:href="@{/product}" class="viewDetail">Xem chi tiết</a> <a
-										th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="main__frame">
-			<div class="grid wide">
-				<h3 class="category__title">OneShop Cometics</h3>
-				<h3 class="category__heading">SẢN PHẨM NỔI BẬT</h3>
-				<div class="owl-carousel hight owl-theme">
-					<div class="product">
-						<div class="product__avt"
-							th:style="'background-image: url(' + @{/assets/img/product/product1.jpg} + ');'">
-						</div>
-						<div class="product__info">
-							<h3 class="product__name">Son môi cao cấp</h3>
-							<div class="product__price">
-								<div class="price__old">100.000 đ</div>
-								<div class="price__new">
-									70.000<span class="price__unit">đ</span>
-								</div>
-							</div>
-						</div>
-						<a th:href="@{/product}" class="viewDetail">Xem chi tiết</a> <a
-							th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="main__policy">
-			<div class="row">
-				<div class="col l-3 m-6">
-					<div class="policy bg-1">
-						<img th:src="@{/assets/img/policy/policy1.png}"
-							class="policy__img">
-						<div class="policy__info">
-							<h3 class="policy__title">GIAO HÀNG MIỄN PHÍ</h3>
-							<p class="policy__description">Cho đơn hàng từ 300K</p>
-						</div>
-					</div>
-				</div>
-				<div class="col l-3 m-6">
-					<div class="policy bg-2">
-						<img th:src="@{/assets/img/policy/policy2.png}"
-							class="policy__img">
-						<div class="policy__info">
-							<h3 class="policy__title">ĐỔI TRẢ HÀNG</h3>
-							<p class="policy__description">Trong 3 ngày đầu tiên</p>
-						</div>
-					</div>
-				</div>
-				<div class="col l-3 m-6">
-					<div class="policy bg-1">
-						<img th:src="@{/assets/img/policy/policy3.png}"
-							class="policy__img">
-						<div class="policy__info">
-							<h3 class="policy__title">HÀNG CHÍNH HÃNG</h3>
-							<p class="policy__description">Cam kết chất lượng</p>
-						</div>
-					</div>
-				</div>
-				<div class="col l-3 m-6">
-					<div class="policy bg-2">
-						<img th:src="@{/assets/img/policy/policy4.png}"
-							class="policy__img">
-						<div class="policy__info">
-							<h3 class="policy__title">TƯ VẤN 24/24</h3>
-							<p class="policy__description">Giải đáp mọi thắc mắc</p>
-						</div>
-					</div>
-				</div>
-
-			</div>
-		</div>
-		<div class="main__frame bg-3">
-			<div class="grid wide">
-				<h3 class="category__title">OneShop Cometics</h3>
-				<h3 class="category__heading">Tin Tức</h3>
-				<div class="owl-carousel news owl-theme">
-					<a th:href="@{/news}" class="news">
-						<div class="news__img">
-							<img th:src="@{/assets/img/news/news1.jpg}" alt="">
-						</div>
-						<div class="news__body">
-							<h3 class="news__body-title">Trang điểm đúng cách</h3>
-							<div class="new__body-date">13/6/2021</div>
-							<p class="news__description">Lorem ipsum dolor sit amet
-								consectetur adipisicing elit. In sit molestiae aperiam modi cum
-								deserunt, maxime blanditiis voluptate officiis accusantium
-								minima pariatur harum tenetur quo iste iusto commodi. Modi,
-								culpa?</p>
-						</div>
-					</a>
-				</div>
-			</div>
-		</div>
-		<div class="main__bands">
-			<div class="grid wide">
-				<div class="owl-carousel bands">
-					<a th:href="@{/list-product}" class="band__item"
-						th:style="'background-image: url(' + @{/assets/img/band/band1.png} + ')'"></a>
-					<a th:href="@{/list-product}" class="band__item"
-						th:style="'background-image: url(' + @{/assets/img/band/band2.png} + ')'"></a>
-					<a th:href="@{/list-product}" class="band__item"
-						th:style="'background-image: url(' + @{/assets/img/band/band3.png} + ')'"></a>
-					<a th:href="@{/list-product}" class="band__item"
-						th:style="'background-image: url(' + @{/assets/img/band/band4.png} + ')'"></a>
-					<a th:href="@{/list-product}" class="band__item"
-						th:style="'background-image: url(' + @{/assets/img/band/band5.png} + ')'"></a>
-					<a th:href="@{/list-product}" class="band__item"
-						th:style="'background-image: url(' + @{/assets/img/band/band6.png} + ')'"></a>
-					<a th:href="@{/list-product}" class="band__item"
-						th:style="'background-image: url(' + @{/assets/img/band/band7.png} + ')'"></a>
-				</div>
-			</div>
-		</div>
-
-	</div>
-	<div class="footer">
-		<div class="grid wide">
-			<div class="row">
-				<div class="col l-3 m-6 s-12">
-					<h3 class="footer__title">Menu</h3>
-					<ul class="footer__list">
-						<li class="footer__item"><a href="#" class="footer__link">Trang
-								điểm</a></li>
-						<li class="footer__item"><a href="#" class="footer__link">Chăm
-								sóc da</a></li>
-					</ul>
-				</div>
-				<div class="col l-3 m-6 s-12">
-					<h3 class="footer__title">Hỗ trợ khách hàng</h3>
-					<ul class="footer__list">
-						<li class="footer__item"><a href="#" class="footer__link">Hướng
-								dẫn mua hàng</a></li>
-					</ul>
-				</div>
-				<div class="col l-3 m-6 s-12">
-					<h3 class="footer__title">Liên hệ</h3>
-					<ul class="footer__list">
-						<li class="footer__item"><span class="footer__text"> <i
-								class="fas fa-map-marked-alt"></i> Số 1 Võ Văn Ngân, Thủ Đức,
-								Tp.HCM
-						</span></li>
-						<li class="footer__item"><a href="#" class="footer__link">
-								<i class="fas fa-phone"></i> 0367xxxxxxxx
-						</a></li>
-					</ul>
-				</div>
-				<div class="col l-3 m-6 s-12">
-					<h3 class="footer__title">Đăng kí</h3>
-					<ul class="footer__list">
-						<li class="footer__item"><span class="footer__text">Đăng
-								ký để nhận được được thông tin ưu đãi mới nhất từ chúng tôi.</span></li>
-						<li class="footer__item">
-							<div class="send-email">
-								<input class="send-email__input" type="email"
-									placeholder="Nhập Email..."> <a href="#"
-									class="send-email__link"> <i class="fas fa-paper-plane"></i>
-								</a>
-							</div>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</div>
-		<div class="copyright">
-			<span class="footer__text"> &copy; Bản quyền thuộc về <a
-				class="footer__link" href="#"> Nhóm 6</a></span>
-		</div>
-	</div>
-	<div class="ModalForm">
-		<div class="modal" id="my-Register">
-    <a href="#" class="overlay-close"></a>
-    <div class="authen-modal register">
-        <h3 class="authen-modal__title">Đăng Kí</h3>
-        <!-- Thêm thông báo lỗi -->
-        <div id="registerError" class="alert alert-danger" role="alert" style="display: none;"></div>
-        <form id="registerForm" method="post">
-            <div class="form-group">
-                <label for="fullName" class="form-label">Họ Tên</label>
-                <input id="fullName" name="fullName" type="text" class="form-control" required>
-                <span class="form-message"></span>
+    <div class="header scrolling" id="myHeader">
+        <div class="grid wide">
+            <div class="header__top">
+                <div class="navbar-icon">
+                    <span></span> <span></span> <span></span>
+                </div>
+                <a th:href="@{/}" class="header__logo">
+                    <img th:src="@{/assets/logo.png}" alt="">
+                </a>
+                <div class="header__search">
+                    <div class="header__search-wrap">
+                        <input type="text" class="header__search-input" placeholder="Tìm kiếm">
+                        <a class="header__search-icon" href="#">
+                            <i class="fas fa-search"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="header__account">
+                    <a href="#my-Login" class="header__account-login">Đăng Nhập</a>
+                    <a href="#my-Register" class="header__account-register">Đăng Kí</a>
+                </div>
+                <div class="header__cart have" href="#">
+                    <i class="fas fa-shopping-basket"></i>
+                    <div class="header__cart-amount">3</div>
+                    <div class="header__cart-wrap">
+                        <ul class="order__list">
+                            <li class="item-order">
+                                <div class="order-wrap">
+                                    <a th:href="@{/product}" class="order-img">
+                                        <img th:src="@{/assets/img/product/product1.jpg}" alt="">
+                                    </a>
+                                    <div class="order-main">
+                                        <a th:href="@{/product}" class="order-main-name">Áo sơ mi caro kèm belt caro kèm belt Áo sơ mi caro kèm belt</a>
+                                        <div class="order-main-price">2 x 45,000 ₫</div>
+                                    </div>
+                                    <a th:href="@{/product}" class="order-close">
+                                        <i class="far fa-times-circle"></i>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="total-money">Tổng cộng: 120.000đ</div>
+                        <a th:href="@{/cart}" class="btn btn--default cart-btn">Xem giỏ hàng</a>
+                        <a th:href="@{/pay}" class="btn btn--default cart-btn orange">Thanh toán</a>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="email" class="form-label">Tài khoản Email *</label>
-                <input id="email" name="email" type="email" class="form-control" required>
-                <span class="form-message"></span>
-            </div>
-            <div class="form-group">
-                <label for="password" class="form-label">Mật khẩu *</label>
-                <input id="password" name="password" type="password" class="form-control" required>
-                <span class="form-message"></span>
-            </div>
-            <div class="form-group">
-                <label for="confirmPassword" class="form-label">Nhập lại mật khẩu *</label>
-                <input id="confirmPassword" name="confirmPassword" type="password" class="form-control" required>
-                <span class="form-message"></span>
-            </div>
-            <div class="authen__btns">
-                <button type="submit" class="btn btn--default">Đăng Kí</button>
-            </div>
-        </form>
+        </div>
+        <div class="header__nav">
+            <ul class="header__nav-list">
+                <li class="header__nav-item index">
+                    <a th:href="@{/}" class="header__nav-link">Trang chủ</a>
+                </li>
+                <li class="header__nav-item has-dropdown-menu">
+                    <a th:href="@{/list-product}" class="header__nav-link">Sản Phẩm</a>
+                    <div class="category-menu">
+                        <div class="category-menu__header">
+                            <span>DANH MỤC SẢN PHẨM</span>
+                        </div>
+                        <ul class="category-menu__list">
+                            <li class="category-menu__item">
+                                <a href="#" class="category-menu__link">
+                                    <span class="category-menu__icon icon-makeup"><i class="fas fa-palette"></i></span>
+                                    <span class="category-menu__text">Trang điểm</span>
+                                    <i class="fas fa-chevron-right category-menu__arrow"></i>
+                                </a>
+                                <div class="category-submenu">
+                                    <div class="category-submenu__item">Son môi</div>
+                                    <div class="category-submenu__item">Phấn mắt</div>
+                                    <div class="category-submenu__item">Mascara</div>
+                                    <div class="category-submenu__item">Kem nền</div>
+                                    <div class="category-submenu__item">Phấn phủ</div>
+                                </div>
+                            </li>
+                            <li class="category-menu__item">
+                                <a href="#" class="category-menu__link">
+                                    <span class="category-menu__icon icon-skincare"><i class="fas fa-spa"></i></span>
+                                    <span class="category-menu__text">Chăm sóc da mặt</span>
+                                    <i class="fas fa-chevron-right category-menu__arrow"></i>
+                                </a>
+                                <div class="category-submenu">
+                                    <div class="category-submenu__item">Sữa rửa mặt</div>
+                                    <div class="category-submenu__item">Toner</div>
+                                    <div class="category-submenu__item">Serum</div>
+                                    <div class="category-submenu__item">Kem dưỡng</div>
+                                    <div class="category-submenu__item">Mặt nạ</div>
+                                </div>
+                            </li>
+                            <li class="category-menu__item">
+                                <a href="#" class="category-menu__link">
+                                    <span class="category-menu__icon icon-bodycare"><i class="fas fa-hand-holding-heart"></i></span>
+                                    <span class="category-menu__text">Chăm sóc cơ thể</span>
+                                    <i class="fas fa-chevron-right category-menu__arrow"></i>
+                                </a>
+                            </li>
+                            <li class="category-menu__item">
+                                <a href="#" class="category-menu__link">
+                                    <span class="category-menu__icon icon-haircare"><i class="fas fa-cut"></i></span>
+                                    <span class="category-menu__text">Chăm sóc tóc & da đầu</span>
+                                    <i class="fas fa-chevron-right category-menu__arrow"></i>
+                                </a>
+                            </li>
+                            <li class="category-menu__item">
+                                <a href="#" class="category-menu__link">
+                                    <span class="category-menu__icon icon-nails"><i class="fas fa-hand-sparkles"></i></span>
+                                    <span class="category-menu__text">Chăm sóc cá nhân</span>
+                                    <i class="fas fa-chevron-right category-menu__arrow"></i>
+                                </a>
+                            </li>
+                            <li class="category-menu__item">
+                                <a href="#" class="category-menu__link">
+                                    <span class="category-menu__icon icon-perfume"><i class="fas fa-spray-can"></i></span>
+                                    <span class="category-menu__text">Nước hoa</span>
+                                    <i class="fas fa-chevron-right category-menu__arrow"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="header__nav-item">
+                    <a th:href="@{/news}" class="header__nav-link">Tin Tức</a>
+                </li>
+                <li class="header__nav-item">
+                    <a th:href="@{/contact}" class="header__nav-link">Liên Hệ</a>
+                </li>
+            </ul>
+        </div>
     </div>
-</div>
-
-<div class="modal" id="my-Login">
-    <a href="#" class="overlay-close"></a>
-    <div class="authen-modal login">
-        <h3 class="authen-modal__title">Đăng Nhập</h3>
-        <!-- Thêm thông báo lỗi -->
-        <div id="loginError" class="alert alert-danger" role="alert" style="display: none;"></div>
-        <form id="loginForm" method="post">
-            <div class="form-group">
-                <label for="account" class="form-label">Địa chỉ email *</label>
-                <input id="account" name="account" type="email" class="form-control" required>
-                <span class="form-message"></span>
+    <div class="main">
+        <div class="main__slice">
+            <div class="slider">
+                <div class="slide active" th:style="'background-image:url(' + @{/assets/img/slider/slide-6.jpg} + ')'">
+                    <div class="container">
+                        <div class="caption">
+                            <h1>Giảm giá 30%</h1>
+                            <p>Giảm giá cực sốc trong tháng 6!</p>
+                            <a th:href="@{/list-product}" class="btn btn--default">Xem ngay</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide" th:style="'background-image:url(' + @{/assets/img/slider/slide-4.jpg} + ')'">
+                    <div class="container">
+                        <div class="caption">
+                            <h1>Giảm giá 30%</h1>
+                            <p>Giảm giá cực sốc trong tháng 6!</p>
+                            <a th:href="@{/list-product}" class="btn btn--default">Xem ngay</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide" th:style="'background-image:url(' + @{/assets/img/slider/slide-5.jpg} + ')'">
+                    <div class="container">
+                        <div class="caption">
+                            <h1>Giảm giá 30%</h1>
+                            <p>Giảm giá cực sốc trong tháng 6!</p>
+                            <a th:href="@{/list-product}" class="btn btn--default">Xem ngay</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="password" class="form-label">Mật khẩu *</label>
-                <input id="password" name="password" type="password" class="form-control" required>
-                <span class="form-message"></span>
+            <div class="controls">
+                <div class="prev">
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="next">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
             </div>
-            <div class="authen__btns">
-                <button type="submit" class="btn btn--default">Đăng Nhập</button>
-                <input type="checkbox" class="authen-checkbox" name="remember-me">
-                <label class="form-label">Ghi nhớ mật khẩu</label>
+            <div class="indicator"></div>
+        </div>
+        <div class="main__tabnine">
+            <div class="grid wide">
+                <div class="tabs">
+                    <div class="tab-item active">Bán Chạy</div>
+                    <div class="tab-item">Giá tốt</div>
+                    <div class="tab-item">Mới Nhập</div>
+                    <div class="line"></div>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane active">
+                        <div class="row">
+                            <div class="col l-2 m-4 s-6">
+                                <div class="product">
+                                    <div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product1.jpg} + ');'">
+                                    </div>
+                                    <div class="product__info">
+                                        <h3 class="product__name">Kem dưỡng da NestPlae</h3>
+                                        <div class="product__rating">
+                                            <div class="rating-stars">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                            </div>
+                                            <span class="rating-count">(1.704)</span>
+                                        </div>
+                                        <div class="product__sold">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            <span>Đã bán 1.704</span>
+                                        </div>
+                                        <div class="product__price">
+                                            <div class="price__old">300.000 đ</div>
+                                            <div class="price__new">
+                                                200.000 <span class="price__unit">đ</span>
+                                            </div>
+                                        </div>
+                                        <div class="product__sale">
+                                            <span class="product__sale-percent">24%</span>
+                                            <span class="product__sale-text">Giảm</span>
+                                        </div>
+                                    </div>
+                                    <a th:href="@{/product}" class="viewDetail">Xem chi tiết</a>
+                                    <a th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
+                                </div>
+                            </div>
+                            <div class="col l-2 m-4 s-6">
+                                <div class="product">
+                                    <div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product5.jpg} + ');'">
+                                    </div>
+                                    <div class="product__info">
+                                        <h3 class="product__name">Nước hoa hồng Klairs</h3>
+                                        <div class="product__rating">
+                                            <div class="rating-stars">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                            </div>
+                                            <span class="rating-count">(1.969)</span>
+                                        </div>
+                                        <div class="product__sold">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            <span>Đã bán 1.969</span>
+                                        </div>
+                                        <div class="product__price">
+                                            <div class="price__old">300.000 đ</div>
+                                            <div class="price__new">
+                                                200.000 <span class="price__unit">đ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a th:href="@{/product}" class="viewDetail">Xem chi tiết</a>
+                                    <a th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
+                                </div>
+                            </div>
+                            <div class="col l-2 m-4 s-6">
+                                <div class="product">
+                                    <div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product2.jpg} + ');'">
+                                    </div>
+                                    <div class="product__info">
+                                        <h3 class="product__name">Combo Nước Tẩy Trang Bí Đao</h3>
+                                        <div class="product__rating">
+                                            <div class="rating-stars">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star-half-alt"></i>
+                                            </div>
+                                            <span class="rating-count">(1.745)</span>
+                                        </div>
+                                        <div class="product__sold">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            <span>Đã bán 1.745</span>
+                                        </div>
+                                        <div class="product__price">
+                                            <div class="price__old">300.000 đ</div>
+                                            <div class="price__new">
+                                                200.000 <span class="price__unit">đ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a th:href="@{/product}" class="viewDetail">Xem chi tiết</a>
+                                    <a th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
+                                </div>
+                            </div>
+                            <div class="col l-2 m-4 s-6">
+                                <div class="product">
+                                    <div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product3.jpg} + ');'">
+                                    </div>
+                                    <div class="product__info">
+                                        <h3 class="product__name">Kem Mắt Centella Green Level</h3>
+                                        <div class="product__rating">
+                                            <div class="rating-stars">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="far fa-star empty"></i>
+                                            </div>
+                                            <span class="rating-count">(892)</span>
+                                        </div>
+                                        <div class="product__sold">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            <span>Đã bán 892</span>
+                                        </div>
+                                        <div class="product__price">
+                                            <div class="price__old">300.000 đ</div>
+                                            <div class="price__new">
+                                                200.000 <span class="price__unit">đ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a th:href="@{/product}" class="viewDetail">Xem chi tiết</a>
+                                    <a th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
+                                </div>
+                            </div>
+                            <div class="col l-2 m-4 s-6">
+                                <div class="product">
+                                    <div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product6.jpg} + ');'">
+                                    </div>
+                                    <div class="product__info">
+                                        <h3 class="product__name">Serum Vitamin C Natural</h3>
+                                        <div class="product__rating">
+                                            <div class="rating-stars">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                            </div>
+                                            <span class="rating-count">(2.314)</span>
+                                        </div>
+                                        <div class="product__sold">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            <span>Đã bán 2.314</span>
+                                        </div>
+                                        <div class="product__price">
+                                            <div class="price__old">300.000 đ</div>
+                                            <div class="price__new">
+                                                200.000 <span class="price__unit">đ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a th:href="@{/product}" class="viewDetail">Xem chi tiết</a>
+                                    <a th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
+                                </div>
+                            </div>
+                            <div class="col l-2 m-4 s-6">
+                                <div class="product">
+                                    <div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product4.jpg} + ');'">
+                                    </div>
+                                    <div class="product__info">
+                                        <h3 class="product__name">Son Môi Lì Maybelline</h3>
+                                        <div class="product__rating">
+                                            <div class="rating-stars">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star-half-alt"></i>
+                                            </div>
+                                            <span class="rating-count">(3.521)</span>
+                                        </div>
+                                        <div class="product__sold">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            <span>Đã bán 3.521</span>
+                                        </div>
+                                        <div class="product__price">
+                                            <div class="price__old">300.000 đ</div>
+                                            <div class="price__new">
+                                                200.000 <span class="price__unit">đ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a th:href="@{/product}" class="viewDetail">Xem chi tiết</a>
+                                    <a th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </form>
-        <a class="authen__link" href="/forgot">Quên mật khẩu ?</a>
+        </div>
+        <div class="main__frame">
+            <div class="grid wide">
+                <h3 class="category__title">OneShop Cometics</h3>
+                <h3 class="category__heading">SẢN PHẨM NỔI BẬT</h3>
+                <div class="owl-carousel hight owl-theme">
+                    <div class="product">
+                        <div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product1.jpg} + ');'">
+                        </div>
+                        <div class="product__info">
+                            <h3 class="product__name">Son môi cao cấp</h3>
+                            <div class="product__rating">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <span class="rating-count">(856)</span>
+                            </div>
+                            <div class="product__sold">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Đã bán 856</span>
+                            </div>
+                            <div class="product__price">
+                                <div class="price__old">100.000 đ</div>
+                                <div class="price__new">
+                                    70.000<span class="price__unit">đ</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a th:href="@{/product}" class="viewDetail">Xem chi tiết</a>
+                        <a th:href="@{/cart}" class="addToCart">Thêm vào giỏ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="main__policy">
+            <div class="row">
+                <div class="col l-3 m-6">
+                    <div class="policy bg-1">
+                        <img th:src="@{/assets/img/policy/policy1.png}" class="policy__img">
+                        <div class="policy__info">
+                            <h3 class="policy__title">GIAO HÀNG MIỄN PHÍ</h3>
+                            <p class="policy__description">Cho đơn hàng từ 300K</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col l-3 m-6">
+                    <div class="policy bg-2">
+                        <img th:src="@{/assets/img/policy/policy2.png}" class="policy__img">
+                        <div class="policy__info">
+                            <h3 class="policy__title">ĐỔI TRẢ HÀNG</h3>
+                            <p class="policy__description">Trong 3 ngày đầu tiên</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col l-3 m-6">
+                    <div class="policy bg-1">
+                        <img th:src="@{/assets/img/policy/policy3.png}" class="policy__img">
+                        <div class="policy__info">
+                            <h3 class="policy__title">HÀNG CHÍNH HÃNG</h3>
+                            <p class="policy__description">Cam kết chất lượng</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col l-3 m-6">
+                    <div class="policy bg-2">
+                        <img th:src="@{/assets/img/policy/policy4.png}" class="policy__img">
+                        <div class="policy__info">
+                            <h3 class="policy__title">TƯ VẤN 24/24</h3>
+                            <p class="policy__description">Giải đáp mọi thắc mắc</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="main__frame bg-3">
+            <div class="grid wide">
+                <h3 class="category__title">OneShop Cometics</h3>
+                <h3 class="category__heading">Tin Tức</h3>
+                <div class="owl-carousel news owl-theme">
+                    <a th:href="@{/news}" class="news">
+                        <div class="news__img">
+                            <img th:src="@{/assets/img/news/news1.jpg}" alt="">
+                        </div>
+                        <div class="news__body">
+                            <h3 class="news__body-title">Trang điểm đúng cách</h3>
+                            <div class="new__body-date">13/6/2021</div>
+                            <p class="news__description">Lorem ipsum dolor sit amet consectetur adipisicing elit. In sit molestiae aperiam modi cum deserunt, maxime blanditiis voluptate officiis accusantium minima pariatur harum tenetur quo iste iusto commodi. Modi, culpa?</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="main__bands">
+            <div class="grid wide">
+                <div class="owl-carousel bands">
+                    <a th:href="@{/list-product}" class="band__item" th:style="'background-image: url(' + @{/assets/img/band/band1.png} + ')'"></a>
+                    <a th:href="@{/list-product}" class="band__item" th:style="'background-image: url(' + @{/assets/img/band/band2.png} + ')'"></a>
+                    <a th:href="@{/list-product}" class="band__item" th:style="'background-image: url(' + @{/assets/img/band/band3.png} + ')'"></a>
+                    <a th:href="@{/list-product}" class="band__item" th:style="'background-image: url(' + @{/assets/img/band/band4.png} + ')'"></a>
+                    <a th:href="@{/list-product}" class="band__item" th:style="'background-image: url(' + @{/assets/img/band/band5.png} + ')'"></a>
+                    <a th:href="@{/list-product}" class="band__item" th:style="'background-image: url(' + @{/assets/img/band/band6.png} + ')'"></a>
+                    <a th:href="@{/list-product}" class="band__item" th:style="'background-image: url(' + @{/assets/img/band/band7.png} + ')'"></a>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-		<div class="up-top" id="upTop" onclick="goToTop()">
-			<i class="fas fa-chevron-up"></i>
-		</div>
 
-	</div>
-	<script>
+    <div class="footer">
+        <div class="grid wide">
+            <div class="row">
+                <div class="col l-3 m-6 s-12">
+                    <h3 class="footer__title">Menu</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item"><a href="#" class="footer__link">Trang điểm</a></li>
+                        <li class="footer__item"><a href="#" class="footer__link">Chăm sóc da</a></li>
+                    </ul>
+                </div>
+                <div class="col l-3 m-6 s-12">
+                    <h3 class="footer__title">Hỗ trợ khách hàng</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item"><a href="#" class="footer__link">Hướng dẫn mua hàng</a></li>
+                    </ul>
+                </div>
+                <div class="col l-3 m-6 s-12">
+                    <h3 class="footer__title">Liên hệ</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item"><span class="footer__text"> <i class="fas fa-map-marked-alt"></i> Số 1 Võ Văn Ngân, Thủ Đức, Tp.HCM</span></li>
+                        <li class="footer__item"><a href="#" class="footer__link"> <i class="fas fa-phone"></i> 0367xxxxxxxx</a></li>
+                    </ul>
+                </div>
+                <div class="col l-3 m-6 s-12">
+                    <h3 class="footer__title">Đăng kí</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item"><span class="footer__text">Đăng ký để nhận được được thông tin ưu đãi mới nhất từ chúng tôi.</span></li>
+                        <li class="footer__item">
+                            <div class="send-email">
+                                <input class="send-email__input" type="email" placeholder="Nhập Email...">
+                                <a href="#" class="send-email__link"> <i class="fas fa-paper-plane"></i></a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <span class="footer__text"> &copy; Bản quyền thuộc về <a class="footer__link" href="#"> Nhóm 6</a></span>
+        </div>
+    </div>
+    
+    <div class="ModalForm">
+        <div class="modal" id="my-Register">
+            <a href="#" class="overlay-close"></a>
+            <div class="authen-modal register">
+                <h3 class="authen-modal__title">Đăng Kí</h3>
+                <div id="registerError" class="alert alert-danger" role="alert" style="display: none;"></div>
+                <form id="registerForm" method="post">
+                    <div class="form-group">
+                        <label for="fullName" class="form-label">Họ Tên</label>
+                        <input id="fullName" name="fullName" type="text" class="form-control" required>
+                        <span class="form-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Tài khoản Email *</label>
+                        <input id="email" name="email" type="email" class="form-control" required>
+                        <span class="form-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="form-label">Mật khẩu *</label>
+                        <input id="password" name="password" type="password" class="form-control" required>
+                        <span class="form-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">Nhập lại mật khẩu *</label>
+                        <input id="confirmPassword" name="confirmPassword" type="password" class="form-control" required>
+                        <span class="form-message"></span>
+                    </div>
+                    <div class="authen__btns">
+                        <button type="submit" class="btn btn--default">Đăng Kí</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal" id="my-Login">
+            <a href="#" class="overlay-close"></a>
+            <div class="authen-modal login">
+                <h3 class="authen-modal__title">Đăng Nhập</h3>
+                <div id="loginError" class="alert alert-danger" role="alert" style="display: none;"></div>
+                <form id="loginForm" method="post">
+                    <div class="form-group">
+                        <label for="account" class="form-label">Địa chỉ email *</label>
+                        <input id="account" name="account" type="email" class="form-control" required>
+                        <span class="form-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="form-label">Mật khẩu *</label>
+                        <input id="password" name="password" type="password" class="form-control" required>
+                        <span class="form-message"></span>
+                    </div>
+                    <div class="authen__btns">
+                        <button type="submit" class="btn btn--default">Đăng Nhập</button>
+                        <input type="checkbox" class="authen-checkbox" name="remember-me">
+                        <label class="form-label">Ghi nhớ mật khẩu</label>
+                    </div>
+                </form>
+                <a class="authen__link" href="/forgot">Quên mật khẩu ?</a>
+            </div>
+        </div>
+        
+        <div class="up-top" id="upTop" onclick="goToTop()">
+            <i class="fas fa-chevron-up"></i>
+        </div>
+    </div>
+    
+    <script>
         $('.owl-carousel.hight').owlCarousel({
             loop: true,
             margin: 20,
@@ -569,11 +665,7 @@
             autoplay: true,
             autoplayTimeout: 3000,
             autoplayHoverPause: true,
-            responsive: {
-                0: { items: 2 },
-                600: { items: 3 },
-                1000: { items: 5 }
-            }
+            responsive: { 0: { items: 2 }, 600: { items: 3 }, 1000: { items: 5 } }
         })
         $('.owl-carousel.news').owlCarousel({
             loop: true,
@@ -583,11 +675,7 @@
             autoplay: true,
             autoplayTimeout: 4000,
             autoplayHoverPause: true,
-            responsive: {
-                0: { items: 1 },
-                600: { items: 1 },
-                1000: { items: 2 }
-            }
+            responsive: { 0: { items: 1 }, 600: { items: 1 }, 1000: { items: 2 } }
         })
         $('.owl-carousel.bands').owlCarousel({
             loop: true,
@@ -597,70 +685,66 @@
             autoplay: true,
             autoplayTimeout: 2000,
             autoplayHoverPause: true,
-            responsive: {
-                0: { items: 2 },
-                600: { items: 3 },
-                1000: { items: 6 }
-            }
+            responsive: { 0: { items: 2 }, 600: { items: 3 }, 1000: { items: 6 } }
         })
     </script>
-	<script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
-	<script th:src="@{/assets/js/homeScript.js}"></script>
-	<script th:src="@{/assets/js/commonscript.js}"></script>
-	<script>
-    $(document).ready(function() {
-        // Xử lý form đăng ký
-        $('#registerForm').submit(function(e) {
-            e.preventDefault(); // Ngăn reload trang
-            $('#registerError').hide(); // Ẩn lỗi cũ
-            var formData = $(this).serialize();
-            $.ajax({
-                type: 'POST',
-                url: '/api/auth/signup',
-                data: formData,
-                success: function(response) {
-                    if (response.success) {
-                        window.location.href = response.redirect; // Chuyển trang nếu thành công
-                    } else {
-                        $('#registerError').text(response.message).show(); // Hiển thị lỗi trong modal đăng ký
+    <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/assets/js/homeScript.js}"></script>
+    <script th:src="@{/assets/js/commonscript.js}"></script>
+    <script>
+        $(document).ready(function() {
+            // Xử lý form đăng ký
+            $('#registerForm').submit(function(e) {
+                e.preventDefault(); // Ngăn reload trang
+                $('#registerError').hide(); // Ẩn lỗi cũ
+                var formData = $(this).serialize();
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/auth/signup',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            window.location.href = response.redirect; // Chuyển trang nếu thành công
+                        } else {
+                            $('#registerError').text(response.message).show(); // Hiển thị lỗi trong modal đăng ký
+                        }
+                    },
+                    error: function() {
+                        $('#registerError').text('Có lỗi xảy ra!').show();
                     }
-                },
-                error: function() {
-                    $('#registerError').text('Có lỗi xảy ra!').show();
-                }
+                });
             });
-        });
 
-        // Xử lý form đăng nhập
-        $('#loginForm').submit(function(e) {
-            e.preventDefault(); // Ngăn reload trang
-            $('#loginError').hide(); // Ẩn lỗi cũ
-            var formData = $(this).serialize();
-            $.ajax({
-                type: 'POST',
-                url: '/login',
-                data: formData,
-                beforeSend: function(xhr) {
-                    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest"); // Đánh dấu AJAX
-                },
-                success: function(response) {
-                    if (response.success) {
-                        window.location.href = response.redirect; // Chuyển trang nếu thành công
-                    } else {
-                        $('#loginError').text(response.message).show(); // Hiển thị lỗi trong modal đăng nhập
+            // Xử lý form đăng nhập
+            $('#loginForm').submit(function(e) {
+                e.preventDefault(); // Ngăn reload trang
+                $('#loginError').hide(); // Ẩn lỗi cũ
+                var formData = $(this).serialize();
+                $.ajax({
+                    type: 'POST',
+                    url: '/login',
+                    data: formData,
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest"); // Đánh dấu AJAX
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            window.location.href = response.redirect; // Chuyển trang nếu thành công
+                        } else {
+                            $('#loginError').text(response.message).show(); // Hiển thị lỗi trong modal đăng nhập
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 401) {
+                            $('#loginError').text('Tài khoản hoặc mật khẩu không chính xác!').show();
+                        } else {
+                            $('#loginError').text('Có lỗi xảy ra!').show();
+                        }
                     }
-                },
-                error: function(xhr) {
-                    if (xhr.status === 401) {
-                        $('#loginError').text('Tài khoản hoặc mật khẩu không chính xác!').show();
-                    } else {
-                        $('#loginError').text('Có lỗi xảy ra!').show();
-                    }
-                }
+                });
             });
         });
-    });
-</script>
+    </script>
 </body>
 
 </html>

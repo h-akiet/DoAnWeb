@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <link rel="stylesheet" href="./assets/css/library.css">
+    <link rel="stylesheet" href="assets/owlCarousel/assets/owl.carousel.min.css">
+    <link rel="stylesheet" href="assets/owlCarousel/assets/owl.theme.default.min.css">
+    <link rel="stylesheet" href="./assets/css/common.css">
+    <link rel="stylesheet" type="text/css" href="./assets/css/pay.css">
+    <link rel="stylesheet" type="text/css" href="./assets/css/pay-custom.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="assets/owlCarousel/owl.carousel.min.js"></script>
+</head>
+
+<body>
+    <div class="header scrolling" id="myHeader">
+        </div>
+
+    <div class="main">
+        <div class="grid wide">
+            <div class="row">
+                <div class="col l-7 m-12 s-12">
+                    <div class="pay-information">
+                        <div class="pay__heading">Thông tin thanh toán</div>
+                        <p class="shipping-address-title">
+                            <i class="fas fa-map-marker-alt icon-primary"></i> 
+                            Địa chỉ giao hàng
+                        </p>
+                        
+                        <div class="selected-address-summary">
+                            <div>
+                                <span class="recipient-info" id="currentRecipient">Nguyễn Hoàng Anh Kiệt | 0387281731</span>
+                                <span class="default-tag">Mặc định</span>
+                                <div class="address-text" id="currentAddressDetail">82, 15/3 ấp, Xã Thạnh Bình, Huyện Chợ Gạo, Tiền Giang</div>
+                            </div>
+                            <button class="btn btn--default small btn-outline-primary" id="btnChangeAddress">Thay Đổi</button>
+                        </div>
+
+                        <hr class="divider">
+
+                        <div class="payment-method-area">
+                            <div class="pay__heading-sub">Phương thức Thanh toán</div>
+                            <div class="payment-item">
+                                <input type="radio" id="pay-cod" name="payment-method" value="cod" checked>
+                                <label for="pay-cod"><i class="fas fa-money-bill-alt"></i> Thanh toán khi nhận hàng (COD)</label>
+                            </div>
+                            <div class="payment-item">
+                                <input type="radio" id="pay-bank" name="payment-method" value="bank">
+                                <label for="pay-bank"><i class="fas fa-credit-card"></i> Thanh toán online (Thẻ/Chuyển khoản)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col l-5 m-12 s-12">
+                    <div class="pay-order">
+                        <div class="pay__heading">Đơn hàng của bạn</div>
+                        
+                        <div class="pay-info border-bottom pb-10 mb-10">
+                            <div class="main__pay-text special text-bold">Sản phẩm (x3)</div>
+                        </div>
+                        <div class="pay-info">
+                            <div class="main__pay-text">Azrouel dress variable</div>
+                            <div class="main__pay-price">1,120,000 ₫</div>
+                        </div>
+                        <hr class="divider-light">
+                        
+                        <div class="pay-info">
+                            <div class="main__pay-text special">Giao hàng</div>
+                            <div class="main__pay-text">Giao hàng miễn phí</div>
+                        </div>
+
+                        <div class="pay-info mt-20">
+                            <div class="main__pay-text special text-large text-bold">Tổng thành tiền</div>
+                            <div class="main__pay-price text-large text-primary text-bold">3,360,000 ₫</div>
+                        </div>
+                        
+                        <button class="btn btn--default orange w-100 mt-15">ĐẶT HÀNG</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        </div>
+
+    <div class="address-modal-overlay" id="addressModalOverlay">
+        <div class="address-modal-content">
+            <div class="modal-header">Địa Chỉ Của Tôi</div>
+            
+            <div class="address-list-container">
+                <div class="modal-body" id="addressListContent">
+                    <div class="address-item selected" data-recipient="Nguyễn Hoàng Anh Kiệt | 0387281731" data-address-text="82, 15/3 ấp, Xã Thạnh Bình, Huyện Chợ Gạo, Tiền Giang" data-is-default="true">
+                        <input type="radio" name="modal-shipping-address" value="1" checked>
+                        <div class="address-info">
+                            <span class="recipient-info">Nguyễn Hoàng Anh Kiệt | 0387281731 <span class="default-tag">Mặc định</span></span>
+                            <div class="address-text">82, 15/3 ấp, Xã Thạnh Bình, Huyện Chợ Gạo, Tiền Giang</div>
+                        </div>
+                        <button type="button" class="btn-update-address" data-address-id="1">Cập nhật</button>
+                    </div>
+                    <div class="address-item" data-recipient="Nguyễn Văn A | 0901234567" data-address-text="73/2, Đường số 4, P.16, Q. Gò Vấp, Tp.HCM" data-is-default="false">
+                        <input type="radio" name="modal-shipping-address" value="2">
+                        <div class="address-info">
+                            <span class="recipient-info">Nguyễn Văn A | 0901234567</span>
+                            <div class="address-text">73/2, Đường số 4, P.16, Q. Gò Vấp, Tp.HCM</div>
+                        </div>
+                        <button type="button" class="btn-update-address" data-address-id="2">Cập nhật</button>
+                    </div>
+                </div>
+                <div class="modal-body-actions">
+                    <button type="button" class="btn-add-new-address" id="btnAddAddressInModal">
+                        <i class="fas fa-plus"></i> Thêm Địa Chỉ Mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="address-form-container">
+                <a href="#" class="back-to-list-btn"><i class="fas fa-arrow-left"></i> Quay lại</a>
+                <h4 id="formModalTitle">Thêm Địa Chỉ Mới</h4>
+                <form id="addressFormModal">
+                    <div class="form-group"><label for="modal_full_name" class="form-label">Họ Tên *</label><input id="modal_full_name" type="text" class="form-control"></div>
+                    <div class="form-group"><label for="modal_phone" class="form-label">Số điện thoại *</label><input id="modal_phone" type="text" class="form-control"></div>
+                    <div class="form-group"><label for="modal_address_detail" class="form-label">Địa chỉ cụ thể *</label><input id="modal_address_detail" type="text" class="form-control"></div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="modal_set_default">
+                        <label for="modal_set_default">Đặt làm địa chỉ mặc định</label>
+                    </div>
+                    <div class="form-group form-actions">
+                        <button type="button" class="btn btn--default" id="btnCancelForm">Hủy</button>
+                        <button type="submit" class="btn btn--default orange">Hoàn thành</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn--default" id="btnModalCancel">Hủy</button>
+                <button type="button" class="btn btn--default orange" id="btnModalConfirm">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./assets/js/commonscript.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // --- KHAI BÁO BIẾN ---
+            const $modalOverlay = $('#addressModalOverlay');
+            const $modalContent = $('.address-modal-content');
+            const $formTitle = $('#formModalTitle');
+            const $addressList = $('#addressListContent');
+
+            // --- QUẢN LÝ MODAL ---
+            function openModal() { $modalOverlay.addClass('is-active'); }
+            function closeModal() { $modalOverlay.removeClass('is-active'); }
+
+            $('#btnChangeAddress').on('click', openModal);
+            $('#btnModalCancel').on('click', closeModal);
+            $modalOverlay.on('click', function(e) {
+                if (e.target.id === 'addressModalOverlay') closeModal();
+            });
+
+            // --- QUẢN LÝ VIEW (DANH SÁCH/FORM) ---
+            function showAddressList() { $modalContent.removeClass('view-form'); }
+            function showAddressForm(isEdit = false, addressData = {}) {
+                $formTitle.text(isEdit ? 'Cập nhật Địa Chỉ' : 'Thêm Địa Chỉ Mới');
+                // TODO: Điền dữ liệu vào form nếu là chế độ edit (addressData)
+                $('#addressFormModal')[0].reset(); 
+                $modalContent.addClass('view-form');
+            }
+
+            $('#btnAddAddressInModal').on('click', () => showAddressForm(false));
+            $('.back-to-list-btn, #btnCancelForm').on('click', (e) => {
+                e.preventDefault();
+                showAddressList();
+            });
+            // Sử dụng event delegation cho các nút "Cập nhật"
+            $addressList.on('click', '.btn-update-address', function() {
+                const addressId = $(this).data('address-id');
+                // TODO: Lấy dữ liệu địa chỉ từ server dựa vào addressId
+                const fakeData = { id: addressId, name: "Data from Server"}; 
+                showAddressForm(true, fakeData);
+            });
+
+            // --- XỬ LÝ DỮ LIỆU ---
+            $('#btnModalConfirm').on('click', function() {
+                const $selectedItem = $addressList.find('input[name="modal-shipping-address"]:checked').closest('.address-item');
+                if ($selectedItem.length === 0) {
+                    alert('Vui lòng chọn một địa chỉ.');
+                    return;
+                }
+                
+                const recipient = $selectedItem.data('recipient');
+                const addressText = $selectedItem.data('address-text');
+                const isDefault = $selectedItem.data('is-default');
+
+                $('#currentRecipient').text(recipient);
+                $('#currentAddressDetail').text(addressText);
+                
+                // Ẩn/hiện tag "Mặc định"
+                if(isDefault) {
+                    $('#currentRecipient').append(' <span class="default-tag">Mặc định</span>');
+                }
+                
+                closeModal();
+            });
+
+            $('#addressFormModal').on('submit', function(e) {
+                e.preventDefault();
+                alert('Địa chỉ đã được lưu! (Cần tích hợp với Backend)');
+                // TODO: Gửi dữ liệu form lên server
+                // Sau khi thành công, tải lại danh sách địa chỉ và hiển thị
+                showAddressList();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,61 +1,48 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liên Hệ</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" xintegrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
     <link rel="stylesheet" th:href="@{/assets/css/library.css}">
-    <link rel="stylesheet" th:href="@{/assets/owlCarousel/assets/owl.carousel.min.css}">
-    <link rel="stylesheet" th:href="@{/assets/owlCarousel/assets/owl.theme.default.min.css}">
     <link rel="stylesheet" th:href="@{/assets/css/common.css}">
     <link rel="stylesheet" type="text/css" th:href="@{/assets/css/contact.css}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script th:src="@{/assets/owlCarousel/owl.carousel.min.js}"></script>
 </head>
 
 <body>
+    <!-- Header -->
     <div class="header scrolling" id="myHeader">
         <div class="grid wide">
             <div class="header__top">
-                <div class="navbar-icon">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-                <a th:href="@{/}" class="header__logo">
-                    <img th:src="@{/assets/logo.png}" alt="">
-                </a>
+                <div class="navbar-icon"><span></span><span></span><span></span></div>
+                <a th:href="@{/}" class="header__logo"><img th:src="@{/assets/logo.png}" alt="Logo"></a>
                 <div class="header__search">
                     <div class="header__search-wrap">
-                        <input type="text" class="header__search-input" placeholder="Tìm kiếm">
-                        <a class="header__search-icon" href="#">
-                            <i class="fas fa-search"></i>
-                        </a>
+                        <input type="text" class="header__search-input" placeholder="Tìm kiếm sản phẩm...">
+                        <a class="header__search-icon" href="#"><i class="fas fa-search"></i></a>
                     </div>
                 </div>
                 <div class="header__account">
                     <a href="#my-Login" class="header__account-login">Đăng Nhập</a>
                     <a href="#my-Register" class="header__account-register">Đăng Kí</a>
                 </div>
-                <div class="header__cart have" href="#">
+                <div class="header__cart have">
                     <i class="fas fa-shopping-basket"></i>
-                    <div class="header__cart-amount">
-                        3
-                    </div>
+                    <div class="header__cart-amount">3</div>
                     <div class="header__cart-wrap">
                         <ul class="order__list">
                             <li class="item-order">
                                 <div class="order-wrap">
-                                    <a th:href="@{/product}" class="order-img">
-                                        <img th:src="@{/assets/img/product/product1.jpg}" alt="">
-                                    </a>
+                                    <a th:href="@{/product}" class="order-img"><img th:src="@{/assets/img/product/product1.jpg}" alt=""></a>
                                     <div class="order-main">
-                                        <a th:href="@{/product}" class="order-main-name">Áo sơ mi  caro kèm belt caro kèm belt Áo sơ mi caro kèm belt</a>
+                                        <a th:href="@{/product}" class="order-main-name">Áo sơ mi caro kèm belt</a>
                                         <div class="order-main-price">2 x 45,000 ₫</div>
                                     </div>
                                     <a th:href="@{/product}" class="order-close"><i class="far fa-times-circle"></i></a>
@@ -71,187 +58,119 @@
         </div>
         <div class="header__nav">
             <ul class="header__nav-list">
-                <li class="header__nav-item nav__search">
-                    <div class="nav__search-wrap">
-                        <input class="nav__search-input" type="text" name="" id="" placeholder="Tìm sản phẩm...">
-                    </div>
-                    <div class="nav__search-btn">
-                        <i class="fas fa-search"></i>
-                    </div>
-                </li>
-                <li class="header__nav-item authen-form">
-                    <a href="#" class="header__nav-link">Tài Khoản</a>
-                    <ul class="sub-nav">
-                        <li class="sub-nav__item">
-                            <a href="#my-Login" class="sub-nav__link">Đăng Nhập</a>
-                        </li>
-                        <li class="sub-nav__item">
-                            <a href="#my-Register" class="sub-nav__link">Đăng Kí</a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="header__nav-item index">
-                    <a th:href="@{/}" class="header__nav-link">Trang chủ</a>
-                </li>
-                <li class="header__nav-item">
-                    <a href="#" class="header__nav-link">Giới Thiệu</a>
-                </li>
-                <li class="header__nav-item">
-                    <a th:href="@{/list-product}" class="header__nav-link">Sản Phẩm</a>
-                </li>
-                <li class="header__nav-item">
-                    <a th:href="@{/news}" class="header__nav-link">Tin Tức</a>
-                </li>
-                <li class="header__nav-item">
-                    <a th:href="@{/contact}" class="header__nav-link">Liên Hệ</a>
-                </li>
+                <li class="header__nav-item index"><a th:href="@{/}" class="header__nav-link">Trang chủ</a></li>
+                <li class="header__nav-item"><a th:href="@{/list-product}" class="header__nav-link">Sản Phẩm</a></li>
+                <li class="header__nav-item"><a th:href="@{/news}" class="header__nav-link">Tin Tức</a></li>
+                <li class="header__nav-item"><a th:href="@{/contact}" class="header__nav-link">Liên Hệ</a></li>
             </ul>
         </div>
     </div>
+
+    <!-- Main Content -->
     <div class="main">
         <div class="grid wide">
             <div class="main__breadcrumb">
-                <div class="breadcrumb__item">
-                    <a th:href="@{/}" class="breadcrumb__link">Trang chủ</a>
-                </div>
-                <div class="breadcrumb__item">
-                    <a th:href="@{/contact}" class="breadcrumb__link">Liên hệ</a>
-                </div>
+                <div class="breadcrumb__item"><a th:href="@{/}" class="breadcrumb__link">Trang chủ</a></div>
+                <div class="breadcrumb__item"><a th:href="@{/contact}" class="breadcrumb__link">Liên hệ</a></div>
             </div>
             <div class="row">
-                <div class="col l-6 m-12 s-12">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.669658423679!2d106.64936371462223!3d10.759974192332999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752e789c43836b%3A0x1a79f048d2a6e7ee!2zMzE5IEwgQzE2IEzDvSBUaMaw4budbmcgS2nhu4d0LCBQaMaw4budbmcgMTUsIFF14bqtbiAxMSwgVGjDoG5oIHBo4buRIEjhu5MgQ2jDrSBNaW5oLCBWaeG7h3QgTmFt!5e0!3m2!1svi!2s!4v1626082264877!5m2!1svi!2s" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-                </div>
-                <div class="col l-6 m-12 s-12">
-                    <div class="contact__wrap">
-                        <div class="contact__img">
-                            <img src="http://mauweb.monamedia.net/vanihome/wp-content/uploads/2018/04/logo-mona.png" alt="">
-                        </div>
-                        <ul class="contact__info">
-                            <li class="contact__text">
-                                <i class="fas fa-map-marked-alt"></i> 319 C16 Lý Thường Kiệt, Phường 15, Quận 11, Tp.HCM
-                            </li>
-                            <li>
-                                <a href="tel:0769220162" class="contact__link">
-                                    <i class="fas fa-phone"></i> 076 922 0162
-                                </a>
-                            </li>
-                            <li>
-                                <a href="mailto:phuonggiang150@gmail.com" class="contact__link">
-                                    <i class="fas fa-envelope"></i> phuonggiang150@gmail.com
-                                </a>
-                            </li>
-                        </ul>
+                <!-- Map Section -->
+                <div class="col l-7 m-12 s-12">
+                    <div class="contact-map">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.484231881473!2d106.76993931533475!3d10.85072066078831!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317527587e9ad5bf%3A0xafa66f9c8e3f91!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBTxrAgcGjhuqFtIEvhu7kgdGh14bqtdCBUcC4gSOG7kyBDaMOtIE1pbmg!5e0!3m2!1svi!2s!4v1668678253686!5m2!1svi!2s" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                     </div>
-                    <div class="about-us">
-                        <div class="about-us__heading">Liên hệ với chúng tôi</div>
-                        <div class="form__group">
-                            <div>
-                                <input type="text" placeholder="Họ và tên">
-                            </div>
-                            <div>
-                                <input type="text" placeholder="Email">
-                            </div>
-                            <div>
-                                <input type="text" placeholder="Địa chỉ">
-                            </div>
-                            <div>
-                                <input type="text" placeholder="Số điện thoại">
+                </div>
+                <!-- Contact Info & Form Section -->
+                <div class="col l-5 m-12 s-12">
+                    <div class="contact-wrapper">
+                        <div class="contact-info-card">
+                            <h2 class="contact-heading">Thông tin liên hệ</h2>
+                            <p class="contact-subheading">Chúng tôi luôn sẵn sàng lắng nghe bạn.</p>
+                            <ul class="info-list">
+                                <li class="info-item">
+                                    <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                    <div class="info-text">
+                                        <strong>Địa chỉ:</strong>
+                                        <span>Số 1 Võ Văn Ngân, Thủ Đức, TP. Hồ Chí Minh</span>
+                                    </div>
+                                </li>
+                                <li class="info-item">
+                                    <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                                    <div class="info-text">
+                                        <strong>Email:</strong>
+                                        <a href="mailto:2311xxxx@student.hcmute.edu.vn">2311xxxx@student.hcmute.edu.vn</a>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="social-links">
+                                <a href="#" class="social-item"><i class="fab fa-facebook-f"></i></a>
+                                <a href="#" class="social-item"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="social-item"><i class="fab fa-youtube"></i></a>
+                                <a href="#" class="social-item"><i class="fab fa-tiktok"></i></a>
                             </div>
                         </div>
-                        <textarea name="" id="" cols="30" rows="5" placeholder="Lời nhắn"></textarea>
-                        <button type="submit" class="btn btn--default">Gửi</button>
+
+                        <div class="contact-form-card">
+                            <h2 class="contact-heading">Gửi tin nhắn cho chúng tôi</h2>
+                            <form class="contact-form">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Họ và tên của bạn" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" class="form-control" placeholder="Email liên hệ" required>
+                                </div>
+                                <div class="form-group">
+                                    <textarea class="form-control" rows="5" placeholder="Nội dung tin nhắn..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn--default orange w-100">Gửi tin nhắn</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
     <div class="footer">
         <div class="grid wide">
             <div class="row">
                 <div class="col l-3 m-6 s-12">
                     <h3 class="footer__title">Menu</h3>
                     <ul class="footer__list">
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Trang điểm</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Chăm sóc da</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Chăm sóc tóc</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Nước hoa</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Chăm sóc toàn thân </a>
-                        </li>
+                        <li class="footer__item"><a href="#" class="footer__link">Trang điểm</a></li>
+                        <li class="footer__item"><a href="#" class="footer__link">Chăm sóc da</a></li>
+                        <li class="footer__item"><a href="#" class="footer__link">Chăm sóc tóc</a></li>
+                        <li class="footer__item"><a href="#" class="footer__link">Nước hoa</a></li>
                     </ul>
                 </div>
                 <div class="col l-3 m-6 s-12">
                     <h3 class="footer__title">Hỗ trợ khách hàng</h3>
                     <ul class="footer__list">
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Hướng dẫn mua hàng</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Giải đáp thắc mắc</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Chính sách mua hàng</a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">Chính sách đổi trả</a>
-                        </li>
+                        <li class="footer__item"><a href="#" class="footer__link">Hướng dẫn mua hàng</a></li>
+                        <li class="footer__item"><a href="#" class="footer__link">Chính sách mua hàng</a></li>
+                        <li class="footer__item"><a href="#" class="footer__link">Chính sách đổi trả</a></li>
                     </ul>
                 </div>
                 <div class="col l-3 m-6 s-12">
                     <h3 class="footer__title">Liên hệ</h3>
                     <ul class="footer__list">
                         <li class="footer__item">
-                            <span class="footer__text">
-                                    <i class="fas fa-map-marked-alt"></i> 319 C16 Lý Thường Kiệt, Phường 15, Quận 11, Tp.HCM
-                            </span>
+                            <span class="footer__text"><i class="fas fa-map-marked-alt"></i> Số 1 Võ Văn Ngân, Thủ Đức, TP. Hồ Chí Minh</span>
                         </li>
                         <li class="footer__item">
-                            <a href="#" class="footer__link">
-                                <i class="fas fa-phone"></i> 076 922 0162
-                            </a>
-                        </li>
-                        <li class="footer__item">
-                            <a href="#" class="footer__link">
-                                <i class="fas fa-envelope"></i> phuonggiang150@gmail.com
-                            </a>
-                        </li>
-                        <li class="footer__item">
-                            <div class="social-group">
-                                <a href="#" class="social-item"><i class="fab fa-facebook-f"></i>
-                                    </a>
-                                <a href="#" class="social-item"><i class="fab fa-twitter"></i>
-                                    </a>
-                                <a href="#" class="social-item"><i class="fab fa-pinterest-p"></i>
-                                    </a>
-                                <a href="#" class="social-item"><i class="fab fa-invision"></i>
-                                    </a>
-                                <a href="#" class="social-item"><i class="fab fa-youtube"></i>  
-                                    </a>
-                            </div>
+                            <a href="mailto:2311xxxx@student.hcmute.edu.vn" class="footer__link"><i class="fas fa-envelope"></i> 2311xxxx@student.hcmute.edu.vn</a>
                         </li>
                     </ul>
                 </div>
                 <div class="col l-3 m-6 s-12">
-                    <h3 class="footer__title">Đăng kí</h3>
+                    <h3 class="footer__title">Đăng kí nhận tin</h3>
                     <ul class="footer__list">
-                        <li class="footer__item">
-                            <span class="footer__text">Đăng ký để nhận được được thông tin ưu đãi mới nhất từ chúng tôi.</span>
-                        </li>
+                        <li class="footer__item"><span class="footer__text">Nhận thông tin ưu đãi mới nhất từ chúng tôi.</span></li>
                         <li class="footer__item">
                             <div class="send-email">
                                 <input class="send-email__input" type="email" placeholder="Nhập Email...">
-                                <a href="#" class="send-email__link">
-                                    <i class="fas fa-paper-plane"></i>
-                                </a>
+                                <a href="#" class="send-email__link"><i class="fas fa-paper-plane"></i></a>
                             </div>
                         </li>
                     </ul>
@@ -259,9 +178,11 @@
             </div>
         </div>
         <div class="copyright">
-            <span class="footer__text"> &copy; Bản quyền thuộc về <a class="footer__link" href="#"> Nhóm 6</a></span>
+            <span class="footer__text">© Bản quyền thuộc về <a class="footer__link" href="#">NHÓM 6</a></span>
         </div>
     </div>
+    
+    <!-- Modals and Go to Top button -->
     <div class="ModalForm">
         <div class="modal" id="my-Register">
     <a href="#" class="overlay-close"></a>
@@ -328,7 +249,7 @@
         </div>
 
     </div>
-    
+
     <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/assets/js/commonscript.js}"></script>
     <script>
