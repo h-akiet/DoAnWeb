@@ -9,9 +9,11 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.HttpFirewall;
@@ -23,6 +25,7 @@ import com.oneshop.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Configuration
 public class SecurityConfig {
@@ -58,23 +61,12 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationSuccessHandler customSuccessHandler() {
-        return new AuthenticationSuccessHandler() {
-            @Override
-            public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws java.io.IOException {
-                // Sinh JWT
-                String jwt = jwtUtils.generateJwtToken(authentication);
-                Cookie cookie = new Cookie("jwtToken", jwt);
-                cookie.setHttpOnly(true);
-                cookie.setPath("/");
-                cookie.setMaxAge(24 * 60 * 60);
-                response.addCookie(cookie);
+        return new CustomAuthenticationSuccessHandler(jwtUtils);
+    }
 
-                System.out.println("✅ JWT token đã được tạo và lưu vào cookie sau đăng nhập thành công!");
-
-                // Chuyển hướng đến /home
-                response.sendRedirect("/home");
-            }
-        };
+    @Bean
+    public AuthenticationFailureHandler customFailureHandler() {
+        return new CustomAuthenticationFailureHandler();
     }
 
     @Bean
@@ -107,9 +99,11 @@ public class SecurityConfig {
             // Cấu hình form login
             .formLogin(form -> form
                 .loginPage("/login")
-                .loginProcessingUrl("/login") // URL xử lý POST login từ form
-                .successHandler(customSuccessHandler()) // Xử lý thành công với JWT
-                .failureUrl("/login?error=true")
+                .loginProcessingUrl("/login")
+                .usernameParameter("account")
+                .passwordParameter("password")
+                .successHandler(customSuccessHandler())
+                .failureHandler(customFailureHandler())
                 .permitAll()
             )
 
@@ -132,5 +126,46 @@ public class SecurityConfig {
         StrictHttpFirewall firewall = new StrictHttpFirewall();
         firewall.setAllowUrlEncodedDoubleSlash(true);
         return firewall;
+    }
+
+    // Custom Success Handler cho AJAX
+    public static class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+        private final JwtUtils jwtUtils;
+
+        public CustomAuthenticationSuccessHandler(JwtUtils jwtUtils) {
+            this.jwtUtils = jwtUtils;
+        }
+
+        @Override
+        public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+            // Sinh JWT
+            String jwt = jwtUtils.generateJwtToken(authentication);
+            Cookie cookie = new Cookie("jwtToken", jwt);
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(24 * 60 * 60);
+            response.addCookie(cookie);
+
+            if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+                response.setContentType("application/json");
+                response.getWriter().write("{\"success\": true, \"redirect\": \"/list-product\"}");
+            } else {
+                response.sendRedirect("/list-product");
+            }
+        }
+    }
+
+    // Custom Failure Handler cho AJAX
+    public static class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
+        @Override
+        public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
+            if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"success\": false, \"message\": \"Tài khoản hoặc mật khẩu không chính xác!\"}");
+            } else {
+                response.sendRedirect("/login?error=true");
+            }
+        }
     }
 }
