@@ -2,6 +2,7 @@ package com.oneshop.service;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -148,4 +149,20 @@ public class UserService implements UserDetailsService {
                     }
                 });
     }
+
+//    // ADMIN
+//	public List<User> searchUsers(String keyword) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+//
+//	public List<User> getAllUsers() {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+//
+//	public void updateUserRole(Integer userId, String newRole) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 }

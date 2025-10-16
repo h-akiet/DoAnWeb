@@ -83,7 +83,7 @@ public class SecurityConfig {
             // Phân quyền truy cập
             .authorizeHttpRequests(auth -> auth
                 // Cho phép truy cập công khai
-            	.requestMatchers("/assets/**","/", "/webjars/**").permitAll() 
+            	.requestMatchers("/assets/**","/", "/webjars/**","/admin/**").permitAll() 
                 .requestMatchers("/", "/home", "/login", "/register",
                                 "/verify-otp", "/forgot", "/reset-password",
                                 "/api/auth/**", "/error", "/search", "/*").permitAll()
