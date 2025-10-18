@@ -83,7 +83,7 @@ public class SecurityConfig {
             // Phân quyền truy cập
             .authorizeHttpRequests(auth -> auth
                 // Cho phép truy cập công khai
-            	.requestMatchers("/assets/**","/", "/webjars/**").permitAll() 
+                .requestMatchers("/assets/**","/", "/webjars/**").permitAll() 
                 .requestMatchers("/", "/home", "/login", "/register",
                                 "/verify-otp", "/forgot", "/reset-password",
                                 "/api/auth/**", "/error", "/search", "/*").permitAll()
@@ -92,6 +92,8 @@ public class SecurityConfig {
                                 "/css/**", "/js/**", "/images/**", "/static/**").permitAll()
                 // Yêu cầu quyền ROLE_SHIPPER cho /shipper/**
                 .requestMatchers("/shipper/**").hasAuthority("ROLE_SHIPPER")
+                // Yêu cầu đăng nhập cho /user/**
+                .requestMatchers("/user/**").authenticated()
                 // Các request khác yêu cầu đăng nhập
                 .anyRequest().authenticated()
             )
@@ -146,11 +148,16 @@ public class SecurityConfig {
             cookie.setMaxAge(24 * 60 * 60);
             response.addCookie(cookie);
 
+            // Kiểm tra vai trò của người dùng
+            String redirectUrl = authentication.getAuthorities().stream()
+                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_SHIPPER"))
+                    ? "/shipper/orders" : "/list-product";
+
             if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
                 response.setContentType("application/json");
-                response.getWriter().write("{\"success\": true, \"redirect\": \"/list-product\"}");
+                response.getWriter().write("{\"success\": true, \"redirect\": \"" + redirectUrl + "\"}");
             } else {
-                response.sendRedirect("/list-product");
+                response.sendRedirect(redirectUrl);
             }
         }
     }

@@ -51,7 +51,7 @@ public class AuthController {
         try {
             // Tạo user và gọi service (sẽ kiểm tra tồn tại + gửi OTP)
             User user = new User();
-            user.setUsername(email.trim());
+            user.setUsername(fullName.trim());
       
             user.setEmail(email.trim());
             user.setPassword(passwordEncoder.encode(password.trim()));
@@ -97,7 +97,7 @@ public class AuthController {
             if ("REGISTRATION".equals(type)) {
                 userService.activate(email, otp);
                 model.addAttribute("message", "Xác thực thành công! Hãy đăng nhập.");
-                return "guest/login"; // hoặc redirect:/login tùy ý
+                return "guest/index"; 
             } else if ("FORGOT".equals(type)) {
                 return "redirect:/reset-password?email=" + email + "&otp=" + otp;
             } else {

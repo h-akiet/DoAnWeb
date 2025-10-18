@@ -26,8 +26,8 @@ public class ProductReview {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @OneToOne(fetch = FetchType.LAZY) // Liên kết 1-1 với đơn hàng (để xác minh đã mua)
-    @JoinColumn(name = "order_id", unique = true) 
+    @ManyToOne(fetch = FetchType.LAZY) // Thay đổi từ OneToOne thành ManyToOne để hỗ trợ nhiều review per order
+    @JoinColumn(name = "order_id") 
     private Order order;
 
     @Column(nullable = false)

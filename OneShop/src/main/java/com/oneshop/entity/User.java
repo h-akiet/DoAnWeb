@@ -1,9 +1,7 @@
 package com.oneshop.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -15,15 +13,17 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "USERS")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"addresses", "roles"})  // Loại trừ fields quan hệ
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long id;  // ✅ Đổi từ userId thành id
+    private Long id;
 
     @Column(length = 100, nullable = false)
     private String username;

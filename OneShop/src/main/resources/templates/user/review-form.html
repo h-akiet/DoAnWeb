@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Đánh giá sản phẩm</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Đánh giá đơn hàng #<span th:text="${order.id}"></span></h1>
+
+        <!-- Hiển thị thông báo thành công hoặc lỗi -->
+        <div th:if="${param.success}" class="alert alert-success" role="alert">
+            <span th:text="${param.success[0]}"></span>
+        </div>
+        <div th:if="${param.error}" class="alert alert-danger" role="alert">
+            <span th:text="${param.error[0]}"></span>
+        </div>
+
+        <!-- Lặp qua từng sản phẩm trong đơn hàng -->
+        <div th:each="reviewInfo : ${productReviews}">
+            <h3>Sản phẩm: <span th:text="${reviewInfo.product.name}"></span></h3>
+            
+            <div th:if="${reviewInfo.reviewed}">
+                <p class="text-success">Đã đánh giá sản phẩm này.</p>
+            </div>
+            
+            <form th:unless="${reviewInfo.reviewed}" 
+                  th:action="@{/user/orders/{orderId}/review/{productId}(orderId=${order.id}, productId=${reviewInfo.product.productId})}" 
+                  method="post">
+                <div class="mb-3">
+                    <label th:for="'rating_' + ${reviewInfo.product.productId}" class="form-label">Đánh giá (1-5 sao)</label>
+                    <select class="form-control" th:id="'rating_' + ${reviewInfo.product.productId}" name="rating" required>
+                        <option value="">Chọn số sao</option>
+                        <option value="1">1 sao</option>
+                        <option value="2">2 sao</option>
+                        <option value="3">3 sao</option>
+                        <option value="4">4 sao</option>
+                        <option value="5">5 sao</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label th:for="'comment_' + ${reviewInfo.product.productId}" class="form-label">Bình luận</label>
+                    <textarea class="form-control" th:id="'comment_' + ${reviewInfo.product.productId}" name="comment" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+            </form>
+            <hr />
+        </div>
+        
+        <a th:href="@{/user/orders}" class="btn btn-secondary">Quay lại</a>
+    </div>
+</body>
+</html>
