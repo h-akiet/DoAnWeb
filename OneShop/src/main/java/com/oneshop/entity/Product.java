@@ -76,4 +76,13 @@ public class Product {
              // Nếu không có ảnh nào là primary, thì lấy tạm ảnh đầu tiên trong danh sách
              .orElse(images.iterator().next().getImageUrl());
  }
+ @Transient
+ private Double rating = 0.0;
+
+ @Transient
+ private Integer reviewCount = 0;
+
+ @Transient
+ private Integer soldCount = 0;
+
 }

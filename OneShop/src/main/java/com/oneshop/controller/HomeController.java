@@ -22,11 +22,13 @@ public class HomeController {
     public String index(Model model) {
     	List<Product> bestSellers = productService.findBestSellingProducts();
     	
-        List<Product> featured = productService.findFeaturedProducts(); // Bạn cần tạo phương thức này
+    	List<Product> newest = productService.findNewestProducts();
+        model.addAttribute("newestProducts", newest);
 
-        // DÙNG model.addAttribute ĐỂ ĐẨY DỮ LIỆU RA VIEW
+        List<Product> bestPrice = productService.findBestPriceProducts();
+        model.addAttribute("bestPriceProducts", bestPrice);
         model.addAttribute("bestSellingProducts", bestSellers);
-        model.addAttribute("featuredProducts", featured);
+        
     	
         model.addAttribute("bestSellingProducts", bestSellers);
         return "guest/index";
@@ -34,7 +36,7 @@ public class HomeController {
 
     @GetMapping("/cart")
     public String cart() {
-        return "guest/cart";
+        return "user/cart";
     }
 
     @GetMapping("/contact")
@@ -44,7 +46,7 @@ public class HomeController {
 
     @GetMapping("/list-product")
     public String listProduct() {
-        return "guest/listProduct";
+        return "user/listProduct";
     }
 
     @GetMapping("/news")
@@ -54,12 +56,12 @@ public class HomeController {
 
     @GetMapping("/pay")
     public String pay() {
-        return "guest/pay";
+        return "user/pay";
     }
 
     @GetMapping("/product")
     public String product() {
-        return "guest/product";
+        return "user/product";
     }
     @GetMapping("/pay-customer")
     public String pay_customer() {

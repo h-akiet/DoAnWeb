@@ -107,12 +107,12 @@ public class SecurityConfig {
                 .permitAll()
             )
 
-            // Cấu hình logout
             .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
-                .permitAll()
-            );
+                    .logoutUrl("/logout") // ⬅️ URL mà trình duyệt sẽ gửi request POST/GET đến
+                    .logoutSuccessUrl("/") // ⬅️ URL chuyển hướng sau khi đăng xuất thành công
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID", "jwtToken")
+                    );
 
         // Thêm authentication provider và JWT filter
         http.authenticationProvider(authenticationProvider());

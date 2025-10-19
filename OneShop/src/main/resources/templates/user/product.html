@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/guest}"> 
+ <head>
+    <meta charset="UTF-8">
+    <title>Chi tiết sản phẩm</title>
+
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" type="text/css" th:href="@{/assets/css/product.css}">
+        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css">
+        <style>
+            .productInfo__name::after,
+            .productInfo__name::before { display: none !important; }
+            .productInfo__meta {
+                padding: 10px 0;
+                border-top: 1px solid #f0f0f0;
+                margin-top: 15px;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+            .product__rating { display: flex; align-items: center; gap: 8px; }
+            .rating-stars i { font-size: 14px; color: #ffa500; }
+            .rating-count { font-size: 14px; color: #666; }
+            .product__sold { font-size: 14px; color: #666; display: flex; align-items: center; gap: 5px; }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div class="main" layout:fragment="content">
+        <div class="grid wide">
+            <div class="productInfo">
+                <div class="row">
+                    <div class="col l-5 m-12 s-12">
+                        <div class="owl-carousel owl-theme" id="sync1">
+                            <div class="item">
+                                <a href="#" class="product"><div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product1.jpg} + ')'"></div></a>
+                            </div>
+                            <div class="item">
+                                <a href="#" class="product"><div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product2.jpg} + ')'"></div></a>
+                            </div>
+                            <div class="item">
+                                <a href="#" class="product"><div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product3.jpg} + ')'"></div></a>
+                            </div>
+                        </div>
+                        <div class="owl-carousel owl-theme" id="sync2">
+                            <div class="item">
+                                <a href="#" class="product"><div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product1.jpg} + ')'"></div></a>
+                            </div>
+                             <div class="item">
+                                <a href="#" class="product"><div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product2.jpg} + ')'"></div></a>
+                            </div>
+                             <div class="item">
+                                <a href="#" class="product"><div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product3.jpg} + ')'"></div></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col l-7 m-12s s-12 pl">
+                        <div class="main__breadcrumb">
+                            <div class="breadcrumb__item"><a th:href="@{/}" class="breadcrumb__link">Trang chủ</a></div>
+                            <div class="breadcrumb__item"><a th:href="@{/products}" class="breadcrumb__link">Sản phẩm</a></div>
+                        </div>
+                        <p class="productInfo__brand">Thương hiệu: <a href="#">The Face Shop</a></p>
+                        <h3 class="productInfo__name">Azrouel dress variable</h3>
+                        <div class="productInfo__meta">
+                            <div class="product__rating">
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <span class="rating-count">(1,250 đánh giá)</span>
+                            </div>
+                            <div class="product__sold">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Đã bán 3.5k</span>
+                            </div>
+                        </div>
+                        <div class="productInfo__price">330.000 <span class="priceInfo__unit">đ</span></div>
+                        <div class="productInfo__description">
+                            <span> Lorem Ipsum </span> chỉ đơn giản là một đoạn văn bản giả, được dùng vào việc trình bày và dàn trang phục vụ cho in ấn.
+                        </div>
+                        <div class="productInfo__addToCart">
+                            <div class="buttons_added">
+                                <input class="minus is-form" type="button" value="-">
+                                <input aria-label="quantity" class="input-qty" max="10" min="1" name="" type="number" value="1">
+                                <input class="plus is-form" type="button" value="+">
+                            </div>
+                            <div class="btn btn--default orange">Thêm vào giỏ</div>
+                        </div>
+                        <div class="productIndfo__policy">
+                            <div class="policy bg-1">
+                                <img th:src="@{/assets/img/policy/policy1.png}" class="productIndfo__policy-img">
+                                <div class="productIndfo__policy-info">
+                                    <h3 class="productIndfo__policy-title">Giao hàng miễn phí</h3>
+                                    <p class="productIndfo__policy-description">Cho đơn hàng từ 300K</p>
+                                </div>
+                            </div>
+                            <div class="policy bg-2">
+                                <img th:src="@{/assets/img/policy/policy2.png}" class="productIndfo__policy-img">
+                                <div class="productIndfo__policy-info">
+                                    <h3 class="productIndfo__policy-title">Đổi trả hàng</h3>
+                                    <p class="productIndfo__policy-description">Trong 3 ngày</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="productIndfo__category">
+                            <p class="productIndfo__category-text"> Danh mục : <a href="#" class="productIndfo__category-link">Nail</a></p>
+                            <p class="productIndfo__category-text"> Số lượng trong kho : 322</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="productDetail">
+                <div class="main__tabnine">
+                    <div class="grid wide">
+                        <div class="tabs">
+                            <div class="tab-item active">Mô tả</div>
+                            <div class="tab-item">Đánh giá</div>
+                            <div class="line"></div>
+                        </div>
+                        <div class="tab-content">
+                            <div class="tab-pane active">
+                                <div class="productDes">
+                                    <div class="productDes__title">Mô tả sản phẩm</div>
+                                    <p class="productDes__text"> <a href="#" class="productDes__link">Lorem Ipsum </a> chỉ đơn giản là một đoạn văn bản giả...</p>
+                                    <div class="productDes__title">Hướng dẫn sử dụng</div>
+                                     <p class="productDes__text">Nó đã được phổ biến vào những năm 1960...</p>
+                                </div>
+                            </div>
+                            <div class="tab-pane">
+                                <div class="productDes__ratting">
+                                    <div class="productDes__ratting-title">Đánh giá của bạn</div>
+                                    <form class="productDes__ratting-wrap">
+                                        <textarea class="form-control" rows="5" placeholder="Viết đánh giá của bạn..."></textarea>
+                                        <input type="submit" class="btn btn--default" value="Gửi đánh giá">
+                                    </form>
+                                </div>
+                                <ul class="rate__list">
+                                    </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="main__frame">
+                <div class="grid wide">
+                    <h3 class="category__title">OneShop Cometics</h3>
+                    <h3 class="category__heading">Sản Phẩm Tương tự</h3>
+                    <div class="owl-carousel hight owl-theme">
+                        <a th:href="@{/product}" class="product">
+                            <div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product1.jpg} + ')'"></div>
+                            <div class="product__info">
+                                <h3 class="product__name">Framed-Sleeve Tops Group</h3>
+                                <div class="product__price">
+                                    <div class="price__old">340.000 đ</div>
+                                    <div class="price__new">320.000 đ</div>
+                                </div>
+                            </div>
+                        </a>
+                         <a th:href="@{/product}" class="product">
+                            <div class="product__avt" th:style="'background-image: url(' + @{/assets/img/product/product2.jpg} + ')'"></div>
+                            <div class="product__info">
+                                <h3 class="product__name">Framed-Sleeve Tops Group</h3>
+                                <div class="product__price">
+                                    <div class="price__old">340.000 đ</div>
+                                    <div class="price__new">320.000 đ</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="js">
+        <script>
+            $(document).ready(function() {
+                var sync1 = $("#sync1");
+                var sync2 = $("#sync2");
+                sync1.owlCarousel({
+                    items: 1, loop: true, margin: 20, nav: true, dots: false, autoplay: true,
+                    autoplayTimeout: 4000, autoplayHoverPause: true
+                });
+                sync2.owlCarousel({
+                    items: 4, dots: false, nav: false, margin: 30, smartSpeed: 200,
+                });
+                
+                // Thêm logic đồng bộ 2 carousel
+                sync1.on('changed.owl.carousel', function(event) {
+                    sync2.trigger('to.owl.carousel', [event.item.index, 200, true]);
+                });
+                sync2.on('click', '.owl-item', function(event) {
+                    event.preventDefault();
+                    var number = $(this).index();
+                    sync1.trigger('to.owl.carousel', [number, 300, true]);
+                });
+            });
+
+            $('.owl-carousel.hight').owlCarousel({
+                loop: true, margin: 20, nav: true, dots: false, autoplay: true,
+                autoplayTimeout: 2000, autoplayHoverPause: true,
+                responsive: {
+                    0: { items: 2 },
+                    600: { items: 3 },
+                    1000: { items: 6 }
+                }
+            });
+        </script>
+    </th:block>
+</body>
+</html>

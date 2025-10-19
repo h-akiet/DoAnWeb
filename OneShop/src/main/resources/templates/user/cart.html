@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/guest}">
+<head>
+    <meta charset="UTF-8">
+    <title>Giỏ hàng</title>
+
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" type="text/css" th:href="@{/assets/css/cart.css}">
+    </th:block>
+</head>
+
+<body>
+
+    <div class="main" layout:fragment="content">
+        <div class="grid wide">
+            <h3 class="main__notify" style="display: none;"> <div class="main__notify-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="main__notify-text">Giỏ hàng đã được cập nhật.</div>
+            </h3>
+            
+            <div class="row">
+                <div class="col l-8 m-12 s-12">
+                    <div class="main__cart">
+                        <table class="shop_table">
+                            <thead>
+                                <tr>
+                                    <th class="product-select">Chọn</th>
+                                    <th class="product-name" colspan="2">Sản phẩm</th>
+                                    <th class="product-price">Giá</th>
+                                    <th class="product-quantity">Số lượng</th>
+                                    <th class="product-subtotal">Tổng</th>
+                                    <th class="product-remove">Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="cart_item">
+                                    <td class="product-select" data-label="Chọn">
+                                        <input type="checkbox" name="a">
+                                    </td>
+                                    <td class="product-thumbnail" data-label="Ảnh">
+                                        <img th:src="@{/assets/img/product/product2.jpg}" alt="">
+                                    </td>
+                                    <td class="product-name" data-label="Sản phẩm">
+                                        <div class="name">Azrouel dress variable Azrouel dress variable</div>
+                                    </td>
+                                    <td class="product-price" data-label="Giá">
+                                        <div class="main__cart-price">476.000 đ</div>
+                                    </td>
+                                    <td class="product-quantity" data-label="Số lượng">
+                                        <div class="buttons_added">
+                                            <input class="minus is-form" type="button" value="-">
+                                            <input aria-label="quantity" class="input-qty" max="10" min="1" name="" type="number" value="1">
+                                            <input class="plus is-form" type="button" value="+">
+                                        </div>
+                                    </td>
+                                    <td class="product-subtotal" data-label="Tổng">
+                                        <div class="main__cart-price">476.000 đ</div>
+                                    </td>
+                                    <td class="product-remove" data-label="Xóa">
+                                        <span class="main__cart-icon">
+                                            <i class="far fa-times-circle"></i>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="cart_item">
+                                    <td class="product-select" data-label="Chọn">
+                                        <input type="checkbox" name="a">
+                                    </td>
+                                    <td class="product-thumbnail" data-label="Ảnh">
+                                        <img th:src="@{/assets/img/product/product2.jpg}" alt="">
+                                    </td>
+                                    <td class="product-name" data-label="Sản phẩm">
+                                        <div class="name">Azrouel dress variable Azrouel dress variable</div>
+                                    </td>
+                                    <td class="product-price" data-label="Giá">
+                                        <div class="main__cart-price">476.000 đ</div>
+                                    </td>
+                                    <td class="product-quantity" data-label="Số lượng">
+                                        <div class="buttons_added">
+                                            <input class="minus is-form" type="button" value="-">
+                                            <input aria-label="quantity" class="input-qty" max="10" min="1" name="" type="number" value="1">
+                                            <input class="plus is-form" type="button" value="+">
+                                        </div>
+                                    </td>
+                                    <td class="product-subtotal" data-label="Tổng">
+                                        <div class="main__cart-price">476.000 đ</div>
+                                    </td>
+                                    <td class="product-remove" data-label="Xóa">
+                                        <span class="main__cart-icon">
+                                            <i class="far fa-times-circle"></i>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="btn btn--default">Cập nhật giỏ hàng</div>
+                    </div>
+                </div>
+                
+                <div class="col l-4 m-12 s-12">
+                    <div class="main__pay">
+                        <div class="main__pay-title">Tổng số lượng</div>
+                        <div class="pay-info">
+                            <div class="main__pay-text">Tổng phụ</div>
+                            <div class="main__pay-price">1,120,000 ₫</div>
+                        </div>
+                        <div class="pay-info">
+                            <div class="main__pay-text">Giao hàng</div>
+                            <div class="main__pay-text">Giao hàng miễn phí</div>
+                        </div>
+                        <div class="pay-info">
+                            <div class="main__pay-text">Tổng thành tiền</div>
+                            <div class="main__pay-price">1,120,000 ₫</div>
+                        </div>
+                        <a th:href="@{/pay}" class="btn btn--default orange">Tiến hành thanh toán</a>
+                        
+                        <div class="main__pay-title">Phiếu ưu đãi</div>
+                        <select class="form-control" style="margin-top: 15px;">
+                            <option value="">-- Chọn phiếu ưu đãi --</option>
+                            <option value="GIAM10K">Giảm 10,000đ cho đơn hàng từ 200,000đ</option>
+                            <option value="GIAM50K">Giảm 50,000đ cho đơn hàng từ 1,000,000đ</option>
+                            <option value="FREESHIP">Miễn phí vận chuyển</option>
+                        </select>
+                        <div class="btn btn--default">Áp dụng</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <th:block layout:fragment="js">
+        </th:block>
+
+</body>
+</html>
