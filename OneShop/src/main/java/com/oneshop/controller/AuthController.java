@@ -7,10 +7,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import com.oneshop.service.UserService;
 import com.oneshop.entity.User;
-
+import com.oneshop.service.JwtUtils;
+import org.springframework.security.authentication.AuthenticationManager;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,17 +22,14 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private JwtUtils jwtUtils;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+   
+   
 
-    // 🔹 Trang đăng nhập — modal nằm trong index.html
-    @GetMapping("/login")
-    public String loginForm(Model model) {
-        return "guest/index";
-    }
-
-    @GetMapping("/logout")
-    public String logout() {
-        return "redirect:/";
-    }
 
     @PostMapping("/api/auth/signup")
     public ResponseEntity<Map<String, Object>> register(@RequestParam String fullName,

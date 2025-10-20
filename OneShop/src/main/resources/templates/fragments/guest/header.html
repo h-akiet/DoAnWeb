@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OneShop</title>
+<link
+	href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+	integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
+	crossorigin="anonymous" />
+<link rel="stylesheet"
+	th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
+<link rel="stylesheet" th:href="@{/assets/css/library.css}">
+<link rel="stylesheet" th:href="@{/assets/css/common.css}">
+<link rel="stylesheet" th:href="@{/assets/css/home.css}">
+
+<script th:src="@{/webjars/jquery/3.6.0/jquery.min.js}"></script>
+<script th:src="@{/assets/owlCarousel/owl.carousel.min.js}"></script>
+</head>
+<body>
+	<div th:fragment="header" class="header scrolling" id="myHeader">
+		<div class="grid wide">
+			<div class="header__top">
+				<div class="navbar-icon">
+					<span></span> <span></span> <span></span>
+				</div>
+				<a th:href="@{/}" class="header__logo"> <img
+					th:src="@{/assets/logo.png}" alt="OneShop Logo">
+				</a>
+				<div class="header__search">
+					<div class="header__search-wrap">
+						<input type="text" class="header__search-input"
+							placeholder="Tìm kiếm"> <a class="header__search-icon"
+							href="#"> <i class="fas fa-search"></i>
+						</a>
+					</div>
+				</div>
+				<div class="header__account">
+					<div sec:authorize="isAnonymous()"
+						class="header__account-guest-links">
+						<a href="#my-Login" class="header__account-login">Đăng Nhập</a> <a
+							href="#my-Register" class="header__account-register">Đăng Kí</a>
+					</div>
+					<div sec:authorize="isAuthenticated()" id="userAccountMenu">
+						<div class="account__avatar-btn">
+							<i class="fas fa-user"></i>
+						</div>
+						<div class="account__dropdown">
+							<span class="dropdown__user-name"
+								th:text="'Xin chào, ' + ${#authentication.principal.username}">Xin
+								chào, Tên Người Dùng</span> <a th:href="@{/profile}"
+								class="dropdown__item"> <i class="fas fa-address-card"></i>
+								Tài khoản
+							</a> <a th:href="@{/orders}" class="dropdown__item"> <i
+								class="fas fa-box-open"></i> Đơn hàng
+							</a> <a th:href="@{/logout}" class="dropdown__item"
+								onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
+								<i class="fas fa-sign-out-alt"></i> Đăng xuất
+							</a>
+							<form th:action="@{/logout}" method="post" id="logoutForm"
+								style="display: none;"></form>
+						</div>
+					</div>
+				</div>
+				<div class="header__cart have">
+					<i class="fas fa-shopping-basket"></i>
+					<div class="header__cart-amount">3</div>
+					<div class="header__cart-wrap">
+						<ul class="order__list">
+							<li class="item-order">
+								<div class="order-wrap">
+									<a th:href="@{/product}" class="order-img"> <img
+										th:src="@{/assets/img/product/product1.jpg}" alt="">
+									</a>
+									<div class="order-main">
+										<a th:href="@{/product}" class="order-main-name">Áo sơ mi
+											caro kèm belt...</a>
+										<div class="order-main-price">2 x 45,000 ₫</div>
+									</div>
+									<a th:href="@{/product}" class="order-close"> <i
+										class="far fa-times-circle"></i>
+									</a>
+								</div>
+							</li>
+						</ul>
+						<div class="total-money">Tổng cộng: 120.000đ</div>
+						<a th:href="@{/cart}" class="btn btn--default cart-btn">Xem
+							giỏ hàng</a> <a th:href="@{/pay}"
+							class="btn btn--default cart-btn orange">Thanh toán</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="header__nav">
+			<ul class="header__nav-list">
+				<li class="header__nav-item index"><a th:href="@{/}"
+					class="header__nav-link">Trang chủ</a></li>
+				<li class="header__nav-item has-dropdown-menu"><a
+					th:href="@{/list-product}" class="header__nav-link">Sản Phẩm</a></li>
+				<li class="header__nav-item"><a th:href="@{/news}"
+					class="header__nav-link">Tin Tức</a></li>
+				<li class="header__nav-item"><a th:href="@{/contact}"
+					class="header__nav-link">Liên Hệ</a></li>
+			</ul>
+		</div>
+
+		<div class="modal" id="my-Login">
+			<a href="#" class="overlay-close"></a>
+			<div class="authen-modal login">
+				<h3 class="authen-modal__title">Đăng Nhập</h3>
+				<div id="loginError" class="alert alert-danger" role="alert"
+					style="display: none;"></div>
+				<form id="loginForm" th:action="@{/login}" method="post">
+					<div class="form-group">
+						<label for="account" class="form-label">Địa chỉ email *</label> <input
+							id="account" name="account" type="email" class="form-control"
+							required> <span class="form-message"></span>
+					</div>
+					<div class="form-group">
+						<label for="password" class="form-label">Mật khẩu *</label> <input
+							id="password" name="password" type="password"
+							class="form-control" required> <span class="form-message"></span>
+					</div>
+					<div class="authen__btns">
+						<button type="submit" class="btn btn--default">Đăng Nhập</button>
+						<input type="checkbox" class="authen-checkbox" name="remember-me">
+						<label class="form-label">Ghi nhớ mật khẩu</label>
+					</div>
+				</form>
+				<a class="authen__link" th:href="@{/forgot}">Quên mật khẩu?</a>
+			</div>
+		</div>
+
+		<div class="ModalForm">
+			<div class="modal" id="my-Register">
+				<a href="#" class="overlay-close"></a>
+				<div class="authen-modal register">
+					<h3 class="authen-modal__title">Đăng Kí</h3>
+					<div id="registerError" class="alert alert-danger" role="alert"
+						style="display: none;"></div>
+					<form id="registerForm" method="post">
+						<div class="form-group">
+							<label for="fullName" class="form-label">Họ Tên</label> <input
+								id="fullName" name="fullName" type="text" class="form-control"
+								required> <span class="form-message"></span>
+						</div>
+						<div class="form-group">
+							<label for="email" class="form-label">Tài khoản Email *</label> <input
+								id="email" name="email" type="email" class="form-control"
+								required> <span class="form-message"></span>
+						</div>
+						<div class="form-group">
+							<label for="password" class="form-label">Mật khẩu *</label> <input
+								id="password" name="password" type="password"
+								class="form-control" required> <span
+								class="form-message"></span>
+						</div>
+						<div class="form-group">
+							<label for="confirmPassword" class="form-label">Nhập lại
+								mật khẩu *</label> <input id="confirmPassword" name="confirmPassword"
+								type="password" class="form-control" required> <span
+								class="form-message"></span>
+						</div>
+						<div class="authen__btns">
+							<button type="submit" class="btn btn--default">Đăng Kí</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script th:src="@{/assets/owlCarousel/owl.carousel.min.js}"></script>
+		<script th:src="@{/assets/js/homeScript.js}"></script>
+		<script th:src="@{/assets/js/commonscript.js}"></script>
+		<script>
+        // *** KHỐI JQUERY KHÔNG CẦN READY (Owl Carousel) ***
+        $('.owl-carousel.hight').owlCarousel({
+            loop: true, margin: 20, nav: true, dots: false,
+            autoplay: true, autoplayTimeout: 3000, autoplayHoverPause: true,
+            responsive: { 0: { items: 2 }, 600: { items: 3 }, 1000: { items: 5 } }
+        });
+        $('.owl-carousel.news').owlCarousel({
+            loop: true, margin: 20, nav: true, dots: false,
+            autoplay: true, autoplayTimeout: 4000, autoplayHoverPause: true,
+            responsive: { 0: { items: 1 }, 600: { items: 1 }, 1000: { items: 2 } }
+        });
+        $('.owl-carousel.bands').owlCarousel({
+            loop: true, margin: 20, nav: false, dots: false,
+            autoplay: true, autoplayTimeout: 2000, autoplayHoverPause: true,
+            responsive: { 0: { items: 2 }, 600: { items: 3 }, 1000: { items: 6 } }
+        });
+        
+        // *** KHỐI CHÍNH BỌC TẤT CẢ LOGIC DOM/AJAX ***
+        $(document).ready(function() {
+            // Xử lý form Đăng ký
+            $('#registerForm').submit(function(e) {
+                e.preventDefault(); 
+                $('#registerError').hide(); 
+                var formData = $(this).serialize();
+                $.ajax({
+                    type: 'POST', url: '/api/auth/signup', data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            window.location.href = response.redirect; 
+                        } else {
+                            $('#registerError').text(response.message).show(); 
+                        }
+                    },
+                    error: function() {
+                        $('#registerError').text('Có lỗi xảy ra!').show();
+                    }
+                });
+            });
+			
+            // Xử lý form Đăng nhập
+            $('#loginForm').submit(function(e) {
+                e.preventDefault(); 
+                $('#loginError').hide(); 
+                var formData = $(this).serialize();
+                $.ajax({
+                    type: 'POST', url: '/login', data: formData,
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest"); 
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            window.location.href = response.redirect; 
+                        } else {
+                            $('#loginError').text(response.message).show();
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 401) {
+                            $('#loginError').text('Tài khoản hoặc mật khẩu không chính xác!').show();
+                        } else {
+                            $('#loginError').text('Có lỗi xảy ra!').show();
+                        }
+                    }
+                });
+            });
+
+            // LOGIC HIỂN THỊ AVATAR DROPDOWN
+            const $accountMenu = $('#userAccountMenu');
+            if ($accountMenu.length) {
+                const $avatarBtn = $accountMenu.find('.account__avatar-btn');
+                $avatarBtn.on('click', function(event) {
+                    event.stopPropagation();
+                    $('.header__account div[id^="userAccountMenu"].active').not($accountMenu).removeClass('active');
+                    $accountMenu.toggleClass('active');
+                });
+
+                $(document).on('click', function(event) {
+                    if ($accountMenu.hasClass('active') && !$accountMenu.has(event.target).length) {
+                        $accountMenu.removeClass('active');
+                    }
+                });
+            }
+
+            // Logic mở/đóng modal
+           const toggleModal = (modalId, shouldOpen) => {
+    const $modal = $(modalId);
+    
+    if (shouldOpen) {
+        // Mở Modal: Dùng show() để đặt display: block
+        $modal.show();
+        // Thêm class 'active' chỉ để kích hoạt CSS animation/hiệu ứng mượt mà
+        $modal.addClass('active'); 
+        
+        // 🔥 KIỂM SOÁT CUỘN: Khóa cuộn nền
+        $('body').css('overflow', 'hidden'); 
+    } else {
+        // Đóng Modal: Dùng hide() để đặt display: none
+        $modal.hide();
+        // Xóa class 'active'
+        $modal.removeClass('active');
+        
+        // 🔥 KIỂM SOÁT CUỘN: Mở cuộn nền
+        $('body').css('overflow', 'auto'); 
+    }
+};
+
+// --- Gán sự kiện cho các nút ---
+
+// Mở Modal Đăng nhập
+$('.header__account-login').off('click').on('click', function(e) {
+    e.preventDefault();
+    toggleModal('#my-Login', true);
+    toggleModal('#my-Register', false); // Đảm bảo modal kia đóng
+});
+
+// Mở Modal Đăng ký
+$('.header__account-register').off('click').on('click', function(e) {
+    e.preventDefault();
+    toggleModal('#my-Register', true);
+    toggleModal('#my-Login', false); // Đảm bảo modal kia đóng
+});
+
+// Đóng Modal bằng nút đóng (.overlay-close)
+$('.overlay-close').off('click').on('click', function(e) {
+    e.preventDefault();
+    // Lấy ID modal gần nhất
+    const modalId = '#' + $(this).closest('.modal').attr('id');
+    toggleModal(modalId, false);
+});
+
+// Đóng Modal khi click ra ngoài (.modal)
+$('.modal').off('click').on('click', function(e) {
+    if ($(e.target).hasClass('modal')) {
+        const modalId = '#' + $(this).attr('id');
+        toggleModal(modalId, false);
+    }
+});
+
+            // Toggle navbar-icon
+            $('.navbar-icon').on('click', function() {
+                $(this).toggleClass('open');
+                $('.header__nav').toggleClass('show');
+            });
+        }); // KẾT THÚC CHÍNH XÁC CỦA $(document).ready
+    </script>
+    </div>
+</body>
+</html>

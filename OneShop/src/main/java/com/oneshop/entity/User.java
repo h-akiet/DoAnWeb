@@ -2,6 +2,10 @@ package com.oneshop.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -18,6 +22,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(exclude = {"addresses", "roles"})  // Loại trừ fields quan hệ
+@ToString(exclude = {"addresses", "otherLazyCollections"})
 public class User implements UserDetails {
 
     @Id
