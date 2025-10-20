@@ -1,36 +1,153 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/guest}">
+
 <head>
     <title>Đơn hàng của tôi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/assets/css/home.css}" rel="stylesheet" />
+    <style>
+        .product__rating { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .rating-stars { display: flex; gap: 2px; }
+        .rating-stars i { font-size: 16px; color: #ffa500; }
+        .rating-stars i.empty { color: #ddd; }
+        .rating-count, .product__sold { font-size: 16px; color: #666; }
+        .product__sold { margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+        .tabs { display: flex; position: relative; margin-bottom: 20px; }
+        .tab-item { padding: 15px 30px; cursor: pointer; font-size: 18px; font-weight: bold; }
+        .tab-item.active { color: #007bff; }
+        .line { position: absolute; bottom: 0; height: 3px; background: #007bff; transition: all 0.3s ease; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+        table { font-size: 18px; }
+        th, td { padding: 15px; }
+        .btn { font-size: 16px; padding: 10px 20px; }
+    </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Đơn hàng của tôi</h1>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tổng tiền</th>
-                    <th>Trạng thái</th>
-                    <th>Ngày tạo</th>
-                    <th>Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="order : ${orders}">
-                    <td th:text="${order.id}"></td>
-                    <td th:text="${order.total}"></td>
-                    <td th:text="${order.orderStatus}"></td>
-                    <td th:text="${order.createdAt}"></td>
-                    <td>
-                        <div th:if="${order.orderStatus == 'DELIVERED'}">
-                            <a th:href="@{/user/orders/{id}/review(id=${order.id})}" class="btn btn-primary">Đánh giá</a>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+<!-- ✅ CHỈ BẮT ĐẦU TỪ ĐÂY NẰM TRONG layout:fragment -->
+<div layout:fragment="content">
+    <div class="container my-4">
+        <h1 class="mb-4" style="font-size: 28px;">Đơn hàng của tôi</h1>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab-item active">DELIVERING</div>
+            <div class="tab-item">DELIVERED</div>
+            <div class="tab-item">CANCELLED</div>
+            <div class="line"></div>
+        </div>
+
+        <!-- Nội dung tab -->
+        <div class="tab-content">
+
+            <!-- DELIVERING -->
+            <div class="tab-pane active">
+                <table class="table table-bordered align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orders}" th:if="${order.orderStatus == 'DELIVERING'}">
+                            <td th:text="${order.id}"></td>
+                            <td th:text="${order.total}"></td>
+                            <td th:text="${order.orderStatus}"></td>
+                            <td th:text="${order.createdAt}"></td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- DELIVERED -->
+            <div class="tab-pane">
+                <table class="table table-bordered align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orders}" th:if="${order.orderStatus == 'DELIVERED'}">
+                            <td th:text="${order.id}"></td>
+                            <td th:text="${order.total}"></td>
+                            <td th:text="${order.orderStatus}"></td>
+                            <td th:text="${order.createdAt}"></td>
+                            <td>
+                                <a th:href="@{/user/orders/{id}/review(id=${order.id})}" class="btn btn-primary btn-sm">Đánh giá</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- CANCELED -->
+            <div class="tab-pane">
+                <table class="table table-bordered align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orders}" th:if="${order.orderStatus == 'CANCELLED'}">
+                            <td th:text="${order.id}"></td>
+                            <td th:text="${order.total}"></td>
+                            <td th:text="${order.orderStatus}"></td>
+                            <td th:text="${order.createdAt}"></td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab-item');
+            const panes = document.querySelectorAll('.tab-pane');
+            const line = document.querySelector('.tabs .line');
+
+            if (!tabs.length || !panes.length || !line) return;
+
+            const activeTab = document.querySelector('.tab-item.active');
+            line.style.left = activeTab.offsetLeft + 'px';
+            line.style.width = activeTab.offsetWidth + 'px';
+
+            tabs.forEach((tab, index) => {
+                const pane = panes[index];
+                tab.onclick = function() {
+                    document.querySelector('.tab-item.active').classList.remove('active');
+                    document.querySelector('.tab-pane.active').classList.remove('active');
+
+                    line.style.left = tab.offsetLeft + 'px';
+                    line.style.width = tab.offsetWidth + 'px';
+
+                    tab.classList.add('active');
+                    pane.classList.add('active');
+                };
+            });
+        });
+    </script>
+</div>
 </body>
 </html>
