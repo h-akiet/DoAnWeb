@@ -1,6 +1,7 @@
 package com.oneshop.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -16,16 +17,18 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "USERS")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"addresses", "roles"})  // Loại trừ fields quan hệ
 @ToString(exclude = {"addresses", "otherLazyCollections"})
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long id;  // ✅ Đổi từ userId thành id
+    private Long id;
 
     @Column(length = 100, nullable = false)
     private String username;

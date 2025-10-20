@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" xintegrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <link rel="stylesheet" href="./assets/css/library.css">
+    <link rel="stylesheet" href="./assets/css/common.css">
+    <link rel="stylesheet" type="text/css" href="./assets/css/pay.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <div class="header scrolling" id="myHeader">
+        <div class="grid wide">
+            <div class="header__top">
+                <div class="navbar-icon"><span></span><span></span><span></span></div>
+                <a th:href="@{/}" class="header__logo"><img th:src="@{/assets/logo.png}" alt="Logo"></a>
+                <div class="header__search">
+                    <div class="header__search-wrap">
+                        <input type="text" class="header__search-input" placeholder="Tìm kiếm sản phẩm...">
+                        <a class="header__search-icon" href="#"><i class="fas fa-search"></i></a>
+                    </div>
+                </div>
+                <div class="header__account">
+                    <a href="#my-Login" class="header__account-login">Đăng Nhập</a>
+                    <a href="#my-Register" class="header__account-register">Đăng Kí</a>
+                </div>
+                <div class="header__cart have">
+                    <i class="fas fa-shopping-basket"></i>
+                    <div class="header__cart-amount">3</div>
+                    <div class="header__cart-wrap">
+                        <ul class="order__list">
+                            <li class="item-order">
+                                <div class="order-wrap">
+                                    <a th:href="@{/product}" class="order-img"><img th:src="@{/assets/img/product/product1.jpg}" alt=""></a>
+                                    <div class="order-main">
+                                        <a th:href="@{/product}" class="order-main-name">Sản phẩm mẫu trong giỏ</a>
+                                        <div class="order-main-price">2 x 45,000 ₫</div>
+                                    </div>
+                                    <a href="#" class="order-close"><i class="far fa-times-circle"></i></a>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="total-money">Tổng cộng: 120.000đ</div>
+                        <a th:href="@{/cart}" class="btn btn--default cart-btn">Xem giỏ hàng</a>
+                        <a th:href="@{/pay}" class="btn btn--default cart-btn orange">Thanh toán</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="header__nav">
+            <ul class="header__nav-list">
+                <li class="header__nav-item index"><a th:href="@{/}" class="header__nav-link">Trang chủ</a></li>
+                <li class="header__nav-item"><a th:href="@{/list-product}" class="header__nav-link">Sản Phẩm</a></li>
+                <li class="header__nav-item"><a th:href="@{/news}" class="header__nav-link">Tin Tức</a></li>
+                <li class="header__nav-item"><a th:href="@{/contact}" class="header__nav-link">Liên Hệ</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="grid wide">
+            <div class="row">
+                <div class="col l-7 m-12 s-12">
+                    <div class="pay-information">
+                        <div class="pay__heading">Thông tin thanh toán</div>
+                        <p class="shipping-address-title">
+                            <i class="fas fa-map-marker-alt icon-primary"></i> Địa chỉ giao hàng
+                        </p>
+                        <div class="selected-address-summary">
+                            <div>
+                                <span class="recipient-info" id="currentRecipient">NHÓM 6 <span class="default-tag">Mặc định</span></span>
+                                <div class="address-text" id="currentAddressDetail">Số 1 Võ Văn Ngân, Thủ Đức, TP. Hồ Chí Minh</div>
+                            </div>
+                            <button class="btn-change-address" id="btnChangeAddress">Thay Đổi</button>
+                        </div>
+                        <hr class="divider">
+                        <div class="payment-method-area">
+                            <h3 class="pay__heading-sub">Phương thức Thanh toán</h3>
+                            <div class="payment-item">
+                                <input type="radio" id="pay-cod" name="payment-method" value="cod" checked>
+                                <label for="pay-cod"><i class="fas fa-truck"></i> <span>Thanh toán khi nhận hàng (COD)</span></label>
+                            </div>
+                            <div class="payment-item">
+                                <input type="radio" id="pay-bank" name="payment-method" value="bank">
+                                <label for="pay-bank"><i class="fas fa-credit-card"></i> <span>Thanh toán online (Thẻ/Chuyển khoản)</span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col l-5 m-12 s-12">
+                    <div class="pay-order">
+                        <div class="pay__heading">Đơn hàng của bạn</div>
+                        <div class="order-items-list">
+                            <div class="order-item">
+                                <img th:src="@{/assets/img/product/product1.jpg}" alt="Product" class="order-item-img">
+                                <div class="order-item-info">
+                                    <p class="order-item-name">Sữa Rửa Mặt CeraVe Sạch Sâu</p>
+                                    <p class="order-item-qty">Số lượng: 1</p>
+                                </div>
+                                <p class="order-item-price">326.000 ₫</p>
+                            </div>
+                            <div class="order-item">
+                                <img th:src="@{/assets/img/product/product2.jpg}" alt="Product" class="order-item-img">
+                                <div class="order-item-info">
+                                    <p class="order-item-name">Nước Hoa Hồng Klairs Không Mùi</p>
+                                    <p class="order-item-qty">Số lượng: 2</p>
+                                </div>
+                                <p class="order-item-price">440.000 ₫</p>
+                            </div>
+                        </div>
+                        <hr class="divider-light">
+                        <div class="voucher-section">
+                            <input type="text" placeholder="Nhập mã giảm giá" class="voucher-input">
+                            <button class="btn-apply-voucher">Áp dụng</button>
+                        </div>
+                        <hr class="divider-light">
+                        <div class="pay-info">
+                            <div class="main__pay-text">Tạm tính</div>
+                            <div class="main__pay-price">766.000 ₫</div>
+                        </div>
+                        <div class="pay-info">
+                            <div class="main__pay-text">Phí vận chuyển</div>
+                            <div class="main__pay-price">Miễn phí</div>
+                        </div>
+                        <hr class="divider-light">
+                        <div class="pay-info total-summary">
+                            <div class="main__pay-text">Tổng cộng</div>
+                            <div class="main__pay-price final-price">766.000 ₫</div>
+                        </div>
+                        <button class="btn btn--default orange w-100 mt-20">ĐẶT HÀNG</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div class="grid wide">
+            <div class="row">
+                <div class="col l-3 m-6 s-12">
+                    <h3 class="footer__title">Menu</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item"><a href="#" class="footer__link">Trang điểm</a></li>
+                        <li class="footer__item"><a href="#" class="footer__link">Chăm sóc da</a></li>
+                        <li class="footer__item"><a href="#" class="footer__link">Chăm sóc tóc</a></li>
+                    </ul>
+                </div>
+                <div class="col l-3 m-6 s-12">
+                    <h3 class="footer__title">Hỗ trợ khách hàng</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item"><a href="#" class="footer__link">Hướng dẫn mua hàng</a></li>
+                        <li class="footer__item"><a href="#" class="footer__link">Chính sách đổi trả</a></li>
+                    </ul>
+                </div>
+                <div class="col l-3 m-6 s-12">
+                    <h3 class="footer__title">Liên hệ</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item"><span class="footer__text"><i class="fas fa-map-marked-alt"></i> Số 1 Võ Văn Ngân, Thủ Đức, TP. Hồ Chí Minh</span></li>
+                        <li class="footer__item"><a href="mailto:2311xxxx@student.hcmute.edu.vn" class="footer__link"><i class="fas fa-envelope"></i> 2311xxxx@student.hcmute.edu.vn</a></li>
+                    </ul>
+                </div>
+                <div class="col l-3 m-6 s-12">
+                    <h3 class="footer__title">Đăng kí nhận tin</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item"><span class="footer__text">Nhận thông tin ưu đãi mới nhất.</span></li>
+                        <li class="footer__item">
+                            <div class="send-email">
+                                <input class="send-email__input" type="email" placeholder="Nhập Email..."><a href="#" class="send-email__link"><i class="fas fa-paper-plane"></i></a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="copyright"><span class="footer__text">© Bản quyền thuộc về <a class="footer__link" href="#">NHÓM 6</a></span></div>
+    </div>
+
+    <div class="address-modal-overlay" id="addressModalOverlay">
+        <div class="address-modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Địa Chỉ Của Tôi</h3>
+                <button class="close-modal-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="address-list-container">
+                <div class="modal-body" id="addressListContent"></div>
+                <div class="modal-body-actions">
+                    <button type="button" class="btn-add-new-address" id="btnAddAddressInModal"><i class="fas fa-plus"></i> Thêm Địa Chỉ Mới</button>
+                </div>
+            </div>
+            <div class="address-form-container">
+                <a href="#" class="back-to-list-btn"><i class="fas fa-arrow-left"></i> Quay lại danh sách</a>
+                <form id="addressFormModal">
+                    <div class="form-group"><input id="modal_full_name" type="text" class="form-control" placeholder="Họ và tên" required></div>
+                    <div class="form-group"><input id="modal_phone" type="text" class="form-control" placeholder="Số điện thoại" required></div>
+                    <div class="form-group"><input id="modal_address_detail" type="text" class="form-control" placeholder="Địa chỉ cụ thể" required></div>
+                    <div class="form-group checkbox-group"><input type="checkbox" id="modal_set_default"><label for="modal_set_default">Đặt làm địa chỉ mặc định</label></div>
+                    <div class="form-group form-actions">
+                        <button type="button" class="btn btn--default" id="btnCancelForm">Hủy</button>
+                        <button type="submit" class="btn btn--default orange">Hoàn thành</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn--default" id="btnModalCancel">Hủy</button>
+                <button type="button" class="btn btn--default orange" id="btnModalConfirm">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./assets/js/commonscript.js"></script>
+    <script>
+        $(document).ready(function() {
+            let addresses = [
+                { id: 1, recipient: 'NHÓM 6', phone: '09xxxxxxx', address: 'Số 1 Võ Văn Ngân, Thủ Đức, TP. Hồ Chí Minh', isDefault: true },
+                { id: 2, recipient: 'NHÓM 6 - VP', phone: '08xxxxxxx', address: 'Tòa nhà Landmark 81, Vinhomes Central Park, Q. Bình Thạnh', isDefault: false },
+            ];
+            let selectedAddressId = 1;
+
+            const $modalOverlay = $('#addressModalOverlay');
+            const $modalContent = $('.address-modal-content');
+            const $modalTitle = $('#modalTitle');
+            const $addressList = $('#addressListContent');
+            const $addressForm = $('#addressFormModal');
+            
+            function renderAddressList() {
+                $addressList.empty();
+                addresses.forEach(addr => {
+                    const isSelected = addr.id === selectedAddressId;
+                    const defaultTag = addr.isDefault ? '<span class="default-tag">Mặc định</span>' : '';
+                    const addressItemHTML = `
+                        <div class="address-item ${isSelected ? 'selected' : ''}" data-id="${addr.id}">
+                            <input type="radio" name="modal-shipping-address" value="${addr.id}" ${isSelected ? 'checked' : ''}>
+                            <div class="address-info">
+                                <span class="recipient-info">${addr.recipient} ${defaultTag}</span>
+                                <div class="address-text">${addr.phone}</div>
+                                <div class="address-text">${addr.address}</div>
+                            </div>
+                            <button type="button" class="btn-update-address" data-id="${addr.id}">Cập nhật</button>
+                        </div>`;
+                    $addressList.append(addressItemHTML);
+                });
+            }
+
+            function updateMainAddressDisplay() {
+                const selectedAddr = addresses.find(addr => addr.id === selectedAddressId);
+                if (selectedAddr) {
+                    const defaultTagHTML = selectedAddr.isDefault ? ' <span class="default-tag">Mặc định</span>' : '';
+                    $('#currentRecipient').html(selectedAddr.recipient + defaultTagHTML);
+                    $('#currentAddressDetail').text(`${selectedAddr.phone} | ${selectedAddr.address}`);
+                }
+            }
+
+            function openModal() {
+                renderAddressList();
+                showAddressList();
+                $modalOverlay.addClass('is-active');
+            }
+
+            function closeModal() { $modalOverlay.removeClass('is-active'); }
+            function showAddressList() { $modalTitle.text('Địa Chỉ Của Tôi'); $modalContent.removeClass('view-form'); }
+
+            function showAddressForm(isEdit = false, addressId = null) {
+                $addressForm[0].reset();
+                $addressForm.find('input[type="hidden"]').remove();
+                if (isEdit && addressId) {
+                    const addr = addresses.find(a => a.id === addressId);
+                    if (addr) {
+                        $modalTitle.text('Cập nhật Địa Chỉ');
+                        $('#modal_full_name').val(addr.recipient);
+                        $('#modal_phone').val(addr.phone);
+                        $('#modal_address_detail').val(addr.address);
+                        $('#modal_set_default').prop('checked', addr.isDefault);
+                        $addressForm.append(`<input type="hidden" name="id" value="${addr.id}">`);
+                    }
+                } else { $modalTitle.text('Thêm Địa Chỉ Mới'); }
+                $modalContent.addClass('view-form');
+            }
+            
+            $('#btnChangeAddress, #closeModalBtn, #btnModalCancel').on('click', (e) => {
+                e.preventDefault();
+                (e.target.id === 'btnChangeAddress') ? openModal() : closeModal();
+            });
+
+            $modalOverlay.on('click', e => { if (e.target.id === 'addressModalOverlay') closeModal(); });
+            $('#btnAddAddressInModal').on('click', () => showAddressForm(false));
+            $('.back-to-list-btn, #btnCancelForm').on('click', e => { e.preventDefault(); showAddressList(); });
+            $addressList.on('click', '.address-item', function() { $(this).find('input[type="radio"]').prop('checked', true).trigger('change'); });
+            $addressList.on('change', 'input[type="radio"]', function() {
+                const selectedId = parseInt($(this).val());
+                $addressList.find('.address-item').removeClass('selected');
+                $(this).closest('.address-item').addClass('selected');
+            });
+            $addressList.on('click', '.btn-update-address', function(e) { e.stopPropagation(); showAddressForm(true, $(this).data('id')); });
+            $('#btnModalConfirm').on('click', function() {
+                const checkedId = parseInt($addressList.find('input:checked').val());
+                if(checkedId) { selectedAddressId = checkedId; updateMainAddressDisplay(); }
+                closeModal();
+            });
+
+            $addressForm.on('submit', function(e) {
+                e.preventDefault();
+                const id = parseInt($(this).find('input[name="id"]').val());
+                const isDefault = $('#modal_set_default').is(':checked');
+                if(isDefault) addresses.forEach(a => a.isDefault = false);
+                
+                const submittedData = {
+                    recipient: $('#modal_full_name').val(),
+                    phone: $('#modal_phone').val(),
+                    address: $('#modal_address_detail').val(),
+                    isDefault: isDefault
+                };
+
+                if (id) {
+                    const index = addresses.findIndex(a => a.id === id);
+                    if (index > -1) addresses[index] = { ...addresses[index], ...submittedData };
+                } else {
+                    const newId = Math.max(0, ...addresses.map(a => a.id)) + 1;
+                    addresses.push({ id: newId, ...submittedData });
+                }
+                renderAddressList();
+                showAddressList();
+            });
+            
+            updateMainAddressDisplay();
+        });
+    </script>
+</body>
+</html>
+

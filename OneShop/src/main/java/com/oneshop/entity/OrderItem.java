@@ -1,17 +1,17 @@
 package com.oneshop.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "ORDER_ITEMS")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"order", "product", "variant"})  // Loại trừ fields gây cycle
 public class OrderItem {
 
     @Id

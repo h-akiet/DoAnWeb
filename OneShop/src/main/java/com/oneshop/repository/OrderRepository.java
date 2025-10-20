@@ -12,19 +12,19 @@ import com.oneshop.entity.Order;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
     
-    // ✅ Sử dụng @Query thay vì query method naming
     @Query("SELECT o FROM Order o WHERE o.shipper.id = :shipperId")
     List<Order> findByShipperId(@Param("shipperId") Long shipperId);
-    
-    // ✅ Hoặc dùng naming convention với underscore (cách khác)
-    // List<Order> findByShipper_Id(Long shipperId);
-    
-    // ✅ Tìm orders theo user
+
     List<Order> findByUserId(Long userId);
-    
-    // ✅ Tìm orders theo status
+
     List<Order> findByOrderStatus(String orderStatus);
-    
-    // ✅ Tìm orders theo user và status
+
     List<Order> findByUserIdAndOrderStatus(Long userId, String orderStatus);
+
+    @Query("SELECT DISTINCT o FROM Order o " +
+           "LEFT JOIN FETCH o.items i " +
+           "LEFT JOIN FETCH i.product p " +
+           "LEFT JOIN FETCH i.variant v " +
+           "WHERE o.id = :orderId")
+    Order findByIdWithItems(@Param("orderId") Long orderId);
 }
