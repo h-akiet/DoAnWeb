@@ -50,9 +50,9 @@ public class OrderService {
     // =====================================================================
 
 
-    /**
-     * Hàm cũ: Lấy đơn hàng đã gán cho shipper
-     */
+    @Autowired
+    private EmailService emailService;
+
     public List<Order> getAssignedOrders(Long shipperId) {
         return orderRepository.findByShipperId(shipperId);
     }
@@ -170,5 +170,30 @@ public class OrderService {
         // cartService.clearCartItems(user.getId(), variantIds);
 
         return savedOrder;
+        return orders.stream().collect(Collectors.groupingBy(Order::getOrderStatus, Collectors.counting()));
+    }
+
+    public void deliverOrder(Long orderId, Long shipperId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Đơn hàng không tồn tại!"));
+
+        if (order.getShipper() == null || !order.getShipper().getUserId().equals(shipperId)) {
+            throw new SecurityException("Bạn không có quyền cập nhật đơn hàng này!");
+        }
+
+        order.setOrderStatus("DELIVERED");
+        orderRepository.save(order);
+
+        // Gửi email thông báo đến người dùng sau khi cập nhật thành công
+        emailService.sendDeliveryConfirmation(order.getUser().getEmail(), order.getId());
+    }
+
+    public List<Order> getUserOrders(Long userId) {
+        return orderRepository.findByUserId(userId); // Giả sử thêm method findByUserId trong OrderRepository
+    }
+
+    public Order getOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Đơn hàng không tồn tại!"));
     }
 }

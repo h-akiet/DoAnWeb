@@ -107,9 +107,11 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public UserDetails loadUserByUsername(String input) throws UsernameNotFoundException {
+        // Tìm bằng username trước, nếu không thì bằng email
+        return userRepository.findByUsername(input)
+                .orElseGet(() -> userRepository.findByEmail(input)
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found")));
     }
 
     public User findByUsername(String username) {

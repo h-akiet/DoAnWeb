@@ -30,20 +30,27 @@
 							<i class="fas fa-user"></i>
 						</div>
 						<div class="account__dropdown">
-							<span class="dropdown__user-name"
-								th:text="'Xin chào, ' + ${#authentication.principal.username}">Xin
-								chào, Tên Người Dùng</span> <a th:href="@{/profile}"
-								class="dropdown__item"> <i class="fas fa-address-card"></i>
-								Tài khoản
-							</a> <a th:href="@{/orders}" class="dropdown__item"> <i
-								class="fas fa-box-open"></i> Đơn hàng
-							</a> <a th:href="@{/logout}" class="dropdown__item"
-								onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
-								<i class="fas fa-sign-out-alt"></i> Đăng xuất
-							</a>
-							<form th:action="@{/logout}" method="post" id="logoutForm"
-								style="display: none;"></form>
+							<div class="dropdown__header">
+								<span class="dropdown__user-name"
+									th:text="'Xin chào, ' + ${#authentication.principal.username}">
+									Xin chào, Tên Người Dùng
+								</span>
+							</div>
+							<div class="dropdown__actions">
+								<a th:href="@{/profile}" class="dropdown__item">
+									<i class="fas fa-address-card"></i> Tài khoản
+								</a>
+								<a th:href="@{/user/orders}" class="dropdown__item">
+									<i class="fas fa-box-open"></i> Đơn hàng
+								</a>
+								<a th:href="@{/logout}" class="dropdown__item"
+									onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
+									<i class="fas fa-sign-out-alt"></i> Đăng xuất
+								</a>
+								<form th:action="@{/logout}" method="post" id="logoutForm" style="display: none;"></form>
+							</div>
 						</div>
+
 					</div>
 				</div>
 				<div class="header__cart"
@@ -137,7 +144,7 @@
 			<div class="modal" id="my-Register">
 				<a href="#" class="overlay-close"></a>
 				<div class="authen-modal register">
-					<h3 class="authen-modal__title">Đăng Kí</h3>
+					<h3 class="authen-modal__title">Đăng Ký</h3>
 					<div id="registerError" class="alert alert-danger" role="alert"
 						style="display: none;"></div>
 					<form id="registerForm" method="post">
@@ -164,7 +171,7 @@
 								class="form-message"></span>
 						</div>
 						<div class="authen__btns">
-							<button type="submit" class="btn btn--default">Đăng Kí</button>
+							<button type="submit" class="btn btn--default">Đăng Ký</button>
 						</div>
 					</form>
 				</div>
