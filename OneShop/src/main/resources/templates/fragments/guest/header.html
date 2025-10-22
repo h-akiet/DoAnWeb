@@ -1,26 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OneShop</title>
-<link
-	href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap"
-	rel="stylesheet">
-<link rel="stylesheet"
-	href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
-	integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
-	crossorigin="anonymous" />
-<link rel="stylesheet"
-	th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
-<link rel="stylesheet" th:href="@{/assets/css/library.css}">
-<link rel="stylesheet" th:href="@{/assets/css/common.css}">
-<link rel="stylesheet" th:href="@{/assets/css/home.css}">
-
-<script th:src="@{/webjars/jquery/3.6.0/jquery.min.js}"></script>
-<script th:src="@{/assets/owlCarousel/owl.carousel.min.js}"></script>
-</head>
 <body>
 	<div th:fragment="header" class="header scrolling" id="myHeader">
 		<div class="grid wide">
@@ -66,42 +46,59 @@
 						</div>
 					</div>
 				</div>
-				<div class="header__cart have">
-					<i class="fas fa-shopping-basket"></i>
-					<div class="header__cart-amount">3</div>
+				<div class="header__cart"
+					th:classappend="${cart != null and !cart.items.isEmpty()} ? 'have' : ''">
+					<a th:href="@{/cart}"><i class="fas fa-shopping-basket"></i></a>
+
+					<div class="header__cart-amount" th:text="${cart?.totalItems ?: 0}">0</div>
+
 					<div class="header__cart-wrap">
-						<ul class="order__list">
-							<li class="item-order">
-								<div class="order-wrap">
-									<a th:href="@{/product}" class="order-img"> <img
-										th:src="@{/assets/img/product/product1.jpg}" alt="">
-									</a>
-									<div class="order-main">
-										<a th:href="@{/product}" class="order-main-name">Áo sơ mi
-											caro kèm belt...</a>
-										<div class="order-main-price">2 x 45,000 ₫</div>
+						<div th:if="${cart == null or cart.items.isEmpty()}"
+							class="cart__empty">
+							<img th:src="@{/assets/img/cart-empty.png}" alt="Empty Cart"
+								class="cart__empty-img">
+							<p class="cart__empty-text">Giỏ hàng của bạn trống</p>
+						</div>
+
+						<div th:unless="${cart == null or cart.items.isEmpty()}">
+							<ul class="order__list">
+								<li class="item-order" th:each="cartItem : ${cart?.items?.values()}">
+									<div class="order-wrap">
+										<a th:href="@{/product/{id}(id=${cartItem.productId})}"
+											class="order-img">
+											<img th:src="@{${cartItem.imageUrl}}"
+												alt="Product Image">
+										</a>
+										<div class="order-main">
+											<a th:href="@{/product/{id}(id=${cartItem.productId})}"
+												class="order-main-name" th:text="${cartItem.name}">Tên sản phẩm</a>
+											<div class="order-main-price"
+												th:text="${cartItem.quantity} + ' x ' + ${#numbers.formatDecimal(cartItem.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">2 x 45,000 đ</div>
+										</div>
+										<a th:href="@{/cart/remove/{id}(id=${cartItem.productId})}"
+											class="order-close" title="Xóa sản phẩm">
+											<i class="far fa-times-circle"></i>
+										</a>
 									</div>
-									<a th:href="@{/product}" class="order-close"> <i
-										class="far fa-times-circle"></i>
-									</a>
-								</div>
-							</li>
-						</ul>
-						<div class="total-money">Tổng cộng: 120.000đ</div>
-						<a th:href="@{/cart}" class="btn btn--default cart-btn">Xem
-							giỏ hàng</a> <a th:href="@{/pay}"
-							class="btn btn--default cart-btn orange">Thanh toán</a>
+								</li>
+							</ul>
+							<div class="total-money"
+								th:text="'Tổng cộng: ' + ${#numbers.formatDecimal(cart?.grandTotal ?: 0, 0, 'COMMA', 0, 'POINT')} + ' đ'">Tổng cộng: 0đ</div>
+							<a th:href="@{/cart}" class="btn btn--default cart-btn">Xem
+								giỏ hàng</a> <a th:href="@{/pay}"
+								class="btn btn--default cart-btn orange">Thanh toán</a>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="header__nav">
 			<ul class="header__nav-list">
 				<li class="header__nav-item index"><a th:href="@{/}"
 					class="header__nav-link">Trang chủ</a></li>
 				<li class="header__nav-item has-dropdown-menu"><a
-					th:href="@{/list-product}" class="header__nav-link">Sản Phẩm</a></li>
+					th:href="@{/products}" class="header__nav-link">Sản Phẩm</a></li>
 				<li class="header__nav-item"><a th:href="@{/news}"
 					class="header__nav-link">Tin Tức</a></li>
 				<li class="header__nav-item"><a th:href="@{/contact}"
@@ -173,7 +170,7 @@
 				</div>
 			</div>
 		</div>
-	
+
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 		<script th:src="@{/assets/owlCarousel/owl.carousel.min.js}"></script>
 		<script th:src="@{/assets/js/homeScript.js}"></script>
@@ -264,66 +261,47 @@
 
             // Logic mở/đóng modal
            const toggleModal = (modalId, shouldOpen) => {
-    const $modal = $(modalId);
-    
-    if (shouldOpen) {
-        // Mở Modal: Dùng show() để đặt display: block
-        $modal.show();
-        // Thêm class 'active' chỉ để kích hoạt CSS animation/hiệu ứng mượt mà
-        $modal.addClass('active'); 
-        
-        // 🔥 KIỂM SOÁT CUỘN: Khóa cuộn nền
-        $('body').css('overflow', 'hidden'); 
-    } else {
-        // Đóng Modal: Dùng hide() để đặt display: none
-        $modal.hide();
-        // Xóa class 'active'
-        $modal.removeClass('active');
-        
-        // 🔥 KIỂM SOÁT CUỘN: Mở cuộn nền
-        $('body').css('overflow', 'auto'); 
-    }
-};
+                const $modal = $(modalId);
+                
+                if (shouldOpen) {
+                    $modal.show().addClass('active'); 
+                    $('body').css('overflow', 'hidden'); 
+                } else {
+                    $modal.hide().removeClass('active');
+                    $('body').css('overflow', 'auto'); 
+                }
+            };
 
-// --- Gán sự kiện cho các nút ---
-
-// Mở Modal Đăng nhập
-$('.header__account-login').off('click').on('click', function(e) {
-    e.preventDefault();
-    toggleModal('#my-Login', true);
-    toggleModal('#my-Register', false); // Đảm bảo modal kia đóng
-});
-
-// Mở Modal Đăng ký
-$('.header__account-register').off('click').on('click', function(e) {
-    e.preventDefault();
-    toggleModal('#my-Register', true);
-    toggleModal('#my-Login', false); // Đảm bảo modal kia đóng
-});
-
-// Đóng Modal bằng nút đóng (.overlay-close)
-$('.overlay-close').off('click').on('click', function(e) {
-    e.preventDefault();
-    // Lấy ID modal gần nhất
-    const modalId = '#' + $(this).closest('.modal').attr('id');
-    toggleModal(modalId, false);
-});
-
-// Đóng Modal khi click ra ngoài (.modal)
-$('.modal').off('click').on('click', function(e) {
-    if ($(e.target).hasClass('modal')) {
-        const modalId = '#' + $(this).attr('id');
-        toggleModal(modalId, false);
-    }
-});
+            // Gán sự kiện cho các nút
+            $('.header__account-login').off('click').on('click', function(e) {
+                e.preventDefault();
+                toggleModal('#my-Login', true);
+                toggleModal('#my-Register', false); 
+            });
+            $('.header__account-register').off('click').on('click', function(e) {
+                e.preventDefault();
+                toggleModal('#my-Register', true);
+                toggleModal('#my-Login', false); 
+            });
+            $('.overlay-close').off('click').on('click', function(e) {
+                e.preventDefault();
+                const modalId = '#' + $(this).closest('.modal').attr('id');
+                toggleModal(modalId, false);
+            });
+            $('.modal').off('click').on('click', function(e) {
+                if ($(e.target).hasClass('modal')) {
+                    const modalId = '#' + $(this).attr('id');
+                    toggleModal(modalId, false);
+                }
+            });
 
             // Toggle navbar-icon
             $('.navbar-icon').on('click', function() {
                 $(this).toggleClass('open');
                 $('.header__nav').toggleClass('show');
             });
-        }); // KẾT THÚC CHÍNH XÁC CỦA $(document).ready
+        }); 
     </script>
-    </div>
+	</div>
 </body>
 </html>

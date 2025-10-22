@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" 
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/guest}"> <head>
+      layout:decorate="~{layouts/guest}"> 
+      <head>
     <meta charset="UTF-8">
     <title>Liên Hệ</title>
 
     <th:block layout:fragment="css">
         <link rel="stylesheet" type="text/css" th:href="@{/assets/css/contact.css}">
+         <link th:href="@{/assets/css/home.css}" rel="stylesheet" />
+        <link rel="stylesheet" th:href="@{/assets/css/common.css}">
     </th:block>
 </head>
 

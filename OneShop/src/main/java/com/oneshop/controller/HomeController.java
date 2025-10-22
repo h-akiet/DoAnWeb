@@ -34,30 +34,20 @@ public class HomeController {
         return "guest/index";
     }
 
-    @GetMapping("/cart")
-    public String cart() {
-        return "user/cart";
-    }
 
     @GetMapping("/contact")
     public String contact() {
         return "guest/contact";
     }
 
-    @GetMapping("/list-product")
-    public String listProduct() {
-        return "user/listProduct";
-    }
+   
 
     @GetMapping("/news")
     public String news() {
         return "guest/news";
     }
 
-    @GetMapping("/pay")
-    public String pay() {
-        return "user/pay";
-    }
+   
 
     @GetMapping("/product")
     public String product() {
