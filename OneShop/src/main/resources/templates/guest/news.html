@@ -9,17 +9,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tin Tức</title>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" crossorigin="anonymous" />
-    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
-    <link rel="stylesheet" th:href="@{/assets/css/library.css}">
-    <link rel="stylesheet" th:href="@{/assets/owlCarousel/assets/owl.carousel.min.css}">
-    <link rel="stylesheet" th:href="@{/assets/owlCarousel/assets/owl.theme.default.min.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
-    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/new.css}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script th:src="@{/assets/owlCarousel/owl.carousel.min.js}"></script>
+     <th:block layout:fragment="css">
+        <link rel="stylesheet" type="text/css" th:href="@{/assets/css/new.css}">
+        <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+    </th:block>
 </head>
 
 <body>

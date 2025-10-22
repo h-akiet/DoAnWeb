@@ -8,24 +8,19 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
+
 import com.oneshop.service.AuthTokenFilter;
 import com.oneshop.service.JwtUtils;
 import com.oneshop.service.UserService;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
+// KHÔNG cần import các class inner hay http/cookie nữa
+// vì logic đó đã được chuyển ra file riêng
 
 @Configuration
 public class SecurityConfig {
@@ -35,6 +30,14 @@ public class SecurityConfig {
 
     @Autowired
     private JwtUtils jwtUtils;
+    
+    // [SỬA 1] - Tiêm BEAN thành công (từ file CustomSuccessHandler.java)
+    @Autowired
+    private CustomSuccessHandler customSuccessHandler;
+
+    // [SỬA 2] - Tiêm BEAN thất bại (từ file CustomAuthenticationFailureHandler.java)
+    @Autowired
+    private CustomAuthenticationFailureHandler customFailureHandler;
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
@@ -59,69 +62,70 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public AuthenticationSuccessHandler customSuccessHandler() {
-        return new CustomAuthenticationSuccessHandler(jwtUtils);
-    }
+   
+    private static final String[] PUBLIC_URLS = {
+            // Tài nguyên tĩnh
+            "/assets/**",
+            "/webjars/**",
+            "/css/**",
+            "/js/**",
+            "/images/**",
+            "/static/**",
 
-    @Bean
-    public AuthenticationFailureHandler customFailureHandler() {
-        return new CustomAuthenticationFailureHandler();
-    }
+            // Các trang công khai
+            "/",
+            "/home",
+            "/search",
+            "/error",
+            "/product/**", // Cho phép xem chi tiết sản phẩm
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            // Tắt CSRF cho API, giữ session cho form login
-            .csrf(csrf -> csrf.disable())
+            // Quy trình xác thực
+            "/login",
+            "/register",
+            "/verify-otp",
+            "/forgot",
+            "/reset-password",
+            "/api/auth/**" // API đăng nhập/đăng ký để lấy token
+        };
 
-            // Sử dụng session khi cần (cho form login)
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-            )
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http
+                .csrf(csrf -> csrf.disable()) 
+                .sessionManagement(session ->
+                    session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
+                .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(PUBLIC_URLS).permitAll()
+                    .requestMatchers("/shipper/**").hasAuthority("ROLE_SHIPPER")
+                    .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                    .anyRequest().authenticated()
+                )
 
-            // Phân quyền truy cập
-            .authorizeHttpRequests(auth -> auth
-                // Cho phép truy cập công khai
-                .requestMatchers("/assets/**","/", "/webjars/**").permitAll() 
-                .requestMatchers("/", "/home", "/login", "/register",
-                                "/verify-otp", "/forgot", "/reset-password",
-                                "/api/auth/**", "/error", "/search", "/*").permitAll()
-                // Cho phép tài nguyên tĩnh và JSP
-                .requestMatchers("/WEB-INF/decorators/**",
-                                "/css/**", "/js/**", "/images/**", "/static/**").permitAll()
-                // Yêu cầu quyền ROLE_SHIPPER cho /shipper/**
-                .requestMatchers("/shipper/**").hasAuthority("ROLE_SHIPPER")
-                // Yêu cầu đăng nhập cho /user/**
-                .requestMatchers("/user/**").authenticated()
-                // Các request khác yêu cầu đăng nhập
-                .anyRequest().authenticated()
-            )
+                // Cấu hình form login
+                .formLogin(form -> form
+                    .loginPage("/login")
+                    .loginProcessingUrl("/login")
+                    .usernameParameter("account")
+                    .passwordParameter("password")
+                    // [SỬA 4] - Sử dụng các biến đã tiêm (inject)
+                    .successHandler(customSuccessHandler) 
+                    .failureHandler(customFailureHandler)
+                    .permitAll()
+                )
+                
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID", "jwtToken")
+                );
 
-            // Cấu hình form login
-            .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/login")
-                .usernameParameter("account")
-                .passwordParameter("password")
-                .successHandler(customSuccessHandler())
-                .failureHandler(customFailureHandler())
-                .permitAll()
-            )
+            http.authenticationProvider(authenticationProvider());
+            http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
-            .logout(logout -> logout
-                    .logoutUrl("/logout") // ⬅️ URL mà trình duyệt sẽ gửi request POST/GET đến
-                    .logoutSuccessUrl("/") // ⬅️ URL chuyển hướng sau khi đăng xuất thành công
-                    .invalidateHttpSession(true)
-                    .deleteCookies("JSESSIONID", "jwtToken")
-                    );
-
-        // Thêm authentication provider và JWT filter
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
+            return http.build();
+        }
 
     @Bean
     public HttpFirewall allowSlashesFirewall() {
@@ -130,49 +134,18 @@ public class SecurityConfig {
         return firewall;
     }
 
-    // Custom Success Handler cho AJAX
-    public static class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
-        private final JwtUtils jwtUtils;
-
-        public CustomAuthenticationSuccessHandler(JwtUtils jwtUtils) {
-            this.jwtUtils = jwtUtils;
-        }
-
-        @Override
-        public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-            // Sinh JWT
-            String jwt = jwtUtils.generateJwtToken(authentication);
-            Cookie cookie = new Cookie("jwtToken", jwt);
-            cookie.setHttpOnly(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(24 * 60 * 60);
-            response.addCookie(cookie);
-
-            // Kiểm tra vai trò của người dùng
-            String redirectUrl = authentication.getAuthorities().stream()
-                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_SHIPPER"))
-                    ? "/shipper/orders" : "/list-product";
-
-            if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-                response.setContentType("application/json");
-                response.getWriter().write("{\"success\": true, \"redirect\": \"" + redirectUrl + "\"}");
-            } else {
-                response.sendRedirect(redirectUrl);
-            }
-        }
+    // [SỬA 5] - XÓA BỎ TOÀN BỘ 2 INNER CLASS
+    // (Vì chúng đã được chuyển thành các file @Component riêng)
+    
+    /*
+    public static class CustomAuthenticationSuccessHandler implements ... {
+        ...
     }
-
-    // Custom Failure Handler cho AJAX
-    public static class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
-        @Override
-        public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
-            if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"success\": false, \"message\": \"Tài khoản hoặc mật khẩu không chính xác!\"}");
-            } else {
-                response.sendRedirect("/login?error=true");
-            }
-        }
+    */
+    
+    /*
+    public static class CustomAuthenticationFailureHandler implements ... {
+        ...
     }
+    */
 }

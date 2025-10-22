@@ -1,874 +1,399 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/guest}"> 
+      layout:decorate="~{layouts/guest}">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danh sách sản phẩm</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" xintegrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css">
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
     <link rel="stylesheet" th:href="@{/assets/css/library.css}">
     <link rel="stylesheet" th:href="@{/assets/css/common.css}">
 
-    <style>
-        /* CSS Variables */
-        :root {
-            --default-cl: #9e5bab;
-            --black-cl-1: #444444;
-            --black-cl-2: #222222;
-            --white-cl-1: #fff;
-            --white-cl-3: #f8f7fd;
-            --orange-cl: #d26e4b;
-        }
-
-        /* Main Layout */
-        .main {
-            /* Đã điều chỉnh margin-top từ 130px xuống 20px để phù hợp khi không có header */
-            margin-top: 20px;
-            background: #f5f5f5;
-            padding: 20px 0;
-        }
-
-        .product-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-
-        /* Breadcrumb & Filter Bar */
-        .filter-bar {
-            background: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .breadcrumb-custom {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            flex-wrap: wrap;
-        }
-
-        .breadcrumb-custom a {
-            color: #666;
-            text-decoration: none;
-        }
-
-        .breadcrumb-custom a:hover {
-            color: var(--default-cl);
-        }
-
-        .breadcrumb-custom .active {
-            color: var(--black-cl-2);
-            font-weight: 500;
-        }
-
-        .filter-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .filter-btn {
-            padding: 8px 16px;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .filter-btn:hover {
-            border-color: var(--default-cl);
-            color: var(--default-cl);
-        }
-
-        .filter-btn.active {
-            background: var(--default-cl);
-            color: white;
-            border-color: var(--default-cl);
-        }
-
-        .sort-select {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        /* Layout 2 cột */
-        .content-layout {
-            display: grid;
-            grid-template-columns: 260px 1fr;
-            gap: 20px;
-        }
-
-        /* Sidebar Filter */
-        .sidebar-filter {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            height: fit-content;
-            /* Đã điều chỉnh vị trí sticky từ 150px xuống 20px */
-            position: sticky;
-            top: 20px;
-        }
-
-        .filter-section {
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .filter-section:last-child {
-            border-bottom: none;
-        }
-
-        .filter-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--black-cl-2);
-            margin-bottom: 15px;
-        }
-
-        .filter-option {
-            display: flex;
-            align-items: center;
-            padding: 8px 0;
-            cursor: pointer;
-        }
-
-        .filter-option input[type="checkbox"] {
-            margin-right: 10px;
-            cursor: pointer;
-        }
-
-        .filter-option label {
-            font-size: 14px;
-            color: #666;
-            cursor: pointer;
-            flex: 1;
-        }
-
-        .filter-option:hover label {
-            color: var(--default-cl);
-        }
-
-        .price-range {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .price-input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
-        }
-
-        .price-range span {
-            color: #999;
-        }
-
-        .apply-filter-btn {
-            width: 100%;
-            padding: 10px;
-            background: var(--default-cl);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .apply-filter-btn:hover {
-            opacity: 0.9;
-        }
-
-        /* Product Grid */
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-        }
-
-        .product-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: all 0.3s;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .product-card:hover {
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-        }
-
-        .product-image {
-            width: 100%;
-            padding-top: 100%;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-
-        .product-badge {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 700;
-            z-index: 2;
-        }
-
-        .product-info {
-            padding: 12px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .product-brand {
-            font-size: 12px;
-            color: #999;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-
-        .product-name {
-            font-size: 14px;
-            line-height: 1.4;
-            color: #333;
-            margin-bottom: 8px;
-            height: 40px;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-
-        /* Rating Section */
-        .product-rating {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 8px;
-        }
-
-        .rating-stars {
-            display: flex;
-            gap: 2px;
-        }
-
-        .rating-stars i {
-            font-size: 11px;
-            color: #ffa500;
-        }
-
-        .rating-stars i.empty {
-            color: #ddd;
-        }
-
-        .rating-count {
-            font-size: 12px;
-            color: #999;
-        }
-
-        /* Sold Count */
-        .product-sold {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        /* Price */
-        .product-price {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: auto;
-        }
-
-        .price-current {
-            font-size: 16px;
-            font-weight: 700;
-            color: #ff4d4d;
-        }
-
-        .price-original {
-            font-size: 13px;
-            color: #999;
-            text-decoration: line-through;
-        }
-
-        .product-actions {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            gap: 8px;
-            z-index: 3;
-        }
-
-        .product-card:hover .product-actions {
-            display: flex;
-        }
-
-        .action-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 4px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: rgba(255,255,255,0.95);
-            color: #333;
-        }
-
-        .action-btn:hover {
-            background: var(--default-cl);
-            color: white;
-        }
-
-        /* Result Info */
-        .result-info {
-            background: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .result-text {
-            font-size: 16px;
-            color: #333;
-        }
-
-        .result-count {
-            font-weight: 600;
-            color: var(--default-cl);
-        }
-
-        /* Pagination */
-        .pagination-wrapper {
-            display: flex;
-            justify-content: center;
-            margin-top: 30px;
-            padding: 20px 0;
-        }
-
-        .pagination {
-            display: flex;
-            gap: 8px;
-        }
-
-        .page-item {
-            padding: 8px 14px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: white;
-            color: #333;
-            font-size: 14px;
-        }
-
-        .page-item:hover {
-            border-color: var(--default-cl);
-            color: var(--default-cl);
-        }
-
-        .page-item.active {
-            background: var(--default-cl);
-            color: white;
-            border-color: var(--default-cl);
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .content-layout {
-                grid-template-columns: 1fr;
+    <th:block layout:fragment="css">
+         <link rel="stylesheet" th:href="@{/assets/css/listProduct.css}"> <style>
+            /* --- COPY ALL YOUR CSS RULES HERE --- */
+            /* CSS Variables */
+            :root {
+                --default-cl: #9e5bab;
+                --black-cl-1: #444444;
+                --black-cl-2: #222222;
+                --white-cl-1: #fff;
+                --white-cl-3: #f8f7fd;
+                --orange-cl: #d26e4b;
             }
 
-            .sidebar-filter {
-                display: none;
+            /* Main Layout */
+            .main {
+                margin-top: 20px; /* Adjust if needed based on header height */
+                background: #f5f5f5;
+                padding: 20px 0;
             }
 
-            .product-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .product-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
+            .product-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 15px;
             }
 
+            /* Breadcrumb & Filter Bar */
             .filter-bar {
-                flex-direction: column;
-                align-items: flex-start;
+                background: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px;
+                display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+            }
+            .breadcrumb-custom { display: flex; align-items: center; gap: 8px; font-size: 14px; flex-wrap: wrap; }
+            .breadcrumb-custom a { color: #666; text-decoration: none; }
+            .breadcrumb-custom a:hover { color: var(--default-cl); }
+            .breadcrumb-custom .active { color: var(--black-cl-2); font-weight: 500; }
+            .filter-controls { display: flex; gap: 10px; align-items: center; }
+            .filter-btn { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; font-size: 14px; cursor: pointer; transition: all 0.3s; text-decoration: none; color: #333; }
+            .filter-btn:hover { border-color: var(--default-cl); color: var(--default-cl); }
+            .filter-btn.active { background: var(--default-cl); color: white; border-color: var(--default-cl); }
+            /* Add .sort-select style if you use a dropdown */
+
+            /* Layout 2 cột */
+            .content-layout { display: grid; grid-template-columns: 260px 1fr; gap: 20px; }
+
+            /* Sidebar Filter */
+            .sidebar-filter { background: white; border-radius: 8px; padding: 20px; height: fit-content; position: sticky; top: 20px; }
+            .filter-section { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #f0f0f0; }
+            .filter-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+            .filter-title { font-size: 16px; font-weight: 600; color: var(--black-cl-2); margin-bottom: 15px; }
+            .filter-option { display: flex; align-items: center; padding: 8px 0; cursor: pointer; }
+            .filter-option input[type="checkbox"] { margin-right: 10px; cursor: pointer; }
+            .filter-option label { font-size: 14px; color: #666; cursor: pointer; flex: 1; }
+            .filter-option:hover label { color: var(--default-cl); }
+            .price-range { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+            .price-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
+            .price-range span { color: #999; }
+            .apply-filter-btn { width: 100%; padding: 10px; background: var(--default-cl); color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; margin-top: 15px; }
+            .apply-filter-btn:hover { opacity: 0.9; }
+            .clear-filter-btn { display: block; text-align: center; margin-top: 10px; color: #666; text-decoration: none; font-size: 14px; transition: all 0.3s; }
+            .clear-filter-btn:hover { color: var(--default-cl); text-decoration: underline; }
+
+
+            /* Product Grid */
+            .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+            .product-card { background: white; border-radius: 8px; overflow: hidden; transition: all 0.3s; position: relative; display: flex; flex-direction: column; }
+            .product-card:hover { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15); transform: translateY(-2px); }
+            .product-image { width: 100%; padding-top: 100%; background-size: cover; background-position: center; position: relative; }
+            .product-badge { position: absolute; top: 8px; right: 8px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; z-index: 2; }
+            .product-info { padding: 12px; flex: 1; display: flex; flex-direction: column; }
+            .product-brand { font-size: 12px; color: #999; text-transform: uppercase; margin-bottom: 4px; }
+            .product-name { font-size: 14px; line-height: 1.4; color: #333; margin-bottom: 8px; height: 40px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+            .product-rating { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; height: 18px; }
+            .rating-stars { display: flex; gap: 2px; }
+            .rating-stars i { font-size: 11px; color: #ffa500; }
+            .rating-stars i.empty { color: #ddd; }
+            .rating-count { font-size: 12px; color: #999; }
+            .product-sold { font-size: 12px; color: #666; margin-bottom: 10px; }
+            .product-price { display: flex; align-items: center; gap: 8px; margin-top: auto; }
+            .price-current { font-size: 16px; font-weight: 700; color: #ff4d4d; }
+            .price-original { font-size: 13px; color: #999; text-decoration: line-through; }
+            .product-actions { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; gap: 8px; z-index: 3; }
+            .product-card:hover .product-actions { display: flex; }
+            .action-btn { flex: 1; padding: 10px; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; transition: all 0.3s; background: rgba(255, 255, 255, 0.95); color: #333; text-decoration: none; text-align: center; } /* Added text-decoration and text-align */
+            .action-btn:hover { background: var(--default-cl); color: white; }
+
+            /* Result Info */
+            .result-info { background: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+            .result-text { font-size: 16px; color: #333; }
+            .result-count { font-weight: 600; color: var(--default-cl); }
+
+            /* Pagination */
+            .pagination-wrapper { display: flex; justify-content: center; margin-top: 30px; padding: 20px 0; }
+            .pagination { display: flex; gap: 8px; }
+            .page-item, .page-link { padding: 8px 14px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: all 0.3s; background: white; color: #333; font-size: 14px; text-decoration: none; display: block; }
+            .page-item:hover, .page-link:hover { border-color: var(--default-cl); color: var(--default-cl); }
+            .page-item.active, .page-link.active { background: var(--default-cl); color: white; border-color: var(--default-cl); }
+            .page-item.disabled, .page-link.disabled { color: #ccc; pointer-events: none; border-color: #ddd; }
+
+
+            /* Responsive */
+            @media (max-width: 1024px) {
+                .content-layout { grid-template-columns: 1fr; }
+                .sidebar-filter { display: none; }
+                .product-grid { grid-template-columns: repeat(3, 1fr); }
+            }
+            @media (max-width: 768px) {
+                .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+                .filter-bar { flex-direction: column; align-items: flex-start; }
             }
 
-            .product-name {
-                font-size: 13px;
-            }
+             /* Loading indicator */
+            #product-list-container.loading { opacity: 0.6; pointer-events: none; }
 
-            .price-current {
-                font-size: 14px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .filter-controls {
-                width: 100%;
-                flex-wrap: wrap;
-            }
-
-            .filter-btn, .sort-select {
-                flex: 1;
-                min-width: 120px;
-            }
-        }
-    </style>
+        </style>
+    </th:block>
 </head>
-
 <body>
     <div class="main" layout:fragment="content">
         <div class="product-container">
             <div class="filter-bar">
                 <div class="breadcrumb-custom">
-                    <a href="#">Trang chủ</a>
-                    <i class="fas fa-chevron-right" style="font-size: 10px; color: #999;"></i>
-                    <span class="active">Sản phẩm bán chạy</span>
-                </div>
+                    <a th:href="@{/}">Trang chủ</a> <i class="fas fa-chevron-right" style="font-size: 10px; color: #999;"></i>
+                    <span class="active">Tất cả sản phẩm</span>
+                    </div>
                 <div class="filter-controls">
-                    <button class="filter-btn active">Bán chạy</button>
-                    <button class="filter-btn">Mới nhất</button>
-                    <button class="filter-btn">Giá thấp</button>
-                    <select class="sort-select">
-                        <option>Sắp xếp</option>
-                        <option>Giá: Thấp đến cao</option>
-                        <option>Giá: Cao đến thấp</option>
-                        <option>Mới nhất</option>
-                        <option>Bán chạy nhất</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="result-info">
-                <div class="result-text">
-                    Hiển thị <span class="result-count">298</span> sản phẩm
-                </div>
+                    <a th:href="@{/products(sort='salesCount,desc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                       class="filter-btn"
+                       th:classappend="${#strings.equals(sort, 'salesCount,desc') ? 'active' : ''}">Bán chạy</a>
+                    <a th:href="@{/products(sort='productId,desc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                       class="filter-btn"
+                       th:classappend="${#strings.equals(sort, 'productId,desc') ? 'active' : ''}">Mới nhất</a>
+                    <a th:href="@{/products(sort='price,asc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                       class="filter-btn"
+                       th:classappend="${#strings.equals(sort, 'price,asc') ? 'active' : ''}">Giá thấp</a>
+                    </div>
             </div>
 
             <div class="content-layout">
                 <aside class="sidebar-filter">
-                    <div class="filter-section">
-                        <h3 class="filter-title">Danh mục</h3>
-                        <div class="filter-option">
-                            <input type="checkbox" id="cat1">
-                            <label for="cat1">Trang điểm</label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="cat2">
-                            <label for="cat2">Chăm sóc da</label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="cat3">
-                            <label for="cat3">Chăm sóc tóc</label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="cat4">
-                            <label for="cat4">Nước hoa</label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="cat5">
-                            <label for="cat5">Chăm sóc cơ thể</label>
-                        </div>
-                    </div>
+                   <form id="filter-form" th:action="@{/products}" method="GET">
+                       <input type="hidden" name="sort" th:value="${sort}"> <div class="filter-section">
+                           <h3 class="filter-title">Danh mục</h3>
+                           <div class="filter-option" th:each="category : ${categories}">
+                               <input type="checkbox" name="categories"
+                                      th:value="${category.categoryId}"
+                                      th:id="'cat-' + ${category.categoryId}"
+                                      th:checked="${selectedCategories != null and #lists.contains(selectedCategories, category.categoryId)}">
+                               <label th:for="'cat-' + ${category.categoryId}"
+                                      th:text="${category.name}">Category Name</label>
+                           </div>
+                       </div>
 
-                    <div class="filter-section">
-                        <h3 class="filter-title">Thương hiệu</h3>
-                        <div class="filter-option">
-                            <input type="checkbox" id="brand1">
-                            <label for="brand1">CeraVe</label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="brand2">
-                            <label for="brand2">Klairs</label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="brand3">
-                            <label for="brand3">Cocoon</label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="brand4">
-                            <label for="brand4">Innisfree</label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="brand5">
-                            <label for="brand5">La Roche-Posay</label>
-                        </div>
-                    </div>
+                       <div class="filter-section">
+                           <h3 class="filter-title">Thương hiệu</h3>
+                           <div class="filter-option" th:each="brand : ${brands}">
+                               <input type="checkbox" name="brands" th:value="${brand.brandId}"
+                                      th:id="'brand-' + ${brand.brandId}"
+                                      th:checked="${selectedBrands != null and #lists.contains(selectedBrands, brand.brandId)}">
+                               <label th:for="'brand-' + ${brand.brandId}"
+                                      th:text="${brand.name}">Brand Name</label>
+                           </div>
+                       </div>
 
-                    <div class="filter-section">
-                        <h3 class="filter-title">Khoảng giá</h3>
-                        <div class="price-range">
-                            <input type="number" class="price-input" placeholder="Từ">
-                            <span>-</span>
-                            <input type="number" class="price-input" placeholder="Đến">
-                        </div>
-                        <button class="apply-filter-btn">Áp dụng</button>
-                    </div>
-
-                    <div class="filter-section">
-                        <h3 class="filter-title">Đánh giá</h3>
-                        <div class="filter-option">
-                            <input type="checkbox" id="star5">
-                            <label for="star5">
-                                <i class="fas fa-star" style="color: #ffa500;"></i>
-                                <i class="fas fa-star" style="color: #ffa500;"></i>
-                                <i class="fas fa-star" style="color: #ffa500;"></i>
-                                <i class="fas fa-star" style="color: #ffa500;"></i>
-                                <i class="fas fa-star" style="color: #ffa500;"></i>
-                            </label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="checkbox" id="star4">
-                            <label for="star4">
-                                <i class="fas fa-star" style="color: #ffa500;"></i>
-                                <i class="fas fa-star" style="color: #ffa500;"></i>
-                                <i class="fas fa-star" style="color: #ffa500;"></i>
-                                <i class="fas fa-star" style="color: #ffa500;"></i>
-                                <i class="far fa-star" style="color: #ddd;"></i>
-                                trở lên
-                            </label>
-                        </div>
-                    </div>
+                       <div class="filter-section">
+                           <h3 class="filter-title">Khoảng giá</h3>
+                           <div class="price-range">
+                               <input type="number" name="minPrice" class="price-input" placeholder="Từ" th:value="${minPrice}">
+                               <span>-</span>
+                               <input type="number" name="maxPrice" class="price-input" placeholder="Đến" th:value="${maxPrice}">
+                           </div>
+                           <button type="submit" class="apply-filter-btn">Áp dụng</button>
+                           <a href="#" class="clear-filter-btn"> <i class="fas fa-undo"></i> Xóa bộ lọc </a> </div>
+                   </form>
                 </aside>
 
-                <div class="product-grid">
-                    <div class="product-card">
-                        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1556228578-dd932d3c0b97?w=400');">
-                            <div class="product-badge">-33%</div>
+                <main id="product-list-container">
+                    <div th:fragment="product_list_fragment">
+                        <div class="result-info">
+                            <div class="result-text" th:if="${productPage != null}">
+                                Hiển thị <span class="result-count" th:text="${productPage.numberOfElements}"></span>
+                                trên tổng số <span class="result-count" th:text="${productPage.totalElements}"></span> sản phẩm
+                            </div>
+                             <div class="result-text" th:unless="${productPage != null and productPage.totalElements > 0}">
+                                Không có sản phẩm nào
+                             </div>
                         </div>
-                        <div class="product-info">
-                            <div class="product-brand">CeraVe</div>
-                            <h3 class="product-name">Sữa Rửa Mặt CeraVe Sạch Sâu Cho Da Foaming Cleanser</h3>
 
-                            <div class="product-rating">
-                                <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
+                        <div class="product-grid" th:if="${productPage != null and !productPage.empty}">
+                            <div class="product-card" th:each="product : ${productPage.content}">
+                                <div class="product-image"
+                                     th:style="'background-image: url(\'' + @{${product.primaryImageUrl ?: '/assets/img/product/no-image.jpg'}} + '\');'"> <div class="product-badge"
+                                         th:if="${product.originalPrice != null and product.originalPrice > product.price and product.originalPrice > 0}"
+                                         th:text="'-' + ${#numbers.formatInteger(100 * (product.originalPrice - product.price) / product.originalPrice, 0)} + '%'">-10%</div>
                                 </div>
-                                <span class="rating-count">(1.704)</span>
-                            </div>
+                                <div class="product-info">
+                                    <div class="product-brand"
+                                         th:text="${product.brand != null ? product.brand.name : 'N/A'}">Brand</div>
+                                    <h3 class="product-name" th:text="${product.name}">Product Name</h3>
 
-                            <div class="product-sold">Đã bán 1.704</div>
+                                    <div class="product-rating">
+                                         <th:block th:if="${product.reviewCount != null and product.reviewCount > 0}">
+                                            <div class="rating-stars">
+                                                <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, 5)}" th:classappend="${i <= product.rating} ? '' : 'empty'"></i>
+                                            </div>
+                                            <span class="rating-count" th:text="'(' + ${product.reviewCount} + ')'"></span>
+                                        </th:block>
+                                         <th:block th:unless="${product.reviewCount != null and product.reviewCount > 0}">
+                                            <span class="rating-count">Chưa có đánh giá</span>
+                                        </th:block>
+                                    </div>
 
-                            <div class="product-price">
-                                <div class="price-current">326.000đ</div>
-                                <div class="price-original">490.000đ</div>
-                            </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="action-btn">Xem</button>
-                            <button class="action-btn">Mua</button>
-                        </div>
-                    </div>
+                                    <div class="product-sold"
+                                         th:text="'Đã bán ' + ${#numbers.formatDecimal(product.soldCount ?: 0, 0, 'POINT', 0, 'COMMA')}">Đã bán 0</div>
 
-                    <div class="product-card">
-                        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400');">
-                            <div class="product-badge">-49%</div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-brand">Klairs</div>
-                            <h3 class="product-name">Nước Hoa Hồng Klairs Không Mùi Cho Supple Preparation</h3>
-
-                            <div class="product-rating">
-                                <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
+                                    <div class="product-price">
+                                        <div class="price-current"
+                                             th:text="${#numbers.formatDecimal(product.price ?: 0, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                                        <div class="price-original"
+                                             th:if="${product.originalPrice != null and product.originalPrice > product.price}"
+                                             th:text="${#numbers.formatDecimal(product.originalPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                                    </div>
                                 </div>
-                                <span class="rating-count">(1.969)</span>
-                            </div>
-
-                            <div class="product-sold">Đã bán 1.969</div>
-
-                            <div class="product-price">
-                                <div class="price-current">220.000đ</div>
-                                <div class="price-original">435.000đ</div>
-                            </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="action-btn">Xem</button>
-                            <button class="action-btn">Mua</button>
-                        </div>
-                    </div>
-
-                    <div class="product-card">
-                        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400');">
-                            <div class="product-badge">-59%</div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-brand">Cocoon</div>
-                            <h3 class="product-name">Combo 2 Nước Tẩy Trang Bí Đao Winter Melon</h3>
-
-                            <div class="product-rating">
-                                <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
+                                <div class="product-actions">
+                                    <a th:href="@{'/product/' + ${product.productId}}" class="action-btn">Xem</a>
+                                    <a th:href="@{'/product/' + ${product.productId}}" class="action-btn">Chọn loại</a>
                                 </div>
-                                <span class="rating-count">(1.745)</span>
-                            </div>
-
-                            <div class="product-sold">Đã bán 1.745</div>
-
-                            <div class="product-price">
-                                <div class="price-current">239.000đ</div>
-                                <div class="price-original">590.000đ</div>
                             </div>
                         </div>
-                        <div class="product-actions">
-                            <button class="action-btn">Xem</button>
-                            <button class="action-btn">Mua</button>
+                        <div class="alert alert-info text-center mt-3" th:if="${productPage == null or productPage.empty}">
+                            <p>Không tìm thấy sản phẩm nào phù hợp.</p>
                         </div>
-                    </div>
 
-                    <div class="product-card">
-                        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400');">
-                            <div class="product-badge">-50%</div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-brand">Skin1004</div>
-                            <h3 class="product-name">Kem Mắt Centella Green Level Eye Cream</h3>
+                        <div class="pagination-wrapper" th:if="${productPage != null and productPage.totalPages > 1}">
+                            <div class="pagination">
+                                <a class="page-link"
+                                   th:href="@{/products(page=${currentPage - 1}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                                   th:if="${productPage.hasPrevious()}" th:data-page="${currentPage - 1}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                                <span class="page-link disabled" th:unless="${productPage.hasPrevious()}"><i class="fas fa-chevron-left"></i></span>
 
-                            <div class="product-rating">
-                                <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="far fa-star empty"></i>
-                                </div>
-                                <span class="rating-count">(892)</span>
-                            </div>
+                                <th:block th:each="i: ${#numbers.sequence(1, totalPages)}">
+                                    <a class="page-link"
+                                       th:href="@{/products(page=${i}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                                       th:text="${i}"
+                                       th:classappend="${i == currentPage} ? 'active' : ''"
+                                       th:data-page="${i}">
+                                    </a>
+                                </th:block>
 
-                            <div class="product-sold">Đã bán 892</div>
-
-                            <div class="product-price">
-                                <div class="price-current">234.000đ</div>
-                                <div class="price-original">465.000đ</div>
+                                <a class="page-link"
+                                   th:href="@{/products(page=${currentPage + 1}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                                   th:if="${productPage.hasNext()}" th:data-page="${currentPage + 1}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                                <span class="page-link disabled" th:unless="${productPage.hasNext()}"><i class="fas fa-chevron-right"></i></span>
                             </div>
                         </div>
-                        <div class="product-actions">
-                            <button class="action-btn">Xem</button>
-                            <button class="action-btn">Mua</button>
-                        </div>
-                    </div>
+                    </div> </main> </div> </div> </div> <th:block layout:fragment="js">
+        <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+        <script th:src="@{/assets/js/commonscript.js}"></script>
+        <script>
+            // --- COPY YOUR ENTIRE AJAX JAVASCRIPT BLOCK HERE ---
+            $(document).ready(function() {
 
-                    <div class="product-card">
-                        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=400');">
-                            <div class="product-badge">-24%</div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-brand">NestPlace</div>
-                            <h3 class="product-name">Kem Dưỡng Da Premium Face Cream</h3>
+                function fetchProducts(url) {
+                    $('#product-list-container').addClass('loading');
+                    $.ajax({
+                        type: 'GET', url: url,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        success: function(fragment) {
+                            $('#product-list-container').html(fragment);
+                            history.pushState(null, '', url);
+                            $('#product-list-container').removeClass('loading');
+                        },
+                        error: function() {
+                            alert('Lỗi khi tải sản phẩm!');
+                            $('#product-list-container').removeClass('loading');
+                        }
+                    });
+                }
 
-                            <div class="product-rating">
-                                <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <span class="rating-count">(2.314)</span>
-                            </div>
+                function buildUrl() {
+                    const params = new URLSearchParams(); // Start fresh or use window.location.search
+                    const formParams = $('#filter-form').serializeArray();
+                    
+                     // Get current sort from hidden input or default
+                    let currentSort = $('input[name="sort"]').val() || 'productId,desc'; 
+                    params.set('sort', currentSort);
 
-                            <div class="product-sold">Đã bán 2.314</div>
+                    params.delete('categories'); // Clear multi-value params first
+                    params.delete('brands');
 
-                            <div class="product-price">
-                                <div class="price-current">200.000đ</div>
-                                <div class="price-original">300.000đ</div>
-                            </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="action-btn">Xem</button>
-                            <button class="action-btn">Mua</button>
-                        </div>
-                    </div>
+                    formParams.forEach(item => {
+                        if (item.value && item.name !== 'sort') { // Add if value exists, ignore sort hidden input
+                             if (params.has(item.name) && (item.name === 'categories' || item.name === 'brands')) {
+                                params.append(item.name, item.value);
+                            } else {
+                                params.set(item.name, item.value);
+                            }
+                        }
+                    });
+                    params.set('page', '1'); // Reset page when filters change
+                    return '/products?' + params.toString();
+                }
 
-                    <div class="product-card">
-                        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1570194065650-d99fb4bedf0a?w=400');">
-                            <div class="product-badge">-35%</div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-brand">Maybelline</div>
-                            <h3 class="product-name">Son Môi Lì SuperStay Matte Ink</h3>
+                function buildUrlWithParam(paramName, paramValue) {
+                    const params = new URLSearchParams(window.location.search);
+                    params.set(paramName, paramValue);
+                    if (paramName !== 'page') {
+                        params.set('page', '1'); // Reset page if filter/sort changes
+                    }
+                    return '/products?' + params.toString();
+                }
 
-                            <div class="product-rating">
-                                <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
-                                </div>
-                                <span class="rating-count">(3.521)</span>
-                            </div>
+                $('#filter-form').on('submit', function(e) {
+                    e.preventDefault();
+                    const url = buildUrl();
+                    fetchProducts(url);
+                });
 
-                            <div class="product-sold">Đã bán 3.521</div>
+                // --- Optional: Instant fetch on filter change ---
+                // $('.sidebar-filter input[type="checkbox"], .price-input').on('change', function() {
+                //      const url = buildUrl();
+                //      fetchProducts(url);
+                // });
+                // $('.price-input').on('blur', function() { // Or 'input'
+                //     const url = buildUrl();
+                //     fetchProducts(url);
+                // });
 
-                            <div class="product-price">
-                                <div class="price-current">145.000đ</div>
-                                <div class="price-original">225.000đ</div>
-                            </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="action-btn">Xem</button>
-                            <button class="action-btn">Mua</button>
-                        </div>
-                    </div>
+                $('.filter-controls .filter-btn').on('click', function(e) {
+                    e.preventDefault();
+                    const sortValue = new URL($(this).attr('href'), window.location.origin).searchParams.get('sort');
+                    // Update hidden sort input value for form submission consistency
+                    $('input[name="sort"]').val(sortValue); 
+                    const url = buildUrlWithParam('sort', sortValue);
+                    fetchProducts(url);
+                     // Visually update active button (optional but good UX)
+                     $('.filter-controls .filter-btn').removeClass('active');
+                     $(this).addClass('active');
+                });
 
-                    <div class="product-card">
-                        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400');">
-                            <div class="product-badge">-28%</div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-brand">Innisfree</div>
-                            <h3 class="product-name">Tinh Chất Trà Xanh Green Tea Seed Serum</h3>
+                $('#product-list-container').on('click', '.pagination a.page-link', function(e) {
+                    e.preventDefault();
+                    const pageNumber = $(this).data('page');
+                    if (pageNumber) {
+                       const url = buildUrlWithParam('page', pageNumber);
+                       fetchProducts(url);
+                    }
+                });
 
-                            <div class="product-rating">
-                                <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <span class="rating-count">(1.856)</span>
-                            </div>
+                $('.clear-filter-btn').on('click', function(e) {
+                    e.preventDefault();
+                    $('#filter-form').trigger('reset');
+                    // Reset sort to default visually and fetch
+                    $('input[name="sort"]').val('productId,desc'); 
+                     $('.filter-controls .filter-btn').removeClass('active');
+                     $('.filter-controls .filter-btn[href*="sort=productId,desc"]').addClass('active'); // Re-activate default sort button
+                    fetchProducts('/products?sort=productId,desc&page=1');
+                });
 
-                            <div class="product-sold">Đã bán 1.856</div>
+                window.onpopstate = function(event) {
+                    fetchProducts(window.location.pathname + window.location.search);
+                     // Update form state based on URL (more advanced, optional)
+                     const params = new URLSearchParams(window.location.search);
+                     $('#filter-form input[type="checkbox"]').each(function() {
+                        $(this).prop('checked', params.getAll($(this).attr('name')).includes($(this).val()));
+                     });
+                      $('#filter-form input[name="minPrice"]').val(params.get('minPrice') || '');
+                      $('#filter-form input[name="maxPrice"]').val(params.get('maxPrice') || '');
+                       // Update active sort button
+                       let currentSort = params.get('sort') || 'productId,desc';
+                        $('input[name="sort"]').val(currentSort); 
+                        $('.filter-controls .filter-btn').removeClass('active');
+                        $('.filter-controls .filter-btn[href*="sort=' + currentSort + '"]').addClass('active');
+                };
 
-                            <div class="product-price">
-                                <div class="price-current">380.000đ</div>
-                                <div class="price-original">530.000đ</div>
-                            </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="action-btn">Xem</button>
-                            <button class="action-btn">Mua</button>
-                        </div>
-                    </div>
-
-                    <div class="product-card">
-                        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400');">
-                            <div class="product-badge">-42%</div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-brand">La Roche-Posay</div>
-                            <h3 class="product-name">Kem Chống Nắng Anthelios SPF 50+</h3>
-
-                            <div class="product-rating">
-                                <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
-                                </div>
-                                <span class="rating-count">(2.104)</span>
-                            </div>
-
-                            <div class="product-sold">Đã bán 2.104</div>
-
-                            <div class="product-price">
-                                <div class="price-current">290.000đ</div>
-                                <div class="price-original">500.000đ</div>
-                            </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="action-btn">Xem</button>
-                            <button class="action-btn">Mua</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pagination-wrapper">
-                <div class="pagination">
-                    <div class="page-item">
-                        <i class="fas fa-chevron-left"></i>
-                    </div>
-                    <div class="page-item active">1</div>
-                    <div class="page-item">2</div>
-                    <div class="page-item">3</div>
-                    <div class="page-item">4</div>
-                    <div class="page-item">...</div>
-                    <div class="page-item">10</div>
-                    <div class="page-item">
-                        <i class="fas fa-chevron-right"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
-    <script th:src="@{/assets/js/commonscript.js}"></script>
-    <script>
-    // Hàm goToTop đã được giữ lại
-    function goToTop() {
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
-    }
-
-    // Logic xử lý AJAX cho form đăng ký/đăng nhập đã được loại bỏ cùng với các Modal
-    $(document).ready(function() {
-        // Có thể cần bổ sung jQuery nếu chưa được load ở đâu đó
-        // Ví dụ: $.ajax() cần jQuery. Nếu file này chạy độc lập, hãy đảm bảo jQuery đã được load.
-        console.log("Product list page content loaded.");
-    });
-    </script>
+            }); // End document ready
+        </script>
+    </th:block>
 </body>
 </html>

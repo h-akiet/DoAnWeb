@@ -1,14 +1,24 @@
 package com.oneshop.service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.oneshop.entity.Brand;
 import com.oneshop.entity.Product;
+import com.oneshop.repository.BrandRepository;
 import com.oneshop.repository.CategoryRepository;
 import com.oneshop.repository.ProductRepository;
 import com.oneshop.repository.ProductReviewRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest; // Thêm import này
+
 
 @Service
 public class ProductService {
@@ -22,78 +32,133 @@ public class ProductService {
     @Autowired
     private CategoryRepository categoryRepository;
     
-    // This method is not used by the homepage but is kept for other features
-    public List<Product> getTopSellingProducts() {
-        return productRepository.findBySalesCountGreaterThanOrderBySalesCountDesc(10);
-    }
+    @Autowired
+    private BrandRepository brandRepository;
     
-    // This method is not used by the homepage but is kept for other features
-    public List<Product> searchAndFilter(String name, Long categoryId, Double minPrice, Double maxPrice) {
-        return productRepository.searchAndFilter(name, categoryId, minPrice, maxPrice);
-    }
+    // --- Public Methods for Index/Home Page ---
 
     public List<com.oneshop.entity.Category> getAllCategories() {
         return categoryRepository.findAll();
     }
 
-    /**
-     * Finds the top 10 best-selling products and populates their details.
-     */
     @Transactional(readOnly = true)
     public List<Product> findBestSellingProducts() {
         List<Product> products = productRepository.findTop10ByOrderBySalesCountDesc();
-        // Use the helper method to add details like rating and review count
         setProductDetails(products); 
         return products;
     }
 
-    /**
-     * Finds the top 10 newest products and populates their details.
-     */
     @Transactional(readOnly = true)
     public List<Product> findNewestProducts() {
         List<Product> products = productRepository.findTop10ByOrderByProductIdDesc();
-        // Use the helper method to add details
         setProductDetails(products);
         return products;
     }
 
-    /**
-     * Finds the top 10 products with the best price (biggest discount)
-     * and populates their details.
-     */
     @Transactional(readOnly = true)
     public List<Product> findBestPriceProducts() {
         List<Product> products = productRepository.findTop10ByBestDiscount();
-        // Use the helper method to add details
         setProductDetails(products);
         return products;
     }
 
+    // --- Public Methods for Product Detail Page ---
+
     /**
-     * A private helper method to populate transient fields (rating, reviewCount, etc.)
-     * for a list of products. This avoids code duplication.
-     * @param products The list of products to process.
+     * Finds a product by its ID and populates its transient details.
+     */
+    @Transactional(readOnly = true)
+    public Product findProductById(Long productId) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if (productOptional.isPresent()) {
+            Product product = productOptional.get();
+            setProductDetails(product); // Set details for single product
+            return product;
+        }
+        return null; 
+    }
+
+    /**
+     * Finds related products based on the current product's category.
+     */
+    @Transactional(readOnly = true)
+    public List<Product> findRelatedProducts(Product product) {
+        if (product == null || product.getCategory() == null) {
+            return Collections.emptyList(); // Trả về danh sách rỗng nếu không có sản phẩm hoặc danh mục
+        }
+
+        // Tạo một đối tượng Pageable để chỉ lấy 6 sản phẩm đầu tiên
+        Pageable limit = PageRequest.of(0, 6); 
+
+        // Gọi phương thức repository mới, truyền vào cả category, productId và giới hạn số lượng
+        List<Product> relatedProducts = productRepository.findByCategoryAndProductIdNot(
+            product.getCategory(), 
+            product.getProductId(),
+            limit
+        );
+        
+        // Làm giàu dữ liệu cho các sản phẩm liên quan (tính rating, sold count,...)
+        setProductDetails(relatedProducts); 
+        return relatedProducts;
+    }
+
+
+    // --- Helper Methods ---
+
+    /**
+     * Populates transient fields (rating, reviewCount, soldCount) for a list of products.
      */
     private void setProductDetails(List<Product> products) {
-        for (Product product : products) {
+        if (products != null) {
+            for (Product product : products) {
+                setProductDetails(product); // Calls the single product helper
+            }
+        }
+    }
+
+    /**
+     * Populates transient fields (rating, reviewCount, soldCount) for a single product.
+     */
+    private void setProductDetails(Product product) {
+        if (product != null) {
             Long productId = product.getProductId();
-            
+
             // Get data from Review Repository
             Double avgRating = reviewRepository.findAverageRatingByProductId(productId);
             Integer reviewCount = reviewRepository.countReviewsByProductId(productId);
 
             // Set the transient fields in the Product entity
-            product.setRating(avgRating);
-            product.setReviewCount(reviewCount);
-            product.setSoldCount(product.getSalesCount());
+            product.setRating(avgRating != null ? avgRating : 0.0);
+            product.setReviewCount(reviewCount != null ? reviewCount : 0);
+            product.setSoldCount(product.getSalesCount()); 
         }
     }
+    
+    // --- Other Methods (Kept for completeness) ---
+    
+    public List<Product> getTopSellingProducts() {
+        return productRepository.findBySalesCountGreaterThanOrderBySalesCountDesc(10);
+    }
+    
+    public List<Product> searchAndFilter(String name, Long categoryId, Double minPrice, Double maxPrice) {
+        return productRepository.searchAndFilter(name, categoryId, minPrice, maxPrice);
+    }
 
-    // This method is likely not needed for the homepage tabs, but I've left it here.
 	@Transactional(readOnly = true)
 	public List<Product> findFeaturedProducts() {
-		// You can implement logic here later if needed
 		return null;
+	}
+
+	public List<com.oneshop.entity.Brand> getAllBrands() {
+	    return brandRepository.findAll();
+	}
+	public Page<Product> findAll(Specification<Product> spec, Pageable pageable) {
+	    // Gọi phương thức findAll() của JpaSpecificationExecutor
+	    Page<Product> productPage = productRepository.findAll(spec, pageable);
+	    
+	    // Làm giàu dữ liệu (tính rating,...) cho các sản phẩm trong trang hiện tại
+	    productPage.getContent().forEach(this::setProductDetails);
+	    
+	    return productPage;
 	}
 }
