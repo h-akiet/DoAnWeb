@@ -12,6 +12,7 @@ import com.oneshop.repository.CartRepository;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -152,5 +153,17 @@ public class CartService {
         cartDto.setItems(itemsMap);
         cartDto.calculateTotals(); // Tính tổng tiền
         return cartDto; // Trả về DTO đã hoàn thiện
+    }
+
+    @Transactional
+    public void clearCartItems(Long userId, List<Long> variantIds) {
+        // Gọi thẳng đến phương thức query trong Repository
+        // (Bạn phải chọn đúng tên hàm dựa trên cấu trúc Entity của bạn)
+        
+        // Dùng hàm này nếu (CartItem -> User)
+        cartItemRepository.deleteByUserIdAndProductVariantIdIn(userId, variantIds);
+        
+        // Dùng hàm này nếu (CartItem -> Cart -> User)
+        // cartItemRepository.deleteByCartUserIdAndProductVariantIdIn(userId, variantIds);
     }
 }

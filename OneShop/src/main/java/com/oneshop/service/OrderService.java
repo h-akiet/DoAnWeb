@@ -1,27 +1,32 @@
 package com.oneshop.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus; // Import bị thiếu
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException; // Import bị thiếu
 
-import com.oneshop.dto.PlaceOrderRequest; // <-- Bổ sung import DTO
+import com.oneshop.dto.PlaceOrderRequest;
 import com.oneshop.entity.Address;
 import com.oneshop.entity.Order;
-//import com.oneshop.entity.OrderDetail;
+import com.oneshop.entity.OrderDetail;
 import com.oneshop.entity.ProductVariant;
 import com.oneshop.entity.User;
-//import com.oneshop.entity.OrderStatus; // <-- Bổ sung import (Giả sử bạn có Enum này)
-import com.oneshop.repository.AddressRepository; // <-- Bổ sung import
-//import com.oneshop.repository.OrderDetailRepository; // <-- Bổ sung import
+import com.oneshop.entity.OrderStatus;
+import com.oneshop.repository.AddressRepository;
+import com.oneshop.repository.OrderDetailRepository;
 import com.oneshop.repository.OrderRepository;
-import com.oneshop.repository.ProductVariantRepository; // <-- Bổ sung import
-import com.oneshop.repository.UserRepository; // <-- Bổ sung import
+import com.oneshop.repository.ProductVariantRepository;
+import com.oneshop.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -31,7 +36,6 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
     
-    // ================= BỔ SUNG CÁC REPOSITORIES CẦN THIẾT =================
     @Autowired
     private UserRepository userRepository;
     
@@ -41,19 +45,22 @@ public class OrderService {
     @Autowired
     private ProductVariantRepository variantRepository;
     
- //   @Autowired
-//    private OrderDetailRepository orderDetailRepository;
+    // Giả định bạn có UserService
+    @Autowired 
+    private UserService userService;
     
-    // (Giả sử bạn có CartService để xóa giỏ hàng sau khi đặt)
-    // @Autowired
-    // private CartService cartService;
-    // =====================================================================
-
+    @Autowired
+    private OrderDetailRepository orderDetailRepository;
+    
+    // Giả định bạn có CartService
+    @Autowired(required = false) 
+    private CartService cartService;
 
     @Autowired
     private EmailService emailService;
 
     public List<Order> getAssignedOrders(Long shipperId) {
+        // Yêu cầu phương thức List<Order> findByShipperId(Long shipperId); trong OrderRepository
         return orderRepository.findByShipperId(shipperId);
     }
 
@@ -76,26 +83,33 @@ public class OrderService {
             ));
     }
 
+    public List<Order> findOrdersByCurrentUser(String username) {
+        
+        // 1. Dùng UserService để tìm User object từ username
+        User currentUser = userService.findByUsername(username); 
 
-    /**
-     * ========================================================================
-     * [HÀM MỚI ĐƯỢC BỔ SUNG]
-     * Logic tạo đơn hàng, tính toán tổng tiền và lưu vào DB
-     * ========================================================================
-     */
-    @Transactional // Đảm bảo tất cả cùng thành công hoặc thất bại
+        // 2. Kiểm tra nếu không tìm thấy user
+        if (currentUser == null) {
+            return new ArrayList<>(); // Trả về danh sách rỗng
+        }
+
+        // 3. Lấy userId và gọi phương thức repository
+        Long userId = currentUser.getId();
+        
+        // Yêu cầu phương thức List<Order> findByUserIdOrderByCreatedAtDesc(Long userId); trong OrderRepository
+        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+    
+    @Transactional
     public Order createOrderFromRequest(String username, PlaceOrderRequest orderRequest) {
         
-        // 1. Tìm User
-        User user = userRepository.findByUsername(username) // Giả sử repo có findByUsername
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng: " + username));
         
-        // 2. Tìm Địa chỉ
         Address address = addressRepository.findById(orderRequest.getSelectedAddressId())
-                .filter(addr -> addr.getUser().getId().equals(user.getId())) // Đảm bảo địa chỉ thuộc về user
+                .filter(addr -> addr.getUser().getId().equals(user.getId()))
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy địa chỉ hợp lệ."));
 
-        // 3. Chuyển đổi chuỗi variantIds (vd: "1,5,10") thành List<Long>
         List<Long> variantIds = Arrays.stream(orderRequest.getVariantIds().split(","))
                                       .map(Long::parseLong)
                                       .collect(Collectors.toList());
@@ -106,94 +120,121 @@ public class OrderService {
             throw new RuntimeException("Một số sản phẩm trong giỏ hàng không tìm thấy.");
         }
 
-        // 4. Tạo Order chính
         Order newOrder = new Order();
         newOrder.setUser(user);
         newOrder.setCreatedAt(LocalDateTime.now());
         
-        // Sao chép thông tin địa chỉ vào đơn hàng
- //       newOrder.setRecipientName(address.getFullName());
-//        newOrder.setShippingAddress(address.getAddress());
-  //      newOrder.setShippingPhone(address.getPhone());
+        newOrder.setRecipientName(address.getFullName());
+        newOrder.setShippingAddress(address.getAddress());
+        newOrder.setShippingPhone(address.getPhone());
       
-        // [QUAN TRỌNG] Đặt trạng thái ban đầu là CHỜ THANH TOÁN
- //       newOrder.setOrderStatus(OrderStatus.PENDING); // Giả sử bạn có Enum OrderStatus.PENDING
+        newOrder.setOrderStatus(OrderStatus.PENDING); 
+        newOrder.setPaymentMethod(orderRequest.getPaymentMethod());
         
- //       newOrder.setPaymentMethod(orderRequest.getPaymentMethod());
- //       newOrder.setShippingCost(30000L); // TODO: Tạm tính phí ship, bạn cần logic tính toán riêng
+        BigDecimal shippingCost = BigDecimal.valueOf(30000); 
+        newOrder.setShippingCost(shippingCost);
        
-        // 5. Tạo Order Details và Tính tổng tiền
-        long subtotal = 0;
+        BigDecimal subtotal = BigDecimal.ZERO; 
         
         for (ProductVariant variant : variants) {
-            // TODO: Bạn cần có logic lấy số lượng (quantity)
-            // Hiện tại 'orderRequest' chưa có thông tin số lượng
-            // Bạn cần sửa DTO và logic JS để gửi kèm số lượng, hoặc lấy từ giỏ hàng (Cart)
-            
-            // Tạm thời, tôi sẽ giả định số lượng là 1 CHO MỖI SẢN PHẨM
-            int quantity = 1; // <--- TODO: CẦN THAY THẾ BẰNG LOGIC ĐÚNG (ví dụ: lấy từ giỏ hàng)
+            int quantity = 1; // <--- TODO: CẦN THAY THẾ BẰNG LOGIC ĐÚNG
 
-            // Kiểm tra tồn kho
             if (variant.getStock() < quantity) {
                 throw new RuntimeException("Sản phẩm " + variant.getProduct().getName() + " không đủ hàng.");
             }
             
-            // Trừ tồn kho
             variant.setStock(variant.getStock() - quantity);
             
-            // Tạo chi tiết đơn hàng
- //           OrderDetail detail = new OrderDetail();
- //           detail.setOrder(newOrder);
- //           detail.setProductVariant(variant);
- //           detail.setQuantity(quantity);
- //           detail.setPrice(variant.getPrice()); // Lưu giá tại thời điểm mua
+            OrderDetail detail = new OrderDetail();
+            detail.setOrder(newOrder);
+            detail.setProductVariant(variant);
+            detail.setQuantity(quantity);
+            detail.setPrice(variant.getPrice()); 
             
- //           subtotal += (variant.getPrice() * quantity);
+            BigDecimal quantityBD = BigDecimal.valueOf(quantity);
+            BigDecimal itemTotal = variant.getPrice().multiply(quantityBD);
+            subtotal = subtotal.add(itemTotal);
             
-            // Thêm detail vào list của Order
-            // (Điều này giả định bạn có: @OneToMany(mappedBy="order", cascade=CascadeType.ALL) 
-            // và private List<OrderDetail> orderDetails = new ArrayList<>(); trong Entity Order)
-  //           newOrder.getOrderDetails().add(detail);
+             newOrder.getOrderDetails().add(detail);
        }
         
-        // 6. Cập nhật lại tồn kho hàng loạt
         variantRepository.saveAll(variants);
         
-        // 7. Set tổng tiền
-  //      newOrder.setSubtotal(subtotal);
-  //      newOrder.setGrandTotal(subtotal + newOrder.getShippingCost()); // Tổng tiền = Tạm tính + Phí ship
+        newOrder.setSubtotal(subtotal);
+        newOrder.setTotal(subtotal.add(shippingCost)); 
         
-        // 8. Lưu Order (và OrderDetail sẽ được lưu theo nhờ CascadeType.ALL)
         Order savedOrder = orderRepository.save(newOrder);
         
-        // 9. TODO: Xóa sản phẩm khỏi giỏ hàng
-        // cartService.clearCartItems(user.getId(), variantIds);
+         if (cartService != null) {
+            cartService.clearCartItems(user.getId(), variantIds);
+         }
 
         return savedOrder;
-        return orders.stream().collect(Collectors.groupingBy(Order::getOrderStatus, Collectors.counting()));
     }
 
+    @Transactional
     public void deliverOrder(Long orderId, Long shipperId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Đơn hàng không tồn tại!"));
 
-        if (order.getShipper() == null || !order.getShipper().getUserId().equals(shipperId)) {
+        if (order.getShipper() == null || !order.getShipper().getId().equals(shipperId)) {
             throw new SecurityException("Bạn không có quyền cập nhật đơn hàng này!");
         }
 
-        order.setOrderStatus("DELIVERED");
+        order.setOrderStatus(OrderStatus.DELIVERED);
         orderRepository.save(order);
 
-        // Gửi email thông báo đến người dùng sau khi cập nhật thành công
         emailService.sendDeliveryConfirmation(order.getUser().getEmail(), order.getId());
     }
 
     public List<Order> getUserOrders(Long userId) {
-        return orderRepository.findByUserId(userId); // Giả sử thêm method findByUserId trong OrderRepository
+        // Yêu cầu phương thức List<Order> findByUserId(Long userId); trong OrderRepository
+        return orderRepository.findByUserId(userId); 
     }
 
     public Order getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Đơn hàng không tồn tại!"));
+    }
+    
+    // [PHƯƠNG THỨC MỚI] - Đảm bảo chỉ người dùng sở hữu mới có thể truy cập đơn hàng
+    public Order findOrderByIdAndUser(Long orderId, String username) {
+        // Yêu cầu phương thức Optional<Order> findByIdAndUser_Username(Long id, String username); trong OrderRepository
+        Optional<Order> orderOptional = orderRepository.findByIdAndUser_Username(orderId, username);
+        
+        return orderOptional.orElseThrow(() -> 
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found or access denied."));
+    }
+
+    // [PHƯƠNG THỨC HOÀN CHỈNH] - Xử lý logic hủy đơn hàng
+    @Transactional
+    public void cancelOrder(Long orderId, String username) {
+        // 1. Kiểm tra quyền sở hữu và lấy đơn hàng
+        Order order = findOrderByIdAndUser(orderId, username);
+
+        String currentStatus = order.getOrderStatus().name();
+
+        // 2. Kiểm tra trạng thái có thể hủy
+        if (!"PENDING".equals(currentStatus) && !"CONFIRMED".equals(currentStatus)) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, 
+                "Order #" + orderId + " cannot be cancelled as its status is " + currentStatus
+            );
+        }
+        
+        // 3. Cập nhật trạng thái
+        order.setOrderStatus(OrderStatus.CANCELLED); 
+        
+        // 4. Hoàn trả kho (TODO: Thêm logic hoàn trả kho hàng từ OrderDetail)
+        // Ví dụ:
+        /*
+        for (OrderDetail detail : order.getOrderDetails()) {
+            ProductVariant variant = detail.getProductVariant();
+            variant.setStock(variant.getStock() + detail.getQuantity());
+            variantRepository.save(variant);
+        }
+        */
+        
+        orderRepository.save(order);
     }
 }

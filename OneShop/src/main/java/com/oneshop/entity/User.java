@@ -2,11 +2,6 @@ package com.oneshop.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -24,8 +19,8 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"addresses", "roles"})  // Loại trừ fields quan hệ
-@ToString(exclude = {"addresses", "otherLazyCollections"})
+@EqualsAndHashCode(exclude = {"addresses", "roles", "cart"}) // Loại trừ fields quan hệ
+@ToString(exclude = {"addresses", "roles", "cart"})
 public class User implements UserDetails {
 
     @Id
@@ -49,7 +44,6 @@ public class User implements UserDetails {
     private boolean activated = false;
     
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @EqualsAndHashCode.Exclude
     private Cart cart;
 
     @ManyToMany(fetch = FetchType.EAGER)

@@ -40,9 +40,8 @@ public class ReviewService {
         if (!"DELIVERED".equals(order.getOrderStatus())) {
             throw new IllegalStateException("Đơn hàng chưa được giao, không thể đánh giá!");
         }
-        boolean hasProduct = order.getItems().stream()
-                .anyMatch(item -> item.getProduct().getProductId().equals(productId));
-
+        boolean hasProduct = order.getOrderDetails().stream()
+        		.anyMatch(item -> item.getProductVariant().getProduct().getProductId().equals(productId));
         if (!hasProduct) {
             throw new IllegalArgumentException("Sản phẩm không có trong đơn hàng này!");
         }

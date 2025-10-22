@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriUtils;
 
 import com.oneshop.entity.Order;
+import com.oneshop.entity.OrderDetail;
 import com.oneshop.entity.OrderItem;
+import com.oneshop.entity.Product;
 import com.oneshop.entity.User;
 import com.oneshop.service.OrderService;
 import com.oneshop.service.ReviewService;
@@ -43,15 +45,16 @@ public class ReviewController {
         }
 
         // Khởi tạo items để tránh LazyInitializationException
-        Hibernate.initialize(order.getItems());
+        Hibernate.initialize(order.getOrderDetails());
         // Sao chép items để tránh ConcurrentModificationException
-        List<OrderItem> items = new ArrayList<>(order.getItems());
+        List<OrderDetail> items = new ArrayList<>(order.getOrderDetails());
         List<Map<String, Object>> productReviews = new ArrayList<>();
 
-        for (OrderItem item : items) {
+        for (OrderDetail item : items) {
             Map<String, Object> productInfo = new HashMap<>();
-            productInfo.put("product", item.getProduct());
-            productInfo.put("reviewed", reviewService.isProductReviewed(orderId, item.getProduct().getProductId()));
+            Product product = item.getProductVariant().getProduct();
+            productInfo.put("product",  product);
+            productInfo.put("reviewed", reviewService.isProductReviewed(orderId, item.getProductVariant().getProduct().getProductId()));
             productReviews.add(productInfo);
         }
 
