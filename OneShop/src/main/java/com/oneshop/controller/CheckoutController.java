@@ -65,7 +65,7 @@ public class CheckoutController {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         
         // Simple free shipping example - adjust as needed
-        BigDecimal shippingCost = BigDecimal.ZERO; 
+        BigDecimal shippingCost = new BigDecimal("30000");; 
         BigDecimal grandTotal = subtotal.add(shippingCost);
 
         // 4. Add data to the model

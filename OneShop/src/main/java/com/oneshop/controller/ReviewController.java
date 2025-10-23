@@ -40,7 +40,8 @@ public class ReviewController {
         if (order == null) {
             return "redirect:/user/orders?error=" + UriUtils.encode("Đơn hàng không tồn tại", StandardCharsets.UTF_8);
         }
-        if (!"DELIVERED".equals(order.getOrderStatus())) {
+        System.out.println("Trạng thái đơn hàng thực tế: " + order.getOrderStatus());
+        if (!"DELIVERED".equalsIgnoreCase(order.getOrderStatus().name())){
             return "redirect:/user/orders?error=" + UriUtils.encode("Đơn hàng chưa được giao, không thể đánh giá", StandardCharsets.UTF_8);
         }
 

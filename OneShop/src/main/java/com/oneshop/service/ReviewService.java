@@ -37,7 +37,7 @@ public class ReviewService {
         if (!order.getUser().getUserId().equals(user.getUserId())) {
             throw new SecurityException("Bạn không có quyền đánh giá đơn hàng này!");
         }
-        if (!"DELIVERED".equals(order.getOrderStatus())) {
+        if (!"DELIVERED".equals(order.getOrderStatus().name())) {
             throw new IllegalStateException("Đơn hàng chưa được giao, không thể đánh giá!");
         }
         boolean hasProduct = order.getOrderDetails().stream()

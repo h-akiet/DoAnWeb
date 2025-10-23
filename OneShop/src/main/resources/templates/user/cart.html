@@ -97,7 +97,7 @@
                         </div>
                         <div class="pay-info">
                             <div class="main__pay-text">Giao hàng</div>
-                            <div class="main__pay-text">Giao hàng miễn phí</div> 
+                            <div class="main__pay-text" id="shipping-fee">30.000 đ</div> 
                         </div>
                         <div class="pay-info">
                             <div class="main__pay-text">Tổng thành tiền</div>
@@ -123,6 +123,9 @@
                 
                 // --- ĐÃ XÓA BỎ LOGIC GỬI JWT HEADER (Authorization) ---
                 // Trình duyệt sẽ tự động gửi cookie "jwtToken"
+
+                // THAY ĐỔI: Định nghĩa phí vận chuyển cố định
+                const SHIPPING_FEE = 30000;
     
                 function formatCurrency(number) {
                     const numericValue = parseFloat(number); // Chuyển BigDecimal (string) sang số
@@ -135,7 +138,7 @@
                 }
     
                 function calculateAndUpdateTotal() {
-                    let grandTotal = 0;
+                    let subTotal = 0; // Đổi tên biến để rõ ràng hơn: Tổng phụ (trước phí ship)
                     let selectedCount = 0;
                     
                     $('.item-checkbox:checked').each(function() {
@@ -145,11 +148,21 @@
                         const quantity = parseInt(row.find('.input-qty').val());
                         
                         if (!isNaN(price) && !isNaN(quantity)) {
-                            grandTotal += price * quantity;
+                            subTotal += price * quantity;
                         }
                     });
+
+                    // Tính Tổng Thành Tiền = Tổng Phụ + Phí Vận Chuyển (nếu có sản phẩm được chọn)
+                    let grandTotal = subTotal;
+                    if (selectedCount > 0) {
+                         grandTotal += SHIPPING_FEE;
+                         $('#shipping-fee').text(formatCurrency(SHIPPING_FEE)).removeClass('main__pay-text').addClass('main__pay-price'); // Định dạng lại phí ship cho đẹp
+                    } else {
+                         // Nếu không có sản phẩm nào được chọn, phí ship là 0
+                         $('#shipping-fee').text('0 đ').removeClass('main__pay-price').addClass('main__pay-text');
+                    }
     
-                    $('#subtotal').text(formatCurrency(grandTotal));
+                    $('#subtotal').text(formatCurrency(subTotal));
                     $('#grandtotal').text(formatCurrency(grandTotal));
                     
                     $('#checkoutBtn').prop('disabled', selectedCount === 0);
