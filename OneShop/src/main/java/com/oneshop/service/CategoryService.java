@@ -20,6 +20,8 @@ public class CategoryService {
     public List<Category> findAll() {
         return categoryRepository.findAll();
     }
+  Category saveCategory(Category category);
+    void deleteCategory(Long id);
 
     // Add other category-related methods here if needed (e.g., findById)
 }

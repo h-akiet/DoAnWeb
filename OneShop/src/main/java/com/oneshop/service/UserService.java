@@ -1,4 +1,4 @@
-package com.oneshop.service;
+package com.oneshop.service.vendor;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;

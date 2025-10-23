@@ -1,10 +1,11 @@
-package com.oneshop.entity;
+package com.oneshop.entity.vendor;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
+import java.util.List;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode; // <<< THÊM: Import cần thiết cho BigDecimal
@@ -18,6 +19,8 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "Products")
 public class Product {
 
     @Id
@@ -46,9 +49,11 @@ public class Product {
     @Column(name = "is_published", nullable = false)
     private boolean published = false;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shop_id", nullable = false)
-    private Shop shop;
+    @Column(nullable = false)
+    private Integer stock; // Số lượng tồn kho
+    
+    @Column(columnDefinition = "nvarchar(500)")
+    private String tags; // Các từ khóa, cách nhau bằng dấu phẩy
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id", nullable = false)

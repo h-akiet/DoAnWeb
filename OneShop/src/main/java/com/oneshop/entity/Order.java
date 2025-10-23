@@ -1,4 +1,4 @@
-package com.oneshop.entity;
+package com.oneshop.entity.vendor;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,9 +28,16 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shipper_id")
-    private User shipper;
+    // Thông tin khách hàng (Lưu trực tiếp thay vì liên kết,
+    // vì thông tin giao hàng có thể khác với thông tin tài khoản)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    private String customerName;
+    @Column(nullable = false)
+    private String customerEmail;
+    @Column(nullable = false)
+    private String customerPhone;
+    @Column(nullable = false, columnDefinition = "nvarchar(500)")
+    private String shippingAddress;
 
     // [SỬA 3] - Chuyển từ String sang Enum OrderStatus
     // Đây là trường cũ của bạn:
@@ -45,8 +52,9 @@ public class Order {
     @Column(nullable = false)
     private BigDecimal total; // Trường này sẽ được dùng làm 'grandTotal'
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status;
 
     // [SỬA 4] - Chuyển từ Set<OrderItem> sang List<OrderDetail>
     // Đây là trường cũ của bạn:

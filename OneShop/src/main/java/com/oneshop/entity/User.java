@@ -1,4 +1,4 @@
-package com.oneshop.entity;
+package com.oneshop.entity.vendor;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,19 +28,11 @@ public class User implements UserDetails {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(length = 100, nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(length = 150, unique = true, nullable = false)
-    private String email;
-
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
-
     @Column(nullable = false)
+    private String password;
     private boolean activated = false;
     
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -58,55 +50,22 @@ public class User implements UserDetails {
     @JsonManagedReference // Manages the forward reference to Address
     private Set<Address> addresses = new HashSet<>();
 
-    // Spring Security methods
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-            .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role.getName().name()))
-            .collect(Collectors.toList());
-    }
+    @Column(nullable = false, unique = true)
+    private String email;
+    
+    @Column(columnDefinition = "nvarchar(255)")
+    private String fullName;
+    @Column(columnDefinition = "nvarchar(500)")
+    private String address;
+    
+    private String phoneNumber;
 
-    @Override
-    public String getPassword() {
-        return passwordHash;
-    }
-
-    public void setPassword(String password) {
-        this.passwordHash = password;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return activated;
-    }
-
-    // Getter cho user_id (tương thích với code cũ)
-    public Long getUserId() {
-        return id;
-    }
-
-    // Setter cho user_id (tương thích với code cũ)
-    public void setUserId(Long userId) {
-        this.id = userId;
-    }
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+    
+    // Một User có thể có một Shop (nếu họ là VENDOR)
+    // mappedBy = "user" nghĩa là việc quản lý quan hệ này được thực hiện bởi thuộc tính "user" bên class Shop
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Shop shop;
 }

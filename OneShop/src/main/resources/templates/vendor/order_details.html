@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{vendor/layout/app}">
+<head>
+    <title>Chi tiết Đơn hàng</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h1 class="h3" th:text="'Chi tiết Đơn hàng #' + ${order.id}">Chi tiết Đơn hàng #12348</h1>
+        <a th:href="@{/vendor/orders}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại Danh sách
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold">Sản phẩm đã đặt</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <tbody>
+                                <tr th:each="item : ${order.orderItems}">
+                                    <td>
+                                        <strong th:text="${item.productName}">Serum Dưỡng Sáng Da</strong>
+                                        </td>
+                                    <td class="text-center" th:text="${item.quantity} + ' x ' + ${#numbers.formatCurrency(item.priceAtPurchase)}">1 x 450.000₫</td>
+                                    <td class="text-end fw-bold" th:text="${#numbers.formatCurrency(item.quantity * item.priceAtPurchase)}">450.000₫</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row justify-content-end text-end mt-4">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Tạm tính:</span>
+                                <span>...</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Phí vận chuyển:</span>
+                                <span>...</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between h5 fw-bold">
+                                <span>Tổng cộng:</span>
+                                <span class="text-primary" th:text="${#numbers.formatCurrency(order.totalAmount)}">825.000₫</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold">Trạng thái: 
+                        <span th:switch="${order.status.name()}">
+                            <span th:case="'NEW'" class="badge bg-secondary">Chờ xác nhận</span>
+                            <span th:case="'CONFIRMED'" class="badge bg-primary">Chờ lấy hàng</span>
+                            <span th:case="'SHIPPING'" class="badge bg-warning text-dark">Đang giao</span>
+                            <span th:case="'DELIVERED'" class="badge bg-success">Đã giao</span>
+                            <span th:case="'CANCELLED'" class="badge bg-danger">Đã hủy</span>
+                            <span th:case="'RETURNED'" class="badge bg-dark">Trả hàng</span>
+                        </span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/vendor/orders/update-status}" method="post">
+                        <input type="hidden" name="orderId" th:value="${order.id}" />
+                        <label for="orderStatus" class="form-label">Cập nhật trạng thái</label>
+                        <select id="orderStatus" name="status" class="form-select mb-2">
+                            <option value="CONFIRMED">Xác nhận đơn hàng</option>
+                            <option value="SHIPPING">Bàn giao vận chuyển</option>
+                            <option value="DELIVERED">Đã giao thành công</option>
+                            <option value="CANCELLED">Hủy đơn hàng</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary w-100 mt-2">Cập nhật</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold">Thông tin Khách hàng</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong class="me-2">Tên:</strong><span th:text="${order.customerName}">Phạm Minh Dũng</span></p>
+                    <p class="mb-1"><strong class="me-2">Email:</strong><span th:text="${order.customerEmail}">customer.d@example.com</span></p>
+                    <p class="mb-0"><strong class="me-2">Điện thoại:</strong><span th:text="${order.customerPhone}">0912 345 678</span></p>
+                </div>
+            </div>
+            
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold">Địa chỉ giao hàng</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0" th:text="${order.shippingAddress}">
+                        123 Đường ABC, Phường 4,<br>
+                        Quận Tân Bình, Thành phố Hồ Chí Minh
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

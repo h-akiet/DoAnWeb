@@ -1,7 +1,7 @@
-package com.oneshop.repository;
+package com.oneshop.repository.vendor;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -25,4 +25,11 @@ public interface ProductRepository extends JpaRepository<Product, Long>,JpaSpeci
 	           "ORDER BY ((p.originalPrice - p.price) / p.originalPrice) DESC LIMIT 10")
 	 List<Product> findTop10ByBestDiscount();
 	List<Product> findTop10ByCategoryAndProductIdNot(Category category, Long productId);
+   Page<Product> findByShopId(Long shopId, Pageable pageable);
+
+    // Tìm sản phẩm theo Shop ID và Tên sản phẩm (hỗ trợ tìm kiếm)
+    Page<Product> findByShopIdAndNameContainingIgnoreCase(Long shopId, String name, Pageable pageable);
+    
+    long countByShopId(Long shopId);
+    long countByCategoryId(Long categoryId);
 }

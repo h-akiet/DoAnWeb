@@ -1,12 +1,14 @@
 package com.oneshop.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
+
+import com.oneshop.service.vendor.impl.CustomOAuth2UserService;
+import com.oneshop.service.vendor.impl.UserDetailsServiceImpl;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,8 +25,13 @@ import com.oneshop.service.UserService;
 // vì logic đó đã được chuyển ra file riêng
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return new UserDetailsServiceImpl();
+    }
     @Autowired
     private UserService userService;
 
@@ -40,22 +47,24 @@ public class SecurityConfig {
     private CustomAuthenticationFailureHandler customFailureHandler;
 
     @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userService);
+        authProvider.setUserDetailsService(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
 
+    // === THÊM BEAN NÀY ===
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    public CustomOAuth2UserService oauth2UserService() {
+        return new CustomOAuth2UserService();
     }
+    // ======================
 
     @Bean
     public PasswordEncoder passwordEncoder() {
