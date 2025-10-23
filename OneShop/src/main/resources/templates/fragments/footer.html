@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="footer">
+    <div class="footer">
+        <div class="grid wide">
+            <div class="row">
+                <div class="col l-3 m-6 s-12">
+                    <h3 class="footer__title">Menu</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item"><a href="#" class="footer__link">Trang điểm</a></li>
+                        <li class="footer__item"><a href="#" class="footer__link">Chăm sóc da</a></li>
+                    </ul>
+                </div>
+                <div class="col l-3 m-6 s-12">
+                    <h3 class="footer__title">Hỗ trợ khách hàng</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item"><a href="#" class="footer__link">Hướng dẫn mua hàng</a></li>
+                    </ul>
+                </div>
+                <div class="col l-3 m-6 s-12">
+                    <h3 class="footer__title">Liên hệ</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item"><span class="footer__text"> <i class="fas fa-map-marked-alt"></i> Số 1 Võ Văn Ngân, Thủ Đức, Tp.HCM</span></li>
+                        <li class="footer__item"><a href="#" class="footer__link"> <i class="fas fa-phone"></i> 0367xxxxxxxx</a></li>
+                    </ul>
+                </div>
+                <div class="col l-3 m-6 s-12">
+                    <h3 class="footer__title">Đăng ký</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item"><span class="footer__text">Đăng ký để nhận được được thông tin ưu đãi mới nhất từ chúng tôi.</span></li>
+                        <li class="footer__item">
+                            <div class="send-email">
+                                <input class="send-email__input" type="email" placeholder="Nhập Email...">
+                                <a href="#" class="send-email__link"> <i class="fas fa-paper-plane"></i></a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <span class="footer__text"> &copy; Bản quyền thuộc về <a class="footer__link" href="#"> Nhóm 6</a></span>
+        </div>
+    </div>
+    
+   
+
+       
+    
+    <script>
+        $('.owl-carousel.hight').owlCarousel({
+            loop: true, margin: 20, nav: true, dots: false, autoplay: true, autoplayTimeout: 3000, autoplayHoverPause: true,
+            responsive: { 0: { items: 2 }, 600: { items: 3 }, 1000: { items: 5 } }
+        });
+        $('.owl-carousel.news').owlCarousel({
+            loop: true, margin: 20, nav: true, dots: false, autoplay: true, autoplayTimeout: 4000, autoplayHoverPause: true,
+            responsive: { 0: { items: 1 }, 600: { items: 1 }, 1000: { items: 2 } }
+        });
+        $('.owl-carousel.bands').owlCarousel({
+            loop: true, margin: 20, nav: false, dots: false, autoplay: true, autoplayTimeout: 2000, autoplayHoverPause: true,
+            responsive: { 0: { items: 2 }, 600: { items: 3 }, 1000: { items: 6 } }
+        });
+    </script>
+  
+    
+  
+    
+    
+</div>
+</body>
+</html>

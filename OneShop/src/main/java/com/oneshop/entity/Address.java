@@ -4,13 +4,16 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "ADDRESSES")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicUpdate
 public class Address {
 
     @Id
@@ -19,13 +22,20 @@ public class Address {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     @Column(name = "full_name", length = 100)
     private String fullName;
 
-    // ... (các trường khác)
+    @Column(name = "phone", length = 20)
+    private String phone;
 
+ 
     @Column(name = "is_default")
     private Boolean isDefault = false;
+
+    @Column(name = "address", columnDefinition = "NVARCHAR(MAX)")
+    private String address; // Trường lưu chuỗi địa chỉ đầy đủ
 }
+ 

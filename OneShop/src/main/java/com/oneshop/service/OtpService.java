@@ -64,7 +64,7 @@ public class OtpService {
             throw new RuntimeException("OTP has expired");
         }
 
-        // Sau khi xác minh thành công, xóa OTP để tránh dùng lại
+        // Xóa OTP sau khi xác minh thành công
         otpRepository.delete(otp);
     }
 

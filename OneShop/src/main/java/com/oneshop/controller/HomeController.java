@@ -7,38 +7,39 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
 
     @GetMapping("/")
-    public String index() {
+    public String index(Model model) {
+    	List<Product> bestSellers = productService.findBestSellingProducts();
+    	
+    	List<Product> newest = productService.findNewestProducts();
+        model.addAttribute("newestProducts", newest);
+
+        List<Product> bestPrice = productService.findBestPriceProducts();
+        model.addAttribute("bestPriceProducts", bestPrice);
+        model.addAttribute("bestSellingProducts", bestSellers);
+        
+    	
+        model.addAttribute("bestSellingProducts", bestSellers);
         return "guest/index";
     }
 
-    @GetMapping("/cart")
-    public String cart() {
-        return "guest/cart";
-    }
 
     @GetMapping("/contact")
     public String contact() {
         return "guest/contact";
     }
 
-    @GetMapping("/list-product")
-    public String listProduct() {
-        return "guest/listProduct";
-    }
+   
 
     @GetMapping("/news")
     public String news() {
         return "guest/news";
     }
 
-    @GetMapping("/pay")
-    public String pay() {
-        return "guest/pay";
-    }
+   
 
     @GetMapping("/product")
     public String product() {
-        return "guest/product";
+        return "user/product";
     }
     
     @GetMapping("/pay-customer")
