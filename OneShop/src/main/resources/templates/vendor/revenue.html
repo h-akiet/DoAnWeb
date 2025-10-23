@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{vendor/layout/app}">
+<head>
+<title>Quản lý Doanh thu</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.border-start {
+	border-left-width: 0.25rem !important;
+}
+
+.border-primary {
+	border-color: #E85A70 !important;
+}
+
+.text-primary {
+	color: #E85A70 !important;
+}
+
+.border-success {
+	border-color: #1cc88a !important;
+}
+
+.border-info {
+	border-color: #36b9cc !important;
+}
+</style>
+</head>
+<body>
+	<div layout:fragment="content">
+		<div
+			class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
+			<h1 class="h3 mb-0">Phân tích Bán hàng</h1>
+			<a th:href="@{/vendor/reports/sales/download}"
+				class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+				<i class="fas fa-download fa-sm text-white-50"></i> Tải báo cáo
+			</a>
+		</div>
+		<p class="lead mb-4">Thống kê và báo cáo về hiệu suất kinh doanh
+			của gian hàng.</p>
+
+		<div class="row">
+			<div class="col-xl-3 col-md-6 mb-4">
+				<div class="card border-start border-success shadow h-100 py-2">
+					<div class="card-body">
+						<div class="row no-gutters align-items-center">
+							<div class="col me-2">
+								<div class="text-xs fw-bold text-success text-uppercase mb-1">Tổng
+									doanh thu</div>
+								<div class="h5 mb-0 fw-bold"></div>
+							</div>
+							<div class="col-auto">
+								<i class="fas fa-dollar-sign fa-2x text-muted"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-xl-3 col-md-6 mb-4">
+				<div class="card border-start border-primary shadow h-100 py-2">
+					<div class="card-body">
+						<div class="row no-gutters align-items-center">
+							<div class="col me-2">
+								<div class="text-xs fw-bold text-primary text-uppercase mb-1">Doanh
+									thu (Tháng này)</div>
+								<div class="h5 mb-0 fw-bold"></div>
+							</div>
+							<div class="col-auto">
+								<i class="fas fa-calendar-alt fa-2x text-muted"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-xl-3 col-md-6 mb-4">
+				<div class="card border-start border-info shadow h-100 py-2">
+					<div class="card-body">
+						<div class="row no-gutters align-items-center">
+							<div class="col me-2">
+								<div class="text-xs fw-bold text-info text-uppercase mb-1">Tổng
+									số đơn hàng</div>
+								<div class="h5 mb-0 fw-bold"></div>
+							</div>
+							<div class="col-auto">
+								<i class="fas fa-receipt fa-2x text-muted"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="card shadow mb-4">
+			<div class="card-header py-3">
+				<h6 class="m-0 font-weight-bold">Tổng quan doanh thu (6 tháng
+					gần nhất)</h6>
+			</div>
+			<div class="card-body">
+				<div class="chart-area" style="height: 320px;">
+					<canvas id="revenueChart"></canvas>
+				</div>
+			</div>
+		</div>
+
+		<div class="card shadow mb-4">
+			<div class="card-header py-3">
+				<h6 class="m-0 font-weight-bold">Lịch sử thanh toán</h6>
+			</div>
+			<div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover align-middle">
+						<thead class="table-light">
+							<tr>
+								<th>Mã thanh toán</th>
+								<th>Ngày</th>
+								<th>Số tiền</th>
+								<th class="text-center">Trạng thái</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td colspan="4" class="text-center">Chưa có lịch sử thanh
+									toán nào.</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+// Cấu hình và vẽ biểu đồ doanh thu bằng Chart.js
+document.addEventListener("DOMContentLoaded", function() {
+    var ctx = document.getElementById("revenueChart").getContext('2d');
+    var myLineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ["Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10"],
+            datasets: [{
+                label: "Doanh thu",
+                lineTension: 0.3,
+                backgroundColor: "rgba(232, 90, 112, 0.05)",
+                borderColor: "rgba(232, 90, 112, 1)",
+                pointRadius: 4,
+                pointBackgroundColor: "rgba(232, 90, 112, 1)",
+                pointBorderColor: "#fff",
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: "rgba(232, 90, 112, 1)",
+                pointHitRadius: 10,
+                pointBorderWidth: 2,
+                data: [15000000, 20000000, 25000000, 22000000, 31000000, 40000000],
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    ticks: {
+                        callback: function(value) {
+                            // Định dạng tiền tệ VNĐ
+                            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(context.parsed.y);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+
+</body>
+</html>

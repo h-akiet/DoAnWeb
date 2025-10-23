@@ -1,79 +1,56 @@
-package com.oneshop.entity;
+package com.oneshop.entity.vendor;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
+import java.util.List;
 
-
-import java.util.Set;
-@Entity
-@Table(name = "PRODUCTS")
-@Getter 
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "Products")
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productId;
-    
-    
-    @Column(nullable = false)
+    private Long id;
+
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String name;
-    
-    @Column(length = 100)
-    private String brand; // <-- BỔ SUNG: Thương hiệu sản phẩm
 
-    @Column(name = "display_price", nullable = false)
-    private double price; // Giờ đóng vai trò là giá hiển thị (có thể là giá thấp nhất)
-
-    @Column(name = "original_price")
-    private Double originalPrice; // Giá gốc để hiển thị chung
-
-    @Lob // Dùng cho các chuỗi văn bản dài
+    @Column(length = 2000, columnDefinition = "nvarchar(2000)")
     private String description;
-    
-   
 
     @Column(nullable = false)
-    private int salesCount = 0;
+    private BigDecimal price; 
+    
+    @Column(columnDefinition = "numeric(19, 2)") 
+    private BigDecimal salePrice;
 
-    @Column(name = "is_published", nullable = false)
-    private boolean published = false; // <-- BỔ SUNG: Trạng thái công khai/ẩn
+    @Column(nullable = false)
+    private Integer stock; // Số lượng tồn kho
+    
+    @Column(columnDefinition = "nvarchar(500)")
+    private String tags; // Các từ khóa, cách nhau bằng dấu phẩy
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shop_id", nullable = false)
-    private Shop shop;
-
+    // Một Sản phẩm chỉ thuộc một Danh mục
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<ProductVariant> variants;
+    // Một Sản phẩm chỉ thuộc một Shop
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id", nullable = false)
+    private Shop shop;
 
-    // <-- BỔ SUNG: Hoàn thiện quan hệ với ProductImage
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<ProductImage> images;
- // Dán đoạn code này vào bên trong class Product của bạn
- // File: com/oneshop/entity/Product.java
-
- public String getPrimaryImageUrl() {
-     // Nếu sản phẩm không có ảnh nào, trả về một ảnh mặc định
-     if (images == null || images.isEmpty()) {
-         return "/assets/img/product/product1.png"; // Thay bằng đường dẫn ảnh mặc định của bạn
-     }
-
-     // Tìm trong danh sách ảnh, ảnh nào được đánh dấu là isPrimary = true
-     return images.stream()
-             .filter(image -> Boolean.TRUE.equals(image.getIsPrimary()))
-             .findFirst()
-             // Nếu tìm thấy, lấy ra imageUrl của nó
-             .map(ProductImage::getImageUrl)
-             // Nếu không có ảnh nào là primary, thì lấy tạm ảnh đầu tiên trong danh sách
-             .orElse(images.iterator().next().getImageUrl());
- }
+    // Quản lý hình ảnh sản phẩm (Cách đơn giản)
+    // ElementCollection sẽ tạo ra một bảng riêng (Product_Images)
+    // để lưu danh sách tên các file ảnh
+    @ElementCollection
+    @CollectionTable(name = "Product_Images", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "image_url", columnDefinition = "nvarchar(255)") 
+    private List<String> images;
 }

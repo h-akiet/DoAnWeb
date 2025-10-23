@@ -1,28 +1,37 @@
-package com.oneshop.service;
+package com.oneshop.service.vendor;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.oneshop.entity.vendor.Order;
+import com.oneshop.entity.vendor.OrderStatus;
 
-import com.oneshop.entity.Order;
-import com.oneshop.repository.OrderRepository;
+import java.util.Optional;
 
-@Service
-public class OrderService {
+public interface OrderService {
 
-    @Autowired
-    private OrderRepository orderRepository;
+    /**
+     * Lấy danh sách đơn hàng cho một shop, có thể lọc theo trạng thái (có phân trang)
+     * @param shopId ID của shop
+     * @param status Trạng thái đơn hàng (nếu null thì lấy tất cả)
+     * @param pageable Thông tin phân trang
+     */
+    Page<Order> getOrdersByShop(Long shopId, Optional<OrderStatus> status, Pageable pageable);
 
-    public List<Order> getAssignedOrders(Long shipperId) {
-        return orderRepository.findByShipperId(shipperId);
-    }
+    /**
+     * Lấy chi tiết một đơn hàng
+     * @param orderId ID đơn hàng
+     * @param shopId ID của shop (để đảm bảo vendor chỉ xem được đơn của mình)
+     */
+    Order getOrderDetails(Long orderId, Long shopId);
 
-    public Map<String, Long> getOrderStats(Long shipperId) {
-        List<Order> orders = getAssignedOrders(shipperId);
-        return orders.stream().collect(Collectors.groupingBy(Order::getOrderStatus, Collectors.counting()));
-
-    }
+    /**
+     * Cập nhật trạng thái một đơn hàng
+     * @param orderId ID đơn hàng
+     * @param newStatus Trạng thái mới
+     * @param shopId ID của shop (để bảo mật)
+     */
+    Order updateOrderStatus(Long orderId, OrderStatus newStatus, Long shopId);
+    
+    long countNewOrdersByShop(Long shopId);
 }

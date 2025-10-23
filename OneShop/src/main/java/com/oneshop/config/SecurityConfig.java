@@ -1,54 +1,25 @@
 package com.oneshop.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.firewall.HttpFirewall;
-import org.springframework.security.web.firewall.StrictHttpFirewall;
-import com.oneshop.service.AuthTokenFilter;
-import com.oneshop.service.JwtUtils;
-import com.oneshop.service.UserService;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.oneshop.service.vendor.impl.CustomOAuth2UserService;
+import com.oneshop.service.vendor.impl.UserDetailsServiceImpl;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private JwtUtils jwtUtils;
-
     @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
-    }
-
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    public UserDetailsService userDetailsService() {
+        return new UserDetailsServiceImpl();
     }
 
     @Bean
@@ -57,80 +28,49 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationSuccessHandler customSuccessHandler() {
-        return new AuthenticationSuccessHandler() {
-            @Override
-            public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws java.io.IOException {
-                // Sinh JWT
-                String jwt = jwtUtils.generateJwtToken(authentication);
-                Cookie cookie = new Cookie("jwtToken", jwt);
-                cookie.setHttpOnly(true);
-                cookie.setPath("/");
-                cookie.setMaxAge(24 * 60 * 60);
-                response.addCookie(cookie);
-
-                System.out.println("✅ JWT token đã được tạo và lưu vào cookie sau đăng nhập thành công!");
-
-                // Chuyển hướng đến /home
-                response.sendRedirect("/home");
-            }
-        };
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService());
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
     }
 
+    // === THÊM BEAN NÀY ===
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public CustomOAuth2UserService oauth2UserService() {
+        return new CustomOAuth2UserService();
+    }
+    // ======================
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Tắt CSRF cho API, giữ session cho form login
-            .csrf(csrf -> csrf.disable())
-
-            // Sử dụng session khi cần (cho form login)
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+            .authorizeHttpRequests(authorize -> authorize
+                // Cho phép truy cập các trang/tài nguyên này mà không cần đăng nhập
+                .requestMatchers("/", "/assets/**", "/uploads/images/**", "/register", "/login", "/oauth2/**").permitAll() 
+                .requestMatchers("/vendor/**").hasRole("VENDOR")
+                .anyRequest().authenticated() 
             )
-
-            // Phân quyền truy cập
-            .authorizeHttpRequests(auth -> auth
-                // Cho phép truy cập công khai
-            	.requestMatchers("/assets/**","/", "/webjars/**").permitAll() 
-                .requestMatchers("/", "/home", "/login", "/register",
-                                "/verify-otp", "/forgot", "/reset-password",
-                                "/api/auth/**", "/error", "/search", "/*").permitAll()
-                // Cho phép tài nguyên tĩnh và JSP
-                .requestMatchers("/WEB-INF/decorators/**",
-                                "/css/**", "/js/**", "/images/**", "/static/**").permitAll()
-                // Yêu cầu quyền ROLE_SHIPPER cho /shipper/**
-                .requestMatchers("/shipper/**").hasAuthority("ROLE_SHIPPER")
-                // Các request khác yêu cầu đăng nhập
-                .anyRequest().authenticated()
-            )
-
-            // Cấu hình form login
-            .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/login") // URL xử lý POST login từ form
-                .successHandler(customSuccessHandler()) // Xử lý thành công với JWT
-                .failureUrl("/login?error=true")
+            .formLogin(form -> form // Cấu hình đăng nhập bằng form
+                .loginPage("/login") 
+                .defaultSuccessUrl("/vendor/dashboard", true)
                 .permitAll()
             )
-
-            // Cấu hình logout
+            // === THÊM CẤU HÌNH OAUTH2 LOGIN ===
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login") // Vẫn dùng trang login tùy chỉnh
+                .defaultSuccessUrl("/vendor/dashboard", true) // Đi đến dashboard sau khi login OAuth2 thành công
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(oauth2UserService()) // Sử dụng service tùy chỉnh
+                )
+            )
+            // =================================
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
+                .logoutSuccessUrl("/login?logout") 
                 .permitAll()
             );
 
-        // Thêm authentication provider và JWT filter
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
-    }
-
-    @Bean
-    public HttpFirewall allowSlashesFirewall() {
-        StrictHttpFirewall firewall = new StrictHttpFirewall();
-        firewall.setAllowUrlEncodedDoubleSlash(true);
-        return firewall;
     }
 }

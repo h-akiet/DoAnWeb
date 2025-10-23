@@ -1,19 +1,21 @@
-package com.oneshop.repository;
+package com.oneshop.repository.vendor;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import com.oneshop.entity.Product;
+import org.springframework.stereotype.Repository;
 
+import com.oneshop.entity.vendor.Product;
+
+@Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    List<Product> findBySalesCountGreaterThanOrderBySalesCountDesc(int minSales);
-    List<Product> findTop6ByOrderBySalesCountDesc();
-    List<Product> findTop6ByOrderByProductIdDesc();
 
-    @Query("SELECT p FROM Product p WHERE (?1 IS NULL OR p.name LIKE %?1%) " +
-           "AND (?2 IS NULL OR p.category.id = ?2) " +
-           "AND (?3 IS NULL OR p.price >= ?3) " +
-           "AND (?4 IS NULL OR p.price <= ?4)")
-    List<Product> searchAndFilter(String name, Long categoryId, Double minPrice, Double maxPrice);
+    // Tìm tất cả sản phẩm thuộc về một Shop (có phân trang)
+    Page<Product> findByShopId(Long shopId, Pageable pageable);
+
+    // Tìm sản phẩm theo Shop ID và Tên sản phẩm (hỗ trợ tìm kiếm)
+    Page<Product> findByShopIdAndNameContainingIgnoreCase(Long shopId, String name, Pageable pageable);
+    
+    long countByShopId(Long shopId);
+    long countByCategoryId(Long categoryId);
 }

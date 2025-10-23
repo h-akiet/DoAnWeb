@@ -1,53 +1,51 @@
-package com.oneshop.entity;
+package com.oneshop.entity.vendor;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
-@Entity
-@Table(name = "ORDERS")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "Orders") // Đặt tên bảng là "Orders" để tránh xung đột với từ khóa SQL "ORDER"
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id")
-    private Long id;  // ✅ Đổi từ orderId thành id
+    private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shipper_id")
-    private User shipper;
-
-    @Column(name = "order_status", length = 50, nullable = false)
-    private String orderStatus;
+    // Thông tin khách hàng (Lưu trực tiếp thay vì liên kết,
+    // vì thông tin giao hàng có thể khác với thông tin tài khoản)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    private String customerName;
+    @Column(nullable = false)
+    private String customerEmail;
+    @Column(nullable = false)
+    private String customerPhone;
+    @Column(nullable = false, columnDefinition = "nvarchar(500)")
+    private String shippingAddress;
 
     @Column(nullable = false)
-    private BigDecimal total;
+    private LocalDateTime orderDate;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(nullable = false)
+    private BigDecimal totalAmount;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status;
+
+    // Một đơn hàng thuộc về một Shop
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id", nullable = false)
+    private Shop shop;
+    
+    // Một đơn hàng có nhiều OrderItem (chi tiết sản phẩm)
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<OrderItem> items;
-
-    // Getter cho order_id (tương thích với code cũ)
-    public Long getOrderId() {
-        return id;
-    }
-
-    // Setter cho order_id (tương thích với code cũ)
-    public void setOrderId(Long orderId) {
-        this.id = orderId;
-    }
+    private List<OrderItem> orderItems;
 }
