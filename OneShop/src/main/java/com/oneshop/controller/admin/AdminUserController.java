@@ -17,7 +17,7 @@ import com.oneshop.service.admin.UserService;
 
 @Controller
 	@RequestMapping("/admin")
-	public class AdminController {
+	public class AdminUserController {
 
 	    @Autowired
 	    private UserService userService; 
@@ -79,5 +79,4 @@ import com.oneshop.service.admin.UserService;
 	        return "redirect:/admin/users";
 	    }
 
-	    // Bạn có thể thêm các phương thức quản lý sản phẩm, danh mục, v.v. ở đây
 	}

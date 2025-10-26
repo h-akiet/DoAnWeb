@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản lý Sản phẩm - Admin</title>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link
+	href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+	integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
+	crossorigin="anonymous" />
+<link rel="stylesheet"
+	th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
+<link rel="stylesheet" th:href="@{/assets/css/library.css}">
+<link rel="stylesheet" th:href="@{/assets/css/common.css}">
+<link rel="stylesheet" th:href="@{/assets/css/admin/user.css}">
+</head>
+
+<body>
+
+	<div th:replace="~{admin/fragments/header :: header}"></div>
+
+	<div class="main admin-container">
+		<div class="grid wide">
+			<div class="breadcrumb-admin-static" style="padding: 20px 0;">
+				<span class="breadcrumb-item-admin"
+					style="font-weight: 500; text-transform: uppercase;">ADMIN</span> <span
+					style="font-weight: 500; margin: 0 5px;">/</span> <span
+					class="breadcrumb-item-admin"
+					style="font-weight: 500; text-transform: uppercase;">QUẢN LÝ
+					SẢN PHẨM</span>
+
+				<th:block th:if="${currentShopName != null}">
+					<span style="font-weight: 500; margin: 0 5px;">/ CỬA HÀNG: </span>
+					<span class="breadcrumb-item-admin"
+						style="font-weight: 600; text-transform: uppercase; color: #9e5bab;"
+						th:text="${currentShopName}">Tên Cửa Hàng</span>
+				</th:block>
+			</div>
+			<form th:action="@{/admin/shops/__${currentShopId}__/products}"
+				method="get" class="filter-controls">
+				<div class="row g-3 align-items-end">
+					<div class="col-md-3">
+						<label for="productCode" class="form-label fw-bold">Nhập
+							Mã Sản phẩm</label>
+						<div class="d-flex">
+							<input type="text" class="form-control" id="productCode"
+								name="productCode" placeholder="Mã sản phẩm..."
+								style="flex-grow: 1;">
+							<button type="submit" class="btn btn-primary ms-2"
+								title="Tìm kiếm">
+								<i class="fas fa-search"></i>
+							</button>
+						</div>
+					</div>
+
+					<div class="col-md-2">
+						<label for="statusFilter" class="form-label fw-bold">Chọn
+							Trạng thái</label> <select class="form-select" id="statusFilter"
+							name="status" onchange="this.form.submit()">
+
+							<option value=""
+								th:selected="${selectedStatusValue == null or selectedStatusValue == ''}">--
+								Tất cả --</option>
+
+							<option
+								th:each="status : ${T(com.oneshop.enums.ProductStatus).values()}"
+								th:value="${status}" th:text="${status.displayName}"
+								th:selected="${selectedStatusValue != null and status.name().equals(selectedStatusValue)}">Trạng
+								thái</option>
+						</select>
+					</div>
+					<div class="col-md-3">
+						<label for="categoryFilter" class="form-label fw-bold">Chọn
+							Danh mục</label> <select class="form-select" id="categoryFilter"
+							name="categoryId" onchange="this.form.submit()">
+							<option value="" th:selected="${selectedCategoryId == null}">--
+								Tất cả --</option>
+							<option th:each="cat : ${categories}"
+								th:value="${cat.categoryId}" th:text="${cat.name}"
+								th:selected="${selectedCategoryId != null and cat.categoryId.equals(selectedCategoryId)}">Danh
+								mục</option>
+						</select>
+					</div>
+
+					<div class="col-md-3">
+						<label for="brandFilter" class="form-label fw-bold">Chọn
+							Thương hiệu</label> <select class="form-select" id="brandFilter"
+							name="brand" onchange="this.form.submit()">
+							<option value=""
+								th:selected="${selectedBrand == null or selectedBrand == ''}">--
+								Tất cả --</option>
+							<option th:each="brand : ${brands}" th:value="${brand}"
+								th:text="${brand}"
+								th:selected="${selectedBrand != null and brand.equals(selectedBrand)}">Thương
+								hiệu</option>
+						</select>
+					</div>
+
+					<div class="col-md-1">
+						<a th:href="@{/admin/shops/__${currentShopId}__/products}"
+							class="btn btn-secondary w-100" title="Đặt lại bộ lọc"> <i
+							class="fas fa-undo"></i>
+						</a>
+					</div>
+				</div>
+			</form>
+			<table class="table table-bordered table-striped mt-4">
+				<thead class="table-dark text-white">
+					<tr>
+						<th scope="col">Mã Sản phẩm</th>
+						<th scope="col">Tên Sản phẩm</th>
+						<th scope="col">Thương hiệu</th>
+						<th scope="col">Danh mục</th>
+						<th scope="col">Mô tả</th>
+						<!-- 						<th scope="col">Hình ảnh</th> -->
+						<th scope="col" class="text-center">Trạng thái duyệt</th>
+						<th scope="col" class="text-center" style="width: 120px;">Thao
+							tác</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="product : ${products}">
+						<td th:text="${product.productId}"></td>
+						<td th:text="${product.name}"></td>
+						<td th:text="${product.brand}"></td>
+						<td th:text="${product.category.name}"></td>
+						<td
+							th:text="${#strings.defaultString(product.description, 'Không có mô tả')}"></td>
+						<td class="text-center"><a
+							th:if="${product.status.name() == 'SELLING'}"
+							th:href="@{/admin/products/updateStatus(productId=${product.productId}, newStatus='PENDING', shopId=${currentShopId})}"
+							class="btn btn-sm btn-success"
+							title="Đang Bán (Click để chuyển sang Chờ Duyệt)"> <i
+								class="fas fa-check" style="color: white !important;"></i>
+						</a> <a th:if="${product.status.name() == 'REJECTED'}"
+							th:href="@{/admin/products/updateStatus(productId=${product.productId}, newStatus='PENDING', shopId=${currentShopId})}"
+							class="btn btn-sm btn-danger"
+							title="Bị Từ Chối (Click để chuyển sang Chờ Duyệt)"> <i
+								class="fas fa-times" style="color: white !important;"></i>
+						</a>
+
+							<div th:if="${product.status.name() == 'PENDING'}">
+								<a
+									th:href="@{/admin/products/updateStatus(productId=${product.productId}, newStatus='SELLING', shopId=${currentShopId})}"
+									class="text-success mx-1" title="Phê duyệt"> <i
+									class="fas fa-check"></i>
+								</a> <a
+									th:href="@{/admin/products/updateStatus(productId=${product.productId}, newStatus='REJECTED', shopId=${currentShopId})}"
+									class="text-danger mx-1" title="Từ chối"> <i
+									class="fas fa-times"></i>
+								</a>
+							</div></td>
+						<td class="text-center action-btns">
+							<button type="button" class="btn btn-warning btn-sm"
+								data-bs-toggle="modal" data-bs-target="#editProductModal"
+								th:attr="data-product-id=${product.productId}, 
+             data-product-name=${#strings.defaultString(product.name, '')}, 
+             data-product-category=${product.category != null ? product.category.categoryId : ''},
+             data-product-description=${#strings.defaultString(product.description, '')}"
+								title="Chỉnh sửa chi tiết">
+								<i class="fas fa-pencil-alt" style="color: black !important;"></i>
+							</button> <a
+							th:href="@{/admin/products/delete/{id}(id=${product.productId}, shopId=${currentShopId})}"
+							class="btn btn-warning btn-sm"
+							onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')"
+							title="Xóa sản phẩm"> <i class="fas fa-trash"
+								style="color: black !important;"></i>
+						</a>
+						</td>
+					</tr>
+					<tr th:if="${#lists.isEmpty(products)}">
+						<td colspan="7" class="text-center">Không tìm thấy sản phẩm
+							nào.</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<div class="modal fade" id="editProductModal" tabindex="-1"
+		aria-labelledby="editProductModalLabel" aria-hidden="true">
+
+		<div class="modal-dialog modal-lg modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="editProductModalLabel">Chỉnh Sửa
+						Sản Phẩm</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<form th:action="@{/admin/products/update}" method="post">
+					<div class="modal-body">
+						<input type="hidden" id="modalProductId" name="productId">
+
+						<div class="mb-3">
+							<label for="modalProductName" class="form-label">Tên Sản
+								Phẩm</label> <input type="text" class="form-control"
+								id="modalProductName" name="name" required>
+						</div>
+
+						<div class="mb-3">
+							<label for="modalProductCategory" class="form-label">Danh
+								Mục</label> <select class="form-select" id="modalProductCategory"
+								name="category.categoryId" required>
+								<option th:each="cat : ${categories}"
+									th:value="${cat.categoryId}" th:text="${cat.name}">Danh
+									mục</option>
+							</select>
+						</div>
+
+						<div class="mb-3">
+							<label for="modalProductDescription" class="form-label">Mô
+								Tả</label>
+							<textarea class="form-control" id="modalProductDescription"
+								name="description" rows="5"></textarea>
+						</div>
+
+						<input type="hidden" name="shopId" th:value="${currentShopId}">
+
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">Đóng</button>
+						<button type="submit" class="btn btn-primary">Lưu Thay
+							Đổi</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div th:replace="~{admin/fragments/footer :: footer}"></div>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+	<script th:src="@{/assets/js/admin/product.js}"></script>
+
+</body>
+
+</html>

@@ -150,19 +150,4 @@ public class UserService implements UserDetailsService {
                 });
     }
 
-//    // ADMIN
-//	public List<User> searchUsers(String keyword) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	public List<User> getAllUsers() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	public void updateUserRole(Integer userId, String newRole) {
-//		// TODO Auto-generated method stub
-//		
-//	}
 }

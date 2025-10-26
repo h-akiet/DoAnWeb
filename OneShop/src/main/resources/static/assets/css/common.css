@@ -280,21 +280,21 @@ input[type=checkbox]:checked:after {
 
 .header {
     height: var(--hight-header);
-    position: fixed;
+    position: fixed; 
     top: 0;
     right: 0;
     left: 0;
-    z-index: 9;
+    z-index: 100;
     background-color: var(--white-cl-1);
 }
 
 .header__top {
+	pointer-events: none; 
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: var(--hight-header-top);
 }
-
 
 /* ------Account------ */
 
@@ -388,12 +388,12 @@ input[type=checkbox]:checked:after {
     right: 0;
     bottom: 0;
     left: 0;
-    display: none;
+    /* display: none;
     z-index: 10;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.4); */
 }
 
-.authen-modal {
+/* .authen-modal {
     position: absolute;
     top: 50%;
     right: 50%;
@@ -404,7 +404,7 @@ input[type=checkbox]:checked:after {
     padding: 30px 20px 50px 20px;
     will-change: opacity;
     animation: fadeInTop ease 0.4s;
-}
+} */
 
 .overlay-close {
     position: absolute;

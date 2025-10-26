@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 
 
 import java.util.Set;
+
+import com.oneshop.enums.ProductStatus;
 @Entity
 @Table(name = "PRODUCTS")
 @Getter 
@@ -35,14 +37,16 @@ public class Product {
 
     @Lob // Dùng cho các chuỗi văn bản dài
     private String description;
-    
-   
 
     @Column(nullable = false)
     private int salesCount = 0;
 
     @Column(name = "is_published", nullable = false)
     private boolean published = false; // <-- BỔ SUNG: Trạng thái công khai/ẩn
+    
+    @Enumerated(EnumType.STRING)//Trạng thái duyệt đơn của admin
+    @Column(name = "status", nullable = false)
+    private ProductStatus status = ProductStatus.PENDING; // Mặc định là 'Chờ duyệt'
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = false)

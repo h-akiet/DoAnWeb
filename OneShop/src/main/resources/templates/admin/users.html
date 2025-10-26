@@ -17,101 +17,7 @@
 	th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
 <link rel="stylesheet" th:href="@{/assets/css/library.css}">
 <link rel="stylesheet" th:href="@{/assets/css/common.css}">
-
-<style>
-.admin-container {
-	padding-top: 50px;
-	padding-bottom: 50px;
-	min-height: 80vh;
-}
-
-.table th, .table td {
-	vertical-align: middle;
-}
-
-.status-active {
-	color: green;
-	font-weight: 500;
-}
-
-.status-inactive {
-	color: orange;
-	font-weight: 500;
-}
-
-/* === BỔ SUNG ĐIỀU CHỈNH CÂN ĐỐI VÀ CHỮ TRÊN HEADER === */
-/* Giảm kích thước chữ trên thanh điều hướng admin */
-.header__nav-link {
-	font-size: 14px;
-	padding: 8px 12px;
-}
-
-/* Cố định kích thước các cột thao tác để bảng cân đối hơn */
-.table th:nth-child(6), /* Cột Khóa/Mở khóa */ .table th:nth-child(7) {
-	/* Cột Cấp/Đổi quyền */
-	width: 150px;
-	min-width: 120px;
-}
-
-/* Tăng font chữ và độ đậm cho tiêu đề cột */
-.table thead th {
-	font-size: 14px;
-	font-weight: 700;
-	color: #333;
-	white-space: nowrap;
-}
-/* CSS MỚI ĐÃ SỬA ĐỔI */
-.header__admin-info {
-	/* Giữ nguyên: căn chỉnh icon và chữ Admin */
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	/* Loại bỏ margin-right vì sẽ căn giữa dọc */
-}
-
-.header__admin-info i {
-	font-size: 30px;
-	color: #9e5bab;
-}
-
-.header__admin-info span {
-	font-size: 18px;
-	font-weight: 600;
-	color: var(--black-cl-2);
-}
-
-.header__account-logout {
-	font-size: 16px;
-	color: #007bff !important;
-	text-decoration: underline;
-	transition: color 0.2s;
-	white-space: nowrap;
-}
-
-.header__account-logout:hover {
-	color: var(--default-cl) !important;
-}
-
-.header__top .header__account {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 4px;
-	padding-left: 15px;
-}
-
-.admin-container {
-	padding-top: 15px; 
-	padding-bottom: 50px;
-	min-height: 80vh;
-}
-
-.breadcrumb-admin-static {
-    font-size: 16px; 
-    color: #444; 
-    margin-bottom: 10px;
-}
-</style>
+<link rel="stylesheet" th:href="@{/assets/css/admin/user.css}">
 </head>
 
 <body>
@@ -120,8 +26,6 @@
 
 	<div class="main admin-container">
 		<div class="grid wide">
-			<!-- <h2 class="category__heading" style="text-align: center;">Quản
-				Lý Người Dùng</h2> -->
 			<div class="breadcrumb-admin-static" style="padding: 20px 0;">
 				<span class="breadcrumb-item-admin"
 					style="font-weight: 500; text-transform: uppercase;">ADMIN</span> <span
@@ -159,7 +63,7 @@
 					</thead>
 					<tbody>
 						<tr th:each="user : ${users}">
-							<td th:text="${user.userId}">1</td>
+							<td th:text="${user.id}">1</td>
 							<td th:text="${user.username}">Nguyễn Văn A</td>
 							<td th:text="${user.email}">user.a@example.com</td>
 							<td><span th:each="role : ${user.roles}"
