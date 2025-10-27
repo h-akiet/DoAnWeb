@@ -1,4 +1,4 @@
-package com.oneshop.entity.vendor;
+package com.oneshop.entity;
 
 public enum PromotionType {
     PERCENTAGE,     // Giảm theo phần trăm

@@ -1,27 +1,17 @@
-package com.oneshop.service; // Or your service package
+// src/main/java/com/oneshop/service/CategoryService.java
+package com.oneshop.service;
 
 import com.oneshop.entity.Category;
-import com.oneshop.repository.CategoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
+import java.util.Optional;
 
-@Service
-public class CategoryService {
+public interface CategoryService {
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    List<Category> findAll();
 
-    /**
-     * Gets all categories from the database.
-     * @return A list of all Category entities.
-     */
-    public List<Category> findAll() {
-        return categoryRepository.findAll();
-    }
-  Category saveCategory(Category category);
+    Optional<Category> findById(Long id);
+
+    Category saveCategory(Category category);
+
     void deleteCategory(Long id);
-
-    // Add other category-related methods here if needed (e.g., findById)
 }

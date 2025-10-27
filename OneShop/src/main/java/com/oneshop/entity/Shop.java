@@ -1,4 +1,4 @@
-package com.oneshop.entity.vendor;
+package com.oneshop.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -28,6 +28,12 @@ public class Shop {
     private String contactEmail;
     private String contactPhone;
 
+    // --- THÊM TRẠNG THÁI SHOP ---
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    private ShopStatus status = ShopStatus.PENDING; // Mặc định là PENDING
+    // ---------------------------
+
     // Một Shop chỉ thuộc về một User
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
@@ -36,12 +42,21 @@ public class Shop {
     // Một Shop có nhiều Sản phẩm
     @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Product> products;
-    
+
     // Một Shop có nhiều Đơn hàng
     @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Order> orders;
-    
+
     // Một Shop có nhiều Khuyến mãi
     @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Promotion> promotions;
+
+    // --- THÊM ENUM TRẠNG THÁI ---
+    public enum ShopStatus {
+        PENDING,    // Đang chờ duyệt
+        APPROVED,   // Đã duyệt
+        REJECTED,   // Bị từ chối
+        INACTIVE    // Tạm ngưng (nếu cần)
+    }
+    // --------------------------
 }

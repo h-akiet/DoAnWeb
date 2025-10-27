@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/guest}">
+<head>
+    <title>Trạng thái đăng ký Shop</title>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+        <style>
+            .status-container {
+                max-width: 600px;
+                margin: 50px auto;
+                padding: 40px;
+                background-color: #fff;
+                border-radius: 8px;
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+            .status-icon {
+                font-size: 5rem;
+                color: #17a2b8; /* Màu info */
+                margin-bottom: 20px;
+            }
+            .status-container h1 {
+                font-size: 1.8rem;
+                font-weight: 600;
+                margin-bottom: 15px;
+                color: #333;
+            }
+            .status-container p {
+                font-size: 1.1rem;
+                color: #555;
+                line-height: 1.6;
+                margin-bottom: 30px;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="status-container">
+        <div class="status-icon">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <h1>Đã Gửi Yêu Cầu</h1>
+        <p th:text="${infoMessage ?: 'Yêu cầu đăng ký shop của bạn đã được ghi nhận và đang chờ quản trị viên xem xét. Vui lòng kiểm tra lại sau.'}">
+            </p>
+        <div class="btn-actions">
+            <a th:href="@{/}" class="btn btn-primary">Về Trang chủ</a>
+            <a th:href="@{/user/orders}" class="btn btn-outline-secondary ms-2">Xem Đơn hàng</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,11 +1,14 @@
-package com.oneshop.repository.vendor;
+package com.oneshop.repository;
 
+import com.oneshop.entity.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.oneshop.entity.vendor.Category;
+import java.util.Optional; // Import Optional
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-    // Các phương thức CRUD cơ bản là đủ dùng
+
+    // <<< BỔ SUNG >>>
+    Optional<Category> findByNameIgnoreCase(String name);
 }

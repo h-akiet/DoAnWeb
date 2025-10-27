@@ -1,9 +1,12 @@
-package com.oneshop.service.vendor;
+package com.oneshop.service;
 
-import com.oneshop.dto.vendor.PromotionDto;
-import com.oneshop.entity.vendor.Promotion;
+import com.oneshop.dto.PromotionDto;
+import com.oneshop.entity.Promotion;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PromotionService {
 
@@ -21,4 +24,11 @@ public interface PromotionService {
      * (Tùy chọn) Xóa một khuyến mãi
      */
     void deletePromotion(Long promotionId, Long shopId);
+
+    /**
+     * Lấy danh sách các khuyến mãi còn hạn (phân trang).
+     * @param pageable Thông tin phân trang (trang, kích thước, sắp xếp).
+     * @return Page<Promotion>
+     */
+    Page<Promotion> findActiveAndUpcomingPromotions(Pageable pageable);
 }

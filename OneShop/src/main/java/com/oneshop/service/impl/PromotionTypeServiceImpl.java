@@ -1,8 +1,8 @@
-package com.oneshop.service.vendor.impl;
+package com.oneshop.service.impl;
 
-import com.oneshop.entity.vendor.PromotionTypeEntity;
-import com.oneshop.repository.vendor.PromotionTypeRepository;
-import com.oneshop.service.vendor.PromotionTypeService;
+import com.oneshop.entity.PromotionTypeEntity;
+import com.oneshop.repository.PromotionTypeRepository;
+import com.oneshop.service.PromotionTypeService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

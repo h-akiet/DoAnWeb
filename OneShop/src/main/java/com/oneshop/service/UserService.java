@@ -1,153 +1,35 @@
-package com.oneshop.service.vendor;
+// src/main/java/com/oneshop/service/UserService.java
+package com.oneshop.service;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.oneshop.entity.Role;
+import com.oneshop.dto.ProfileUpdateDto;
+import com.oneshop.entity.Role.RoleName;
 import com.oneshop.entity.User;
-import com.oneshop.repository.OtpRepository; // Thêm import
-import com.oneshop.repository.RoleRepository;
-import com.oneshop.repository.UserRepository;
+import org.springframework.security.core.userdetails.UserDetailsService; // <<< KẾ THỪA
+import java.util.Optional;
 
-@Service
-public class UserService implements UserDetailsService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+public interface UserService extends UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
+    // --- Các chức năng quản lý User ---
+    void register(User user, RoleName roleNameEnum);
+    void activate(String email, String otp);
+    void forgotPassword(String email);
+    void resetPassword(String email, String otp, String newPassword);
+    void verifyOtp(String email, String otp, String type);
 
-    @Autowired
-    private RoleRepository roleRepository;
+    User findByUsername(String username);
+    Optional<User> findUserByEmail(String email);
 
-    @Autowired
-    private OtpRepository otpRepository; // Thêm OtpRepository
+    boolean existsByEmail(String email);
+    boolean existsByUsername(String username);
 
-    @Autowired
-    @Lazy
-    private PasswordEncoder passwordEncoder;
+    void save(User user);
+    void deleteByEmail(String email);
 
-    @Autowired
-    private EmailService emailService;
+    void sendOtpForRegistration(String email);
 
-    @Autowired
-    private OtpService otpService;
-
-    @Transactional(rollbackFor = Exception.class)
-    public void register(User user, String roleName) {
-        if (userRepository.existsByUsername(user.getUsername()) || userRepository.existsByEmail(user.getEmail())) {
-            logger.warn("Email hoặc username đã tồn tại: {}", user.getEmail());
-            throw new IllegalArgumentException("Email hoặc username đã tồn tại!");
-        }
-
-        // Mã hóa mật khẩu nếu chưa mã hóa
-        if (!user.getPassword().startsWith("$2a$") && !user.getPassword().startsWith("$2b$")) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
-
-        Role roleUser = roleRepository.findByName(Role.RoleName.USER)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
-
-        Set<Role> roles = new HashSet<>();
-        roles.add(roleUser);
-        user.setRoles(roles);
-        user.setActivated(false);
-        userRepository.save(user);
-
-        // Gửi OTP - Nếu thất bại, rollback toàn bộ
-        try {
-            otpService.generateAndSendOtp(user.getEmail(), "REGISTRATION");
-            logger.info("Đăng ký thành công và gửi OTP cho: {}", user.getEmail());
-        } catch (Exception e) {
-            logger.error("Lỗi gửi OTP cho email {}: {}", user.getEmail(), e.getMessage());
-            throw new RuntimeException("Không thể gửi OTP: " + e.getMessage());
-        }
-    }
-
-    public void activate(String email, String otp) {
-        otpService.verifyOtp(email, otp, "REGISTRATION");
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setActivated(true);
-        userRepository.save(user);
-        logger.info("Kích hoạt tài khoản thành công: {}", email);
-    }
-
-    public void forgotPassword(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        otpService.generateAndSendOtp(email, "FORGOT");
-        logger.info("Gửi OTP quên mật khẩu thành công: {}", email);
-    }
-
-    public void resetPassword(String email, String otp, String newPassword) {
-        otpService.verifyOtp(email, otp, "FORGOT");
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-        logger.info("Reset mật khẩu thành công: {}", email);
-    }
-
-    public void verifyOtp(String email, String otp, String type) {
-        otpService.verifyOtp(email, otp, type);
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String input) throws UsernameNotFoundException {
-        // Tìm bằng username trước, nếu không thì bằng email
-        return userRepository.findByUsername(input)
-                .orElseGet(() -> userRepository.findByEmail(input)
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found")));
-    }
-
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username).orElse(null);
-    }
-
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
-    }
-
-    public void save(User user) {
-        userRepository.save(user);
-    }
-
-    public void deleteByEmail(String email) {
-        userRepository.findByEmail(email)
-                .ifPresent(userRepository::delete);
-    }
-
-    public void sendOtpForRegistration(String email) {
-        otpService.generateAndSendOtp(email, "REGISTRATION");
-    }
-
-    // 🔹 Scheduler xóa user chưa kích hoạt có OTP hết hạn
-    @Scheduled(fixedRate = 300000) // Chạy mỗi 10 phút
-    @Transactional
-    public void deleteExpiredUnverifiedUsers() {
-        LocalDateTime now = LocalDateTime.now();
-        otpRepository.findByTypeAndExpiresAtBefore("REGISTRATION", now)
-                .forEach(otp -> {
-                    User user = otp.getUser();
-                    if (!user.isActivated()) {
-                        logger.info("Xóa tài khoản chưa kích hoạt: {}", user.getEmail());
-                        userRepository.delete(user);
-                        otpRepository.delete(otp);
-                    }
-                });
-    }
+    User updateUserProfile(String username, ProfileUpdateDto profileUpdateDto);
+    
+    User findById(Long id);
+    
 }

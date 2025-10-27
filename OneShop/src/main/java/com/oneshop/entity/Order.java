@@ -1,4 +1,5 @@
-package com.oneshop.entity.vendor;
+// src/main/java/com/oneshop/entity/Order.java
+package com.oneshop.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,16 +8,15 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-// import java.util.Set; // Không cần Set nữa
 
 @Entity
 @Table(name = "ORDERS")
-@Getter
+@Getter // Dùng @Getter @Setter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
-@EqualsAndHashCode(exclude = {"orderDetails", "user", "shipper"})
+@EqualsAndHashCode(exclude = {"orderDetails", "user", "shop", "shipper"}) // Thêm shop, shipper
+@ToString(exclude = {"orderDetails", "user", "shop", "shipper"})      // Thêm shop, shipper
 public class Order {
 
     @Id
@@ -26,84 +26,64 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private User user; // Import com.oneshop.entity.User
 
-    // Thông tin khách hàng (Lưu trực tiếp thay vì liên kết,
-    // vì thông tin giao hàng có thể khác với thông tin tài khoản)
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
-    private String customerName;
-    @Column(nullable = false)
-    private String customerEmail;
-    @Column(nullable = false)
-    private String customerPhone;
-    @Column(nullable = false, columnDefinition = "nvarchar(500)")
-    private String shippingAddress;
-
-    // [SỬA 3] - Chuyển từ String sang Enum OrderStatus
-    // Đây là trường cũ của bạn:
-    // @Column(name = "order_status", length = 50, nullable = false)
-    // private String orderStatus;
-    
-    // Đây là trường mới (đúng) để dùng với OrderService:
-    @Enumerated(EnumType.STRING)
-    @Column(name = "order_status", nullable = false)
-    private OrderStatus orderStatus; // Sử dụng Enum đã tạo
-
-    @Column(nullable = false)
-    private BigDecimal total; // Trường này sẽ được dùng làm 'grandTotal'
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private OrderStatus status;
-
-    // [SỬA 4] - Chuyển từ Set<OrderItem> sang List<OrderDetail>
-    // Đây là trường cũ của bạn:
-    // @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    // private Set<OrderItem> items;
-    
-    // Đây là trường mới (đúng) để dùng với OrderService và OrderDetail.java:
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderDetail> orderDetails = new ArrayList<>();
-
-
-    // ==========================================================
-    // === [SỬA 5] BỔ SUNG TẤT CẢ CÁC TRƯỜNG CÒN THIẾU SAU ===
-    // ==========================================================
-
-    @Column(name = "recipient_name", nullable = true)
+    // --- Thông tin Người nhận (Lưu tại thời điểm đặt hàng) ---
+    @Column(name = "recipient_name", nullable = false, columnDefinition = "nvarchar(255)")
     private String recipientName;
 
-    @Column(name = "shipping_address", nullable = true)
-    private String shippingAddress;
-    
-    @Column(name = "shipping_phone", nullable = true)
+    @Column(name = "shipping_phone", nullable = false, length = 20)
     private String shippingPhone;
 
-    @Column(name = "payment_method", nullable = true)
+    @Column(name = "shipping_address", nullable = false, columnDefinition = "nvarchar(500)")
+    private String shippingAddress; // Giữ lại MỘT trường này
+
+    // --- Thông tin Đơn hàng ---
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_status", nullable = false, length=50)
+    private OrderStatus orderStatus; // Import com.oneshop.entity.OrderStatus
+
+    @Column(name = "payment_method", length = 50)
     private String paymentMethod;
 
-    @Column(name = "subtotal", nullable = true)
+    @Column(precision = 19, scale = 2)
     private BigDecimal subtotal;
 
-    @Column(name = "shipping_cost", nullable = true)
+    @Column(name = "shipping_cost", precision = 19, scale = 2)
     private BigDecimal shippingCost;
 
-    // ==========================================================
-    // === HẾT PHẦN BỔ SUNG ===
-    // ==========================================================
+    @Column(name = "total_amount", nullable = false, precision = 19, scale = 2)
+    private BigDecimal total;
 
+    // --- Liên kết ---
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id", nullable = false)
+    private Shop shop; // Import com.oneshop.entity.Shop
 
-    // Getter cho order_id (tương thích với code cũ)
-    public Long getOrderId() {
-        return id;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipper_id") // nullable = true
+    private User shipper; // Shipper cũng là User
 
-    // Setter cho order_id (tương thích với code cũ)
-    public void setOrderId(Long orderId) {
-        this.id = orderId;
-    }
-    
-    // Bạn không cần thêm getters/setters cho các trường mới
-    // vì @Getter và @Setter (Lombok) đã tự động làm việc đó.
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<OrderDetail> orderDetails = new ArrayList<>(); // Import com.oneshop.entity.OrderDetail
+
+    // Bỏ các trường duplicate và getter/setter thủ công
+    // @Column(...)
+    // private String customerName; // Đã có recipientName
+    // @Column(...)
+    // private String customerEmail; // Lấy từ user.getEmail()
+    // @Column(...)
+    // private String customerPhone; // Đã có shippingPhone
+    // @Column(...)
+    // private String shippingAddress; // duplicate
+
+    // @Column(...)
+    // private OrderStatus status; // duplicate
+
+    // Bỏ các getter/setter thủ công
+    // public Long getOrderId() { return id; }
+    // public void setOrderId(Long orderId) { this.id = orderId; }
 }
-

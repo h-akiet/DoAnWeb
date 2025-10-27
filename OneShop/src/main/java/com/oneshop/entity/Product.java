@@ -1,117 +1,117 @@
-package com.oneshop.entity.vendor;
+// src/main/java/com/oneshop/entity/Product.java
+package com.oneshop.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*; // Import Getter, Setter riêng
 import java.math.BigDecimal;
-import java.util.List;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode; // <<< THÊM: Import cần thiết cho BigDecimal
+import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.util.HashSet; // Import HashSet
 import java.util.Locale;
 import java.util.Set;
 
-@Entity
-@Table(name = "PRODUCTS")
-@Getter 
-@Setter
+@Entity // Chỉ một @Entity
+@Table(name = "PRODUCTS") // Đổi tên bảng thành PRODUCTS cho nhất quán
+@Getter // Thêm @Getter
+@Setter // Thêm @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "Products")
+@EqualsAndHashCode(exclude = { "brand", "category", "variants", "images", "shop" }) // Exclude các quan hệ
+@ToString(exclude = { "brand", "category", "variants", "images", "shop" }) // Exclude các quan hệ
 public class Product {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long productId;
 
-    @Column(nullable = false)
-    private String name;
+	@Column(nullable = false, columnDefinition = "nvarchar(255)")
+	private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "brand_id")
-    private Brand brand;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "brand_id")
+	private Brand brand; // Import com.oneshop.entity.Brand
 
-    @Column(name = "display_price", nullable = false, precision = 19, scale = 2) // <<< CẢI THIỆN: Thêm precision và scale
-    private BigDecimal price;
+	// Đổi tên cột price thành price (bỏ display_)
+	@Column(name = "price", nullable = false, precision = 19, scale = 2)
+	private BigDecimal price;
 
-    @Column(name = "original_price", precision = 19, scale = 2) // <<< CẢI THIỆN: Thêm precision và scale
-    private BigDecimal originalPrice;
+	@Column(name = "original_price", precision = 19, scale = 2)
+	private BigDecimal originalPrice;
 
-    @Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
-    private String description;
+	@Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
+	private String description;
 
-    @Column(nullable = false)
-    private int salesCount = 0; // <<< SỬA: Giữ lại trường này là nguồn dữ liệu chính
+	@Column(name = "sales_count", nullable = false)
+	private int salesCount = 0;
 
-    @Column(name = "is_published", nullable = false)
-    private boolean published = false;
+	@Column(name = "is_published", nullable = false)
+	private boolean published = true; // Mặc định là true khi tạo?
 
-    @Column(nullable = false)
-    private Integer stock; // Số lượng tồn kho
-    
-    @Column(columnDefinition = "nvarchar(500)")
-    private String tags; // Các từ khóa, cách nhau bằng dấu phẩy
+	@Column(nullable = false)
+	private Integer stock; // Tổng tồn kho (nếu sản phẩm không có variant)
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+	@Column(columnDefinition = "nvarchar(500)")
+	private String tags;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<ProductVariant> variants;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "category_id", nullable = false)
+	private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<ProductImage> images;
+	// Quan hệ với Shop (Product thuộc về Shop nào)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "shop_id", nullable = false)
+	private Shop shop; // Import com.oneshop.entity.Shop
 
-    public String getPrimaryImageUrl() {
-        if (images == null || images.isEmpty()) {
-            return "/assets/img/product/product1.png";
-        }
-        return images.stream()
-                .filter(image -> Boolean.TRUE.equals(image.getIsPrimary()))
-                .findFirst()
-                .map(ProductImage::getImageUrl)
-                .orElse(images.iterator().next().getImageUrl());
-    }
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private Set<ProductVariant> variants = new HashSet<>(); // Import com.oneshop.entity.ProductVariant
 
-    // <<< SỬA: Viết lại hoàn toàn để tính toán đúng với BigDecimal
-    public int getDiscountPercentage() {
-        if (originalPrice == null || price == null ||
-            originalPrice.compareTo(BigDecimal.ZERO) <= 0 ||
-            price.compareTo(originalPrice) >= 0) {
-            return 0; // Không có giảm giá
-        }
-        
-        BigDecimal discount = originalPrice.subtract(price);
-        BigDecimal percentage = discount.multiply(new BigDecimal("100"))
-                                      .divide(originalPrice, 0, RoundingMode.HALF_UP);
-        
-        return percentage.intValue();
-    }
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private Set<ProductImage> images = new HashSet<>(); // Import com.oneshop.entity.ProductImage
 
-    public String getFormattedDisplayPrice() {
-        return formatCurrency(this.price);
-    }
+	// --- Các trường Transient và Methods ---
 
-    public String getFormattedOriginalPrice() {
-        return formatCurrency(this.originalPrice);
-    }
+	@Transient
+	private Double rating = 0.0;
 
-    // <<< SỬA: Thay đổi tham số từ Double thành BigDecimal
-    private String formatCurrency(BigDecimal amount) {
-        if (amount == null) return "0 đ"; // Trả về có đơn vị cho nhất quán
-        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        return currencyFormatter.format(amount).replace("₫", "đ");
-    }
+	@Transient
+	private Integer reviewCount = 0;
 
-    @Transient
-    private Double rating = 0.0;
+	@Transient
+	private Integer soldCount = 0; // Có thể lấy từ salesCount
 
-    @Transient
-    private Integer reviewCount = 0;
+	public String getPrimaryImageUrl() {
+		if (images == null || images.isEmpty()) {
+			return "/assets/img/product/no-image.jpg"; // Default path
+		}
 
-     @Transient
-     private Integer soldCount = 0; 
+		ProductImage image = images.stream().filter(img -> Boolean.TRUE.equals(img.getIsPrimary())).findFirst()
+				.orElse(images.iterator().next());
+
+		return "/uploads/images/" + image.getImageUrl();
+	}
+
+	public int getDiscountPercentage() {
+		if (originalPrice == null || price == null || originalPrice.compareTo(BigDecimal.ZERO) <= 0
+				|| price.compareTo(originalPrice) >= 0) {
+			return 0;
+		}
+		BigDecimal discount = originalPrice.subtract(price);
+		BigDecimal percentage = discount.multiply(new BigDecimal("100")).divide(originalPrice, 0, RoundingMode.HALF_UP);
+		return percentage.intValue();
+	}
+
+	public String getFormattedDisplayPrice() {
+		return formatCurrency(this.price);
+	}
+
+	public String getFormattedOriginalPrice() {
+		return formatCurrency(this.originalPrice);
+	}
+
+	private String formatCurrency(BigDecimal amount) {
+		if (amount == null)
+			return "0 đ";
+		NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+		return currencyFormatter.format(amount).replace("₫", "đ");
+	}
 }

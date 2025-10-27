@@ -1,4 +1,4 @@
-package com.oneshop.dto.vendor;
+package com.oneshop.dto;
 
 import lombok.Data;
 

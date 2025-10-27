@@ -1,61 +1,90 @@
+// src/main/java/com/oneshop/specification/ProductSpecification.java
 package com.oneshop.specification;
 
 import com.oneshop.entity.Product;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.ArrayList;
 
 public class ProductSpecification {
 
-    /**
-     * Tạo một Specification để lọc sản phẩm theo danh sách ID danh mục.
-     * @param categoryIds Danh sách ID danh mục để lọc.
-     * @return Specification cho việc lọc.
-     */
+    // --- CÁC HÀM CŨ GIỮ NGUYÊN ---
     public static Specification<Product> hasCategory(List<Long> categoryIds) {
         return (root, query, criteriaBuilder) -> {
             if (categoryIds == null || categoryIds.isEmpty()) {
-                return criteriaBuilder.conjunction(); // Trả về điều kiện "luôn đúng" nếu không có ID nào được chọn
+                return criteriaBuilder.conjunction(); // Không lọc nếu list rỗng
             }
-            // Sử dụng "categoryId" để khớp với tên trường trong Entity Category của bạn
-            return root.get("category").get("categoryId").in(categoryIds);
+            // Giả sử Category entity có trường 'id'
+            return root.get("category").get("id").in(categoryIds);
         };
     }
 
-    /**
-     * Tạo một Specification để lọc sản phẩm theo danh sách ID thương hiệu.
-     * @param brandIds Danh sách ID thương hiệu để lọc.
-     * @return Specification cho việc lọc.
-     */
     public static Specification<Product> hasBrand(List<Long> brandIds) {
         return (root, query, criteriaBuilder) -> {
             if (brandIds == null || brandIds.isEmpty()) {
-                return criteriaBuilder.conjunction(); // Trả về điều kiện "luôn đúng" nếu không có ID nào được chọn
+                return criteriaBuilder.conjunction();
             }
-            // Sử dụng "brandId" để khớp với tên trường trong Entity Brand của bạn
+             // Giả sử Brand entity có trường 'brandId'
             return root.get("brand").get("brandId").in(brandIds);
         };
     }
 
-    /**
-     * Tạo một Specification để lọc sản phẩm theo khoảng giá.
-     * @param minPrice Giá tối thiểu.
-     * @param maxPrice Giá tối đa.
-     * @return Specification cho việc lọc.
-     */
     public static Specification<Product> priceBetween(BigDecimal minPrice, BigDecimal maxPrice) {
         return (root, query, criteriaBuilder) -> {
-            if (minPrice != null && maxPrice != null) {
-                return criteriaBuilder.between(root.get("price"), minPrice, maxPrice);
-            }
+            List<Predicate> predicates = new ArrayList<>();
             if (minPrice != null) {
-                return criteriaBuilder.greaterThanOrEqualTo(root.get("price"), minPrice);
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("price"), minPrice));
             }
             if (maxPrice != null) {
-                return criteriaBuilder.lessThanOrEqualTo(root.get("price"), maxPrice);
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("price"), maxPrice));
             }
-            return criteriaBuilder.conjunction(); // Không lọc theo giá nếu không có giá trị nào được cung cấp
+            // Trả về Predicate kết hợp hoặc Predicate luôn đúng nếu không có điều kiện giá
+            if (predicates.isEmpty()) {
+                 return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
+
+    public static Specification<Product> hasName(String name) {
+        return (root, query, criteriaBuilder) -> {
+            if (!StringUtils.hasText(name)) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%");
+        };
+    }
+
+    public static Specification<Product> hasCategoryId(Long categoryId) {
+        return (root, query, criteriaBuilder) -> {
+            if (categoryId == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("category").get("id"), categoryId);
+        };
+    }
+
+    public static Specification<Product> hasBrandId(Long brandId) {
+        return (root, query, criteriaBuilder) -> {
+            if (brandId == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("brand").get("brandId"), brandId);
+        };
+    }
+
+    // --- >>> THÊM PHƯƠNG THỨC NÀY <<< ---
+    /**
+     * Tạo Specification để lọc các sản phẩm đã được published (published = true).
+     * @return Specification.
+     */
+    public static Specification<Product> isPublished() {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.isTrue(root.get("published")); // Giả sử trường boolean tên là "published"
+    }
+    // --- >>> KẾT THÚC PHƯƠNG THỨC MỚI <<< ---
 }

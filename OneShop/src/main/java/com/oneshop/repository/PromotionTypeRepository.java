@@ -1,9 +1,9 @@
-package com.oneshop.repository.vendor;
+package com.oneshop.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.oneshop.entity.vendor.PromotionTypeEntity;
+import com.oneshop.entity.PromotionTypeEntity;
 
 
 @Repository

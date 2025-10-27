@@ -1,4 +1,4 @@
-package com.oneshop.service.vendor;
+package com.oneshop.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;

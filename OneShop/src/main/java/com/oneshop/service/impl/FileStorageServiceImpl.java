@@ -1,11 +1,11 @@
-package com.oneshop.service.vendor.impl;
+package com.oneshop.service.impl;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.oneshop.service.vendor.FileStorageService;
+import com.oneshop.service.FileStorageService;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

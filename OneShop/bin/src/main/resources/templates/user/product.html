@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/guest}">
+<head>
+<meta charset="UTF-8">
+<title th:text="${product.name} ?: 'Chi tiết sản phẩm'"></title>
+
+<th:block layout:fragment="css">
+	<link rel="stylesheet" type="text-css"
+		th:href="@{/assets/css/product.css}">
+	<link rel="stylesheet"
+		href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css">
+		<link rel="stylesheet" th:href="@{/assets/css/common.css}">
+	<style>
+/* (CSS Styles giữ nguyên) */
+.productInfo__name {
+	font-size: 26px; /* Hoặc 1.6rem, 28px... tùy bạn */
+	margin-bottom: 15px; /* Thêm khoảng cách dưới */
+}
+
+/* 2. Tiêu đề "Chọn loại:" */
+.productInfo__variants h4 {
+	font-size: 18px; /* Hoặc 1.1rem */
+	font-weight: 700; /* Đậm hơn */
+}
+
+/* 3. Phần mô tả (cả tóm tắt và chi tiết) */
+.productInfo__description, .productDes__text {
+	font-size: 16px; /* Hoặc 1rem */
+	line-height: 1.6; /* Tăng khoảng cách dòng cho dễ đọc */
+}
+.productIndfo__category{
+	font-size: 16px; /* Hoặc 1rem */
+	line-height: 1.6; /* Tăng khoảng cách dòng cho dễ đọc */
+}
+.productInfo__meta {
+	padding: 10px 0;
+	border-top: 1px solid #f0f0f0;
+	margin-top: 15px;
+	display: flex;
+	align-items: center;
+	gap: 20px;
+}
+
+.product__rating {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.rating-stars i {
+	font-size: 14px;
+	color: #ffa500;
+}
+
+.rating-count {
+	font-size: 14px;
+	color: #666;
+}
+
+.rate__author {
+	font-size: 16px; /* Hoặc 1rem */
+	font-weight: 600;
+}
+
+/* 6. Nội dung đánh giá */
+.rate__content {
+	font-size: 15px; /* Hoặc 0.95rem */
+	line-height: 1.5;
+}
+
+.product__sold {
+	font-size: 14px;
+	color: #666;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.price__old {
+	text-decoration: line-through;
+	color: #999;
+	font-size: 16px;
+	margin-right: 15px;
+}
+
+.productInfo__price {
+	display: flex;
+	align-items: baseline;
+	margin-top: 10px;
+	margin-bottom: 20px;
+	font-weight: 700;
+	color: var(--primary-color);
+	font-size: 28px;
+}
+
+.priceInfo__unit {
+	font-size: 22px;
+	margin-left: 5px;
+}
+
+.product__sale-tag {
+	background-color: var(--primary-color);
+	color: white;
+	padding: 2px 8px;
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: 500;
+	margin-left: 15px;
+}
+
+.productInfo__brand {
+	font-size: 16px;
+	margin-bottom: 10px;
+	color: #555;
+}
+.productDes__title {
+  font-size: 18px; /* Hoặc 1.1rem, 20px... tùy bạn chọn */
+  font-weight: 600; /* Làm chữ đậm hơn */
+  margin-top: 25px; /* Thêm khoảng cách phía trên */
+  margin-bottom: 15px; /* Thêm khoảng cách phía dưới */
+}
+.productDes__ratting-title {
+  font-size: 20px; /* Hoặc 1.25rem */
+  font-weight: 600;
+  margin-bottom: 25px; /* Thêm khoảng cách dưới */
+}
+
+/* Tăng kích thước thông báo chưa có đánh giá */
+.no-reviews-message {
+    font-size: 16px; /* Hoặc 1rem */
+    color: #555; /* Có thể đổi màu nếu muốn */
+    margin-top: 15px; /* Thêm khoảng cách trên */
+}
+/* [THÊM MỚI] - CSS cho phần chọn biến thể */
+.variant-item label {
+	cursor: pointer;
+	font-size: 15px;
+}
+
+.variant-item input[type="radio"] {
+	cursor: pointer;
+}
+
+</style>
+</th:block>
+</head>
+
+<body>
+	<div class="main" layout:fragment="content" style="margin-top: 30px;">
+		<div class="grid wide">
+			<div class="productInfo">
+				<div class="row">
+					<div class="col l-5 m-12 s-12">
+						<div class="owl-carousel owl-theme" id="sync1">
+							<div class="item" th:each="image : ${product.images}">
+								<a href="#" class="product product__avt"
+									th:style="'display: block; background-image: url(' + @{${image.imageUrl}} + ')'">
+								</a>
+							</div>
+							<div class="item" th:if="${#lists.isEmpty(product.images)}">
+								<a href="#" class="product product__avt"
+									th:style="'display: block; background-image: url(' + @{/assets/img/product/no-image.jpg} + ')'">
+								</a>
+							</div>
+						</div>
+						<div class="owl-carousel owl-theme" id="sync2">
+							<div class="item" th:each="image : ${product.images}">
+								<a href="#" class="product product__avt"
+									th:style="'display: block; background-image: url(' + @{${image.imageUrl}} + ')'">
+								</a>
+							</div>
+							<div class="item" th:if="${#lists.isEmpty(product.images)}">
+								<a href="#" class="product product__avt"
+									th:style="'display: block; background-image: url(' + @{/assets/img/product/no-image.jpg} + ')'">
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="col l-7 m-12s s-12 pl">
+						<div class="main__breadcrumb">
+							<div class="breadcrumb__item">
+								<a th:href="@{/}" class="breadcrumb__link">Trang chủ</a>
+							</div>
+							<div class="breadcrumb__item">
+								<a th:href="@{/products}" class="breadcrumb__link">Sản phẩm</a>
+							</div>
+							<div class="breadcrumb__item" th:if="${product.category}">
+								<a
+									th:href="@{/products(category=${product.category.categoryId})}"
+									class="breadcrumb__link" th:text="${product.category.name}"></a>
+							</div>
+						</div>
+						<p class="productInfo__brand">
+							Thương hiệu: <a href="#"
+								th:text="${product.brand != null ? product.brand.name : 'Không rõ'}">Brand
+								Name</a>
+						</p>
+						<h3 class="productInfo__name" th:text="${product.name}">Tên
+							sản phẩm Azrouel dress variable</h3>
+						<div class="productInfo__meta">
+							<div class="product__rating">
+								<div class="rating-stars">
+									<i class="fas fa-star" th:each="i : ${#numbers.sequence(1, 5)}"
+										th:classappend="${i <= product.rating} ? 'text-warning' : 'text-secondary'"></i>
+								</div>
+								<span class="rating-count"
+									th:text="'(' + ${product.reviewCount} + ' đánh giá)'"></span>
+							</div>
+							<div class="product__sold">
+								<i class="fas fa-shopping-cart"></i> <span
+									th:text="'Đã bán ' + ${product.soldCount}">Đã bán 3.5k</span>
+							</div>
+						</div>
+						<div class="productInfo__price">
+							<span class="price__old"
+								th:if="${product.originalPrice != null and product.originalPrice > product.price}"
+								th:text="${#numbers.formatDecimal(product.originalPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">Giá
+								cũ</span> <span
+								th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')}">330.000</span>
+							<span class="priceInfo__unit">đ</span> <span
+								class="product__sale-tag"
+								th:if="${product.originalPrice != null and product.originalPrice > product.price and product.originalPrice > 0}"
+								th:text="'-' + ${#numbers.formatInteger(100 * (product.originalPrice - product.price) / product.originalPrice, 0)} + '%'">-10%</span>
+						</div>
+
+						<div class="productInfo__description"
+							th:utext="${product.description}">Mô tả tóm tắt sản phẩm</div>
+
+						<div class="productInfo__variants" style="margin-bottom: 20px;">
+							<div class="variant-options"
+								th:if="${product.variants != null and !product.variants.isEmpty()}">
+								<h4 style="margin-bottom: 10px; font-weight: 600;">Chọn
+									loại:</h4>
+
+								<div class="variant-item"
+									th:each="variant : ${product.variants}"
+									style="margin-bottom: 8px;">
+									<input type="radio" name="selectedVariantId"
+										th:id="'variant-' + ${variant.variantId}"
+										th:value="${variant.variantId}"
+										th:data-price="${variant.price}"
+										th:data-original-price="${variant.originalPrice}" required
+										style="margin-right: 5px;"> <label
+										th:for="'variant-' + ${variant.variantId}"
+										th:text="${variant.name} + ' - ' + ${#numbers.formatDecimal(variant.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+										Loại 1 - 100.000 đ </label>
+								</div>
+							</div>
+
+							<div
+								th:if="${product.variants == null or product.variants.isEmpty()}">
+								<p style="color: red;">Sản phẩm này hiện chưa có sẵn để bán.</p>
+							</div>
+						</div>
+
+
+						<div class="productInfo__addToCart">
+							<div class="buttons_added">
+								<input class="minus is-form" type="button" value="-"> <input
+									aria-label="quantity" class="input-qty" min="1" name="quantity"
+									type="number" value="1"> <input class="plus is-form"
+									type="button" value="+">
+							</div>
+
+							<a th:href="@{/cart/add/}" class="btn btn--default orange"
+								id="addToCartBtn">Thêm vào giỏ</a>
+						</div>
+
+						
+						<div class="productIndfo__category">
+							<p class="productIndfo__category-text">
+								Danh mục : <a href="#" class="productIndfo__category-link"
+									th:text="${product.category.name}">Nail</a>
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="productDetail">
+				<div class="main__tabnine">
+					<div class="grid wide">
+						<div class="tabs">
+							<div class="tab-item active">Mô tả</div>
+							<div class="tab-item">Đánh giá</div>
+							<div class="line"></div>
+						</div>
+						<div class="tab-content">
+							<div class="tab-pane active">
+								<div class="productDes">
+									<div class="productDes__title">Mô tả chi tiết sản phẩm</div>
+									<div class="productDes__text" th:utext="${product.description}">Mô
+										tả chi tiết sản phẩm...</div>
+									<div class="productDes__title">Hướng dẫn sử dụng</div>
+									<div class="productDes__text" th:utext="${product.description}">Nó
+										đã được phổ biến vào những năm 1960...</div>
+								</div>
+							</div>
+							<div class="tab-pane">
+								<div class="productDes__ratting">
+									<div class="productDes__ratting-title">Đánh giá của khách
+										hàng</div>
+
+									<div th:if="${reviews.isEmpty()}">
+										<p>Chưa có đánh giá nào cho sản phẩm này.</p>
+									</div>
+
+									<ul class="rate__list" th:unless="${reviews.isEmpty()}">
+										<li th:each="review : ${reviews}" class="rate__item"
+											style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+											<div class="rate__info">
+												<strong class="rate__author"
+													th:text="${review.user?.username}">Tên khách hàng</strong>
+												<span class="rate__date"
+													th:text="' - ' + ${#temporals.format(review.reviewDate, 'dd/MM/yyyy HH:mm')}"></span>
+											</div>
+
+											<div class="productDes__ratting-star mb-2">
+												<span th:each="i : ${#numbers.sequence(1, 5)}"> <i
+													class="fas fa-star" th:if="${i <= review.rating}"
+													style="color: #ffc107;"></i> <i class="far fa-star"
+													th:if="${i > review.rating}" style="color: #e4e5e9;"></i>
+												</span>
+											</div>
+
+											<p class="rate__content" th:text="${review.comment}">Nội
+												dung đánh giá của khách hàng.</p>
+
+											<div class="review-media" th:if="${!review.media.isEmpty()}">
+												<img th:each="mediaItem : ${review.media}"
+													th:src="@{${mediaItem.url}}" alt="Review Image"
+													style="width: 80px; height: 80px; margin-right: 10px;" />
+											</div>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="main__frame">
+				<div class="grid wide">
+					<h3 class="category__title">OneShop Cometics</h3>
+					<h3 class="category__heading">Sản Phẩm Tương tự</h3>
+					<div class="owl-carousel hight owl-theme">
+						<a th:href="@{/product/{id}(id=${related.productId})}"
+							class="product" th:each="related : ${relatedProducts}">
+							<div class="product__avt"
+								th:style="'background-image: url(' + @{${related.primaryImageUrl}} + ')'"></div>
+							<div class="product__info">
+								<h3 class="product__name" th:text="${related.name}">Tên sản
+									phẩm</h3>
+								<div class="product__price">
+									<div class="price__old"
+										th:if="${related.originalPrice != null and related.originalPrice > related.price}"
+										th:text="${#numbers.formatDecimal(related.originalPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">340.000
+										đ</div>
+									<div class="price__new" th:if="${related.price}"
+										th:text="${#numbers.formatDecimal(related.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">320.000
+										đ</div>
+								</div>
+							</div>
+						</a> <span th:if="${#lists.isEmpty(relatedProducts)}">Không có
+							sản phẩm tương tự.</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<th:block layout:fragment="js">
+		<script>
+            // Logic cho Quantity Input
+            $(document).on('click', '.plus, .minus', function () {
+                var $qty = $(this).closest('.buttons_added').find('.input-qty');
+                var currentVal = parseInt($qty.val());
+                var maxVal = parseInt($qty.attr('max')) || 999999; 
+                var minVal = parseInt($qty.attr('min')) || 1; // Đảm bảo min là 1
+
+                if ($(this).hasClass('plus')) {
+                    if (currentVal < maxVal) {
+                        $qty.val(currentVal + 1).change();
+                    }
+                } else {
+                    if (currentVal > minVal) {
+                        $qty.val(currentVal - 1).change();
+                    }
+                }
+            });
+
+            // [SỬA LẠI] - Logic thêm vào giỏ hàng
+            $('#addToCartBtn').on('click', function(e) {
+                e.preventDefault(); // Ngăn thẻ <a> điều hướng
+                
+                // 1. Lấy ID của biến thể (variantId) từ radio button đã được chọn
+                var selectedVariantId = $('input[name="selectedVariantId"]:checked').val();
+                
+                // 2. Kiểm tra xem người dùng đã chọn biến thể chưa
+                if (!selectedVariantId) {
+                    alert('Vui lòng chọn một loại sản phẩm!');
+                    return; // Dừng lại nếu chưa chọn
+                }
+                
+                // 3. Lấy số lượng
+                var $qtyInput = $(this).closest('.productInfo__addToCart').find('.input-qty');
+                var quantity = $qtyInput.val();
+                
+                // 4. Lấy URL gốc (ví dụ: "/cart/add/") từ thuộc tính href của nút
+                var baseUrl = $(this).attr('href'); 
+                
+                // 5. Tạo URL cuối cùng và điều hướng trang
+                // (Kết quả ví dụ: "/cart/add/5?quantity=2", trong đó 5 là variantId)
+                window.location.href = baseUrl + selectedVariantId + "?quantity=" + quantity;
+            });
+            
+            // [THÊM MỚI] - Logic cập nhật giá khi chọn biến thể
+            $('input[name="selectedVariantId"]').on('change', function() {
+                var $selected = $(this);
+                if ($selected.is(':checked')) {
+                    var newPrice = $selected.data('price');
+                    var oldPrice = $selected.data('original-price');
+                    
+                    var $priceContainer = $('.productInfo__price');
+                    
+                    // Cập nhật giá chính
+                    $priceContainer.find('span:not(.price__old):not(.priceInfo__unit):not(.product__sale-tag)')
+                                .text(formatPrice(newPrice));
+                                
+                    // Cập nhật giá cũ (nếu có)
+                    var $oldPriceSpan = $priceContainer.find('.price__old');
+                    if (oldPrice && oldPrice > newPrice) {
+                        $oldPriceSpan.text(formatPrice(oldPrice) + ' đ').show();
+                    } else {
+                        $oldPriceSpan.hide();
+                    }
+                    
+                    // Cập nhật tag giảm giá
+                    var $saleTag = $priceContainer.find('.product__sale-tag');
+                    if (oldPrice && oldPrice > newPrice && oldPrice > 0) {
+                        var discount = Math.round(100 * (oldPrice - newPrice) / oldPrice);
+                        $saleTag.text('-' + discount + '%').show();
+                    } else {
+                        $saleTag.hide();
+                    }
+                }
+            });
+
+            // [THÊM MỚI] - Hàm trợ giúp format giá
+            function formatPrice(number) {
+                if (typeof number === 'undefined' || number === null) return '';
+                return new Intl.NumberFormat('vi-VN').format(number);
+            }
+
+            // Logic Tab Mô tả/Đánh giá (Giữ nguyên)
+            $('.tabs .tab-item').on('click', function() {
+                $('.tabs .tab-item').removeClass('active');
+                $(this).addClass('active');
+
+                var index = $(this).index();
+                $('.tab-content .tab-pane').removeClass('active');
+                $('.tab-content .tab-pane').eq(index).addClass('active');
+                
+                var line = $('.tabs .line');
+                if (line.length) {
+                    line.css({
+                        left: $(this).position().left + 'px',
+                        width: $(this).width() + 'px'
+                    });
+                }
+            });
+            $('.tabs .tab-item:first-child').click(); // Tự động click tab đầu tiên
+
+            // Logic cho Owl Carousel (Giữ nguyên)
+            $(document).ready(function() {
+                var sync1 = $("#sync1");
+                var sync2 = $("#sync2");
+                
+                if (sync1.length && sync1.find('.item').length > 0) {
+                    sync1.owlCarousel({
+                        items: 1, loop: true, margin: 20, nav: true, dots: false, autoplay: true,
+                        autoplayTimeout: 4000, autoplayHoverPause: true
+                    });
+                } else {
+                     sync1.siblings('.owl-nav').hide(); 
+                }
+                
+                if (sync2.length && sync2.find('.item').length > 1) {
+                    sync2.owlCarousel({
+                        items: 4, dots: false, nav: false, margin: 30, smartSpeed: 200,
+                    });
+
+                    sync1.on('changed.owl.carousel', function(event) {
+                        sync2.trigger('to.owl.carousel', [event.item.index, 200, true]);
+                    });
+                    sync2.on('click', '.owl-item', function(event) {
+                        event.preventDefault();
+                        var number = $(this).index();
+                        sync1.trigger('to.owl.carousel', [number, 300, true]);
+                    });
+                }
+
+                $('.owl-carousel.hight').owlCarousel({
+                    loop: true, margin: 20, nav: true, dots: false, autoplay: true,
+                    autoplayTimeout: 2000, autoplayHoverPause: true,
+                    responsive: {
+                        0: { items: 2 },
+                        600: { items: 3 },
+                        1000: { items: 6 }
+                    }
+                });
+            });
+        </script>
+	</th:block>
+</body>
+</html>

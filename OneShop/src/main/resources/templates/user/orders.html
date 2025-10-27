@@ -23,16 +23,23 @@
         .tab-pane { display: none; }
         .tab-pane.active { display: block; }
         table { font-size: 16px; }
-        th, td { padding: 15px; }
+        th, td { padding: 15px; vertical-align: middle; }
         .btn { font-size: 14px; padding: 8px 15px; }
-        /* CSS cho các nút hành động */
         .action-cell a, .action-cell button { margin-right: 5px; }
         .action-cell a:last-child, .action-cell button:last-child { margin-right: 0; }
-        /* GHI ĐÈ CSS để nút luôn hiển thị */
-        .action-cell a, .action-cell button { 
+        .action-cell a, .action-cell button {
             visibility: visible !important;
             opacity: 1 !important;
         }
+        /* --- Điều chỉnh kích thước ảnh sản phẩm --- */
+        .order-product-image {
+            width: 50px; /* Giảm kích thước */
+            height: 50px; /* Giảm kích thước */
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+        /* ------------------------------------- */
     </style>
 </head>
 
@@ -58,6 +65,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
+                            <th>Sản phẩm</th>
                             <th>Tổng tiền</th>
                             <th>Trạng thái</th>
                             <th>Ngày tạo</th>
@@ -65,9 +73,15 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="order : ${orders}" 
+                        <tr th:each="order : ${orders}"
                             th:if="${order.orderStatus.name() == 'PENDING'}">
                             <td th:text="${order.id}"></td>
+                            <td>
+                                <img th:if="${order.orderDetails != null and !order.orderDetails.isEmpty() and order.orderDetails[0].productVariant != null and order.orderDetails[0].productVariant.product != null}"
+                                     th:src="@{${order.orderDetails[0].productVariant.product.primaryImageUrl ?: '/assets/img/product/no-image.jpg'}}"
+                                     alt="Ảnh sản phẩm" class="order-product-image">
+                                <span th:unless="${order.orderDetails != null and !order.orderDetails.isEmpty() and order.orderDetails[0].productVariant != null and order.orderDetails[0].productVariant.product != null}">N/A</span>
+                            </td>
                             <td th:text="${#numbers.formatDecimal(order.total, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'"></td>
                             <td th:text="${order.orderStatus}"></td>
                             <td th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
@@ -76,11 +90,11 @@
                                     th:onclick="'confirmCancellation(\'' + ${order.id} + '\')'">
                                     Hủy đơn
                                 </button>
-                                <form th:id="'cancelForm_' + ${order.id}" 
-                                      th:action="@{/user/orders/{id}/cancel(id=${order.id})}" 
+                                <form th:id="'cancelForm_' + ${order.id}"
+                                      th:action="@{/user/orders/{id}/cancel(id=${order.id})}"
                                       method="post" style="display: none;">
                                     </form>
-                                
+
                                 <button type="button" class="btn btn-info btn-sm"
                                         data-bs-toggle="modal"
                                         data-bs-target="#orderDetailsModal"
@@ -90,17 +104,18 @@
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(orders.?[orderStatus.name() == 'PENDING'])}">
-                            <td colspan="5">Không có đơn hàng nào đang chờ xử lý.</td>
+                            <td colspan="6">Không có đơn hàng nào đang chờ xử lý.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            
+
             <div class="tab-pane">
                 <table class="table table-bordered align-middle text-center">
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
+                            <th>Sản phẩm</th>
                             <th>Tổng tiền</th>
                             <th>Trạng thái</th>
                             <th>Ngày tạo</th>
@@ -110,6 +125,12 @@
                     <tbody>
                         <tr th:each="order : ${orders}" th:if="${order.orderStatus.name() == 'CONFIRMED'}">
                             <td th:text="${order.id}"></td>
+                            <td>
+                                <img th:if="${order.orderDetails != null and !order.orderDetails.isEmpty() and order.orderDetails[0].productVariant != null and order.orderDetails[0].productVariant.product != null}"
+                                     th:src="@{${order.orderDetails[0].productVariant.product.primaryImageUrl ?: '/assets/img/product/no-image.jpg'}}"
+                                     alt="Ảnh sản phẩm" class="order-product-image">
+                                <span th:unless="${order.orderDetails != null and !order.orderDetails.isEmpty() and order.orderDetails[0].productVariant != null and order.orderDetails[0].productVariant.product != null}">N/A</span>
+                            </td>
                             <td th:text="${#numbers.formatDecimal(order.total, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'"></td>
                             <td th:text="${order.orderStatus}"></td>
                             <td th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
@@ -118,8 +139,8 @@
                                     th:onclick="'confirmCancellation(\'' + ${order.id} + '\')'">
                                     Hủy đơn
                                 </button>
-                                <form th:id="'cancelForm_' + ${order.id}" 
-                                      th:action="@{/user/orders/{id}/cancel(id=${order.id})}" 
+                                <form th:id="'cancelForm_' + ${order.id}"
+                                      th:action="@{/user/orders/{id}/cancel(id=${order.id})}"
                                       method="post" style="display: none;"></form>
 
                                 <button type="button" class="btn btn-info btn-sm"
@@ -131,7 +152,7 @@
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(orders.?[orderStatus.name() == 'CONFIRMED'])}">
-                            <td colspan="5">Không có đơn hàng nào đã được xác nhận.</td>
+                            <td colspan="6">Không có đơn hàng nào đã được xác nhận.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -142,6 +163,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
+                            <th>Sản phẩm</th>
                             <th>Tổng tiền</th>
                             <th>Trạng thái</th>
                             <th>Ngày tạo</th>
@@ -151,6 +173,12 @@
                     <tbody>
                         <tr th:each="order : ${orders}" th:if="${order.orderStatus.name() == 'DELIVERING'}">
                             <td th:text="${order.id}"></td>
+                            <td>
+                                <img th:if="${order.orderDetails != null and !order.orderDetails.isEmpty() and order.orderDetails[0].productVariant != null and order.orderDetails[0].productVariant.product != null}"
+                                     th:src="@{${order.orderDetails[0].productVariant.product.primaryImageUrl ?: '/assets/img/product/no-image.jpg'}}"
+                                     alt="Ảnh sản phẩm" class="order-product-image">
+                                <span th:unless="${order.orderDetails != null and !order.orderDetails.isEmpty() and order.orderDetails[0].productVariant != null and order.orderDetails[0].productVariant.product != null}">N/A</span>
+                            </td>
                             <td th:text="${#numbers.formatDecimal(order.total, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'"></td>
                             <td th:text="${order.orderStatus}"></td>
                             <td th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
@@ -164,7 +192,7 @@
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(orders.?[orderStatus.name() == 'DELIVERING'])}">
-                            <td colspan="5">Không có đơn hàng nào đang vận chuyển.</td>
+                            <td colspan="6">Không có đơn hàng nào đang vận chuyển.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -175,6 +203,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
+                            <th>Sản phẩm</th>
                             <th>Tổng tiền</th>
                             <th>Trạng thái</th>
                             <th>Ngày tạo</th>
@@ -184,6 +213,12 @@
                     <tbody>
                         <tr th:each="order : ${orders}" th:if="${order.orderStatus.name() == 'DELIVERED'}">
                             <td th:text="${order.id}"></td>
+                            <td>
+                                <img th:if="${order.orderDetails != null and !order.orderDetails.isEmpty() and order.orderDetails[0].productVariant != null and order.orderDetails[0].productVariant.product != null}"
+                                     th:src="@{${order.orderDetails[0].productVariant.product.primaryImageUrl ?: '/assets/img/product/no-image.jpg'}}"
+                                     alt="Ảnh sản phẩm" class="order-product-image">
+                                <span th:unless="${order.orderDetails != null and !order.orderDetails.isEmpty() and order.orderDetails[0].productVariant != null and order.orderDetails[0].productVariant.product != null}">N/A</span>
+                            </td>
                             <td th:text="${#numbers.formatDecimal(order.total, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'"></td>
                             <td th:text="${order.orderStatus}"></td>
                             <td th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
@@ -198,7 +233,7 @@
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(orders.?[orderStatus.name() == 'DELIVERED'])}">
-                            <td colspan="5">Không có đơn hàng nào đã giao.</td>
+                            <td colspan="6">Không có đơn hàng nào đã giao.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -209,6 +244,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
+                            <th>Sản phẩm</th>
                             <th>Tổng tiền</th>
                             <th>Trạng thái</th>
                             <th>Ngày tạo</th>
@@ -218,6 +254,12 @@
                     <tbody>
                         <tr th:each="order : ${orders}" th:if="${order.orderStatus.name() == 'CANCELLED'}">
                             <td th:text="${order.id}"></td>
+                            <td>
+                                <img th:if="${order.orderDetails != null and !order.orderDetails.isEmpty() and order.orderDetails[0].productVariant != null and order.orderDetails[0].productVariant.product != null}"
+                                     th:src="@{${order.orderDetails[0].productVariant.product.primaryImageUrl ?: '/assets/img/product/no-image.jpg'}}"
+                                     alt="Ảnh sản phẩm" class="order-product-image">
+                                <span th:unless="${order.orderDetails != null and !order.orderDetails.isEmpty() and order.orderDetails[0].productVariant != null and order.orderDetails[0].productVariant.product != null}">N/A</span>
+                            </td>
                             <td th:text="${#numbers.formatDecimal(order.total, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'"></td>
                             <td th:text="${order.orderStatus}"></td>
                             <td th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
@@ -231,17 +273,18 @@
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(orders.?[orderStatus.name() == 'CANCELLED'])}">
-                            <td colspan="5">Không có đơn hàng nào đã bị hủy.</td>
+                            <td colspan="6">Không có đơn hàng nào đã bị hủy.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            
+
             <div class="tab-pane">
                 <table class="table table-bordered align-middle text-center">
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
+                            <th>Sản phẩm</th>
                             <th>Tổng tiền</th>
                             <th>Trạng thái</th>
                             <th>Ngày tạo</th>
@@ -251,6 +294,12 @@
                     <tbody>
                         <tr th:each="order : ${orders}" th:if="${order.orderStatus.name() == 'RETURNED'}">
                             <td th:text="${order.id}"></td>
+                            <td>
+                                <img th:if="${order.orderDetails != null and !order.orderDetails.isEmpty() and order.orderDetails[0].productVariant != null and order.orderDetails[0].productVariant.product != null}"
+                                     th:src="@{${order.orderDetails[0].productVariant.product.primaryImageUrl ?: '/assets/img/product/no-image.jpg'}}"
+                                     alt="Ảnh sản phẩm" class="order-product-image">
+                                <span th:unless="${order.orderDetails != null and !order.orderDetails.isEmpty() and order.orderDetails[0].productVariant != null and order.orderDetails[0].productVariant.product != null}">N/A</span>
+                            </td>
                             <td th:text="${#numbers.formatDecimal(order.total, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'"></td>
                             <td th:text="${order.orderStatus}"></td>
                             <td th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
@@ -264,7 +313,7 @@
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(orders.?[orderStatus.name() == 'RETURNED'])}">
-                            <td colspan="5">Không có đơn hàng nào đã được trả lại.</td>
+                            <td colspan="6">Không có đơn hàng nào đã được trả lại.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -272,7 +321,7 @@
 
         </div>
     </div>
-    
+
     <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">

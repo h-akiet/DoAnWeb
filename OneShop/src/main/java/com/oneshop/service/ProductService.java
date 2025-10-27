@@ -1,193 +1,140 @@
-package com.oneshop.service.vendor;
+// src/main/java/com/oneshop/service/ProductService.java
+package com.oneshop.service; // Đảm bảo package đúng
 
-import com.oneshop.dto.vendor.ProductDto;
-import java.util.Collections;
+import com.oneshop.dto.ProductDto;
+import com.oneshop.entity.Brand;
+import com.oneshop.entity.Category;
+import com.oneshop.entity.Product;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal; // Import BigDecimal
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-
-import com.oneshop.entity.Brand;
-import com.oneshop.entity.Product;
-import com.oneshop.repository.BrandRepository;
-import com.oneshop.repository.CategoryRepository;
-import com.oneshop.repository.ProductRepository;
-import com.oneshop.repository.ProductReviewRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest; // Thêm import này
-
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
-
-    @Autowired
-    private ProductRepository productRepository;
-    
-    @Autowired
-    private ProductReviewRepository reviewRepository;
-
+// Đây là Interface, chỉ khai báo phương thức
 public interface ProductService {
 
+    // --- Chức năng cho Vendor ---
     /**
-     * Lấy danh sách sản phẩm của một shop (phân trang)
+     * Lấy danh sách sản phẩm của một Shop (phân trang).
+     * @param shopId ID của Shop.
+     * @param pageable Thông tin phân trang.
+     * @return Page<Product>.
      */
     Page<Product> getProductsByShop(Long shopId, Pageable pageable);
 
     /**
-     * Lấy thông tin chi tiết một sản phẩm
+     * Lấy thông tin chi tiết một sản phẩm cho Vendor (kiểm tra quyền sở hữu).
+     * @param productId ID sản phẩm.
+     * @param shopId ID của Shop sở hữu.
+     * @return Optional<Product>.
      */
-    Product getProductById(Long productId);
+    Optional<Product> getProductByIdForVendor(Long productId, Long shopId); // Đổi tên để phân biệt với hàm public
 
     /**
-     * Thêm một sản phẩm mới
-     * @param productDto Thông tin sản phẩm từ DTO
-     * @param images Danh sách file ảnh
-     * @param shopId ID của shop sở hữu
+     * Thêm sản phẩm mới cho Shop.
+     * @param productDto DTO chứa thông tin.
+     * @param images Danh sách file ảnh.
+     * @param shopId ID của Shop.
+     * @return Product đã lưu.
      */
     Product addProduct(ProductDto productDto, List<MultipartFile> images, Long shopId);
 
     /**
-     * Cập nhật thông tin sản phẩm
+     * Cập nhật thông tin sản phẩm.
+     * @param productId ID sản phẩm cần cập nhật.
+     * @param productDto DTO chứa thông tin mới.
+     * @param newImages Danh sách file ảnh mới (có thể rỗng).
+     * @param shopId ID của Shop sở hữu (để kiểm tra quyền).
+     * @return Product đã cập nhật.
      */
-    Product updateProduct(Long productId, ProductDto productDto, List<MultipartFile> newImages);
+    Product updateProduct(Long productId, ProductDto productDto, List<MultipartFile> newImages, Long shopId); // Sửa: Thêm shopId
 
     /**
-     * Xóa một sản phẩm
+     * Xóa sản phẩm.
+     * @param productId ID sản phẩm cần xóa.
+     * @param shopId ID của Shop sở hữu (để kiểm tra quyền).
      */
-    void deleteProduct(Long productId);
-    
-    @Autowired
-    private BrandRepository brandRepository;
-    
-    // --- Public Methods for Index/Home Page ---
-
-    public List<com.oneshop.entity.Category> getAllCategories() {
-        return categoryRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> findBestSellingProducts() {
-        List<Product> products = productRepository.findTop10ByOrderBySalesCountDesc();
-        setProductDetails(products); 
-        return products;
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> findNewestProducts() {
-        List<Product> products = productRepository.findTop10ByOrderByProductIdDesc();
-        setProductDetails(products);
-        return products;
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> findBestPriceProducts() {
-        List<Product> products = productRepository.findTop10ByBestDiscount();
-        setProductDetails(products);
-        return products;
-    }
-
-    // --- Public Methods for Product Detail Page ---
+    void deleteProduct(Long productId, Long shopId); // Sửa: Thêm shopId
 
     /**
-     * Finds a product by its ID and populates its transient details.
+     * Đếm số lượng sản phẩm của Shop.
+     * @param shopId ID Shop.
+     * @return Số lượng sản phẩm.
      */
-    @Transactional(readOnly = true)
-    public Product findProductById(Long productId) {
-        Optional<Product> productOptional = productRepository.findById(productId);
-        if (productOptional.isPresent()) {
-            Product product = productOptional.get();
-            setProductDetails(product); // Set details for single product
-            return product;
-        }
-        return null; 
-    }
+    long countProductsByShop(Long shopId);
+
+    // --- Chức năng cho User (Public) ---
+    /**
+     * Lấy tất cả danh mục.
+     * @return List<Category>.
+     */
+    List<Category> getAllCategories();
 
     /**
-     * Finds related products based on the current product's category.
+     * Lấy tất cả thương hiệu.
+     * @return List<Brand>.
      */
-    @Transactional(readOnly = true)
-    public List<Product> findRelatedProducts(Product product) {
-        if (product == null || product.getCategory() == null) {
-            return Collections.emptyList(); // Trả về danh sách rỗng nếu không có sản phẩm hoặc danh mục
-        }
-
-        // Tạo một đối tượng Pageable để chỉ lấy 6 sản phẩm đầu tiên
-        Pageable limit = PageRequest.of(0, 6); 
-
-        // Gọi phương thức repository mới, truyền vào cả category, productId và giới hạn số lượng
-        List<Product> relatedProducts = productRepository.findByCategoryAndProductIdNot(
-            product.getCategory(), 
-            product.getProductId(),
-            limit
-        );
-        
-        // Làm giàu dữ liệu cho các sản phẩm liên quan (tính rating, sold count,...)
-        setProductDetails(relatedProducts); 
-        return relatedProducts;
-    }
-
-
-    // --- Helper Methods ---
+    List<Brand> getAllBrands();
 
     /**
-     * Populates transient fields (rating, reviewCount, soldCount) for a list of products.
+     * Lấy danh sách sản phẩm bán chạy nhất (đã published).
+     * @param limit Số lượng tối đa cần lấy.
+     * @return List<Product>.
      */
-    private void setProductDetails(List<Product> products) {
-        if (products != null) {
-            for (Product product : products) {
-                setProductDetails(product); // Calls the single product helper
-            }
-        }
-    }
+    List<Product> findBestSellingProducts(int limit);
 
     /**
-     * Populates transient fields (rating, reviewCount, soldCount) for a single product.
+     * Lấy danh sách sản phẩm mới nhất (đã published), có phân trang.
+     * @param pageable Thông tin phân trang (trang, kích thước, sắp xếp).
+     * @return Page<Product>.
      */
-    private void setProductDetails(Product product) {
-        if (product != null) {
-            Long productId = product.getProductId();
+    Page<Product> findNewestProducts(Pageable pageable);
 
-            // Get data from Review Repository
-            Double avgRating = reviewRepository.findAverageRatingByProductId(productId);
-            Integer reviewCount = reviewRepository.countReviewsByProductId(productId);
+    /**
+     * Lấy danh sách sản phẩm có giá tốt/giảm giá nhiều nhất (đã published).
+     * @param limit Số lượng tối đa cần lấy.
+     * @return List<Product>.
+     */
+    List<Product> findBestPriceProducts(int limit);
 
-            // Set the transient fields in the Product entity
-            product.setRating(avgRating != null ? avgRating : 0.0);
-            product.setReviewCount(reviewCount != null ? reviewCount : 0);
-            product.setSoldCount(product.getSalesCount()); 
-        }
-    }
+    /**
+     * Tìm sản phẩm theo ID (chỉ sản phẩm đã published).
+     * @param productId ID sản phẩm.
+     * @return Optional<Product>.
+     */
+    Optional<Product> findProductById(Long productId); // Sửa: Trả về Optional
+
+    /**
+     * Tìm sản phẩm liên quan (cùng category, khác ID, đã published).
+     * @param product Sản phẩm hiện tại.
+     * @param limit Số lượng tối đa cần lấy.
+     * @return List<Product>.
+     */
+    List<Product> findRelatedProducts(Product product, int limit); // Sửa: Thêm limit
+
+    /**
+     * Tìm kiếm và lọc tất cả sản phẩm đã published, có phân trang.
+     * @param spec Specification chứa điều kiện lọc.
+     * @param pageable Thông tin phân trang và sắp xếp.
+     * @return Page<Product>.
+     */
+    Page<Product> findAllPublishedProducts(Specification<Product> spec, Pageable pageable); // Sửa tên: findAllPublishedProducts
+
+    /**
+     * Tìm kiếm và lọc sản phẩm public (không phân trang).
+     * @param name Tên sản phẩm (có thể null).
+     * @param categoryId ID danh mục (có thể null).
+     * @param brandId ID thương hiệu (có thể null).
+     * @param minPrice Giá tối thiểu (có thể null).
+     * @param maxPrice Giá tối đa (có thể null).
+     * @return List<Product>.
+     */
+    List<Product> searchAndFilterPublic(String name, Long categoryId, Long brandId, BigDecimal minPrice, BigDecimal maxPrice); 
     
-    // --- Other Methods (Kept for completeness) ---
-    
-    public List<Product> getTopSellingProducts() {
-        return productRepository.findBySalesCountGreaterThanOrderBySalesCountDesc(10);
-    }
-    
-    public List<Product> searchAndFilter(String name, Long categoryId, Double minPrice, Double maxPrice) {
-        return productRepository.searchAndFilter(name, categoryId, minPrice, maxPrice);
-    }
-
-	@Transactional(readOnly = true)
-	public List<Product> findFeaturedProducts() {
-		return null;
-	}
-
-	public List<com.oneshop.entity.Brand> getAllBrands() {
-	    return brandRepository.findAll();
-	}
-	public Page<Product> findAll(Specification<Product> spec, Pageable pageable) {
-	    // Gọi phương thức findAll() của JpaSpecificationExecutor
-	    Page<Product> productPage = productRepository.findAll(spec, pageable);
-	    
-	    // Làm giàu dữ liệu (tính rating,...) cho các sản phẩm trong trang hiện tại
-	    productPage.getContent().forEach(this::setProductDetails);
-	    
-	    return productPage;
-	}
+    void updateProductStockAndPriceFromVariants(Product product);
 }

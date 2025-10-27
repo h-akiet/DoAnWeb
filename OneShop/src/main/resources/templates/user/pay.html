@@ -97,11 +97,11 @@
 								th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0
 								₫</div>
 						</div>
+						
 						<div class="pay-info">
 							<div class="main__pay-text">Phí vận chuyển</div>
 							<div class="main__pay-price"
-								th:text="${shippingCost == 0 ? 'Miễn phí' : #numbers.formatDecimal(shippingCost, 0, 'COMMA', 0, 'POINT') + ' ₫'}">Miễn
-								phí</div>
+								th:text="${#numbers.formatDecimal(shippingCost, 0, 'COMMA', 0, 'POINT')} + ' ₫'">30.000 ₫</div>
 						</div>
 						<hr class="divider-light">
 						<div class="pay-info total-summary">

@@ -1,8 +1,8 @@
-package com.oneshop.service.vendor;
+package com.oneshop.service;
 
 import java.util.List;
 
-import com.oneshop.entity.vendor.PromotionTypeEntity;
+import com.oneshop.entity.PromotionTypeEntity;
 
 public interface PromotionTypeService {
     List<PromotionTypeEntity> findAll();

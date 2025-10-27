@@ -1,13 +1,13 @@
-package com.oneshop.service.vendor.impl;
+package com.oneshop.service.impl;
 
-import com.oneshop.dto.vendor.PromotionDto;
-import com.oneshop.entity.vendor.Promotion;
-import com.oneshop.entity.vendor.PromotionTypeEntity;
-import com.oneshop.entity.vendor.Shop;
-import com.oneshop.repository.vendor.PromotionRepository;
-import com.oneshop.repository.vendor.PromotionTypeRepository;
-import com.oneshop.repository.vendor.ShopRepository;
-import com.oneshop.service.vendor.PromotionService;
+import com.oneshop.dto.PromotionDto;
+import com.oneshop.entity.Promotion;
+import com.oneshop.entity.PromotionTypeEntity;
+import com.oneshop.entity.Shop;
+import com.oneshop.repository.PromotionRepository;
+import com.oneshop.repository.PromotionTypeRepository;
+import com.oneshop.repository.ShopRepository;
+import com.oneshop.service.PromotionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal; // Thêm import BigDecimal
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest; // <<< THÊM IMPORT
+import org.springframework.data.domain.Pageable; // <<< THÊM IMPORT
+import org.springframework.data.domain.Sort;
+import java.time.LocalDate;
 
 @Service
 public class PromotionServiceImpl implements PromotionService {
@@ -80,5 +86,14 @@ public class PromotionServiceImpl implements PromotionService {
         }
         
         promotionRepository.delete(promotion);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Promotion> findActiveAndUpcomingPromotions(Pageable pageable) {
+        // Tìm các khuyến mãi có ngày kết thúc là hôm nay hoặc sau hôm nay
+        // (Trừ đi 1 ngày để bao gồm cả các khuyến mãi kết thúc hôm nay)
+        // Repository đã hỗ trợ Pageable, chỉ cần truyền vào
+        return promotionRepository.findByEndDateAfter(LocalDate.now().minusDays(1), pageable);
     }
 }

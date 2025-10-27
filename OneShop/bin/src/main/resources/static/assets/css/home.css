@@ -1,42 +1,10 @@
-/* =====Css lại header cho trang home====== */
-
-.header.scrolling {
-    background-color: transparent;
-}
-
-.header.scrolling .header__nav {
-    background-color: transparent;
-    box-shadow: none;
-}
-
-.header.scrolling .header__nav-item {
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.header.scrolling .header__nav .header__nav-item:last-child {
-    border-right: none;
-}
-
-.header.scrolling .header__search-wrap {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.header.scrolling .header__search-icon i,
-.header.scrolling .header__search-input,
-.header.scrolling .header__account-login,
-.header.scrolling .header__account-register,
-.header.scrolling .header__account-login:after,
-.header.scrolling .name-user,
-.header.scrolling .header__cart i {
-    color: var(--white-cl-1);
-}
-
+/* ======================================================== */
+/* ===== CSS CHO TRANG CHỦ (SAU KHI TÁCH HEADER) ========== */
+/* ======================================================== */
 
 /* ===========Slider======= */
-
 .main {
-    margin-top: 0;
+    margin-top: 0; /* Chỉ áp dụng cho trang chủ có slider */
 }
 
 .main__slice {
@@ -68,10 +36,6 @@
     display: block;
 }
 
-.header__account-login:after {
-    border-right: 1px solid var(--white-cl-1);
-}
-
 .container {
     max-width: 1170px;
     margin: auto;
@@ -85,7 +49,7 @@
     width: 50%;
     position: absolute;
     top: 50%;
-    transform: translateY(-50%)
+    transform: translateY(-50%);
 }
 
 .main__slice .caption h1 {
@@ -187,9 +151,10 @@
 
 
 /* ====Main Tabnine==== */
-
 .main__tabnine {
     margin-top: 40px;
+    position: relative;
+    z-index: 2; /* Đảm bảo tab nằm trên các lớp khác nếu cần */
 }
 
 .main__tabnine .row {
@@ -197,7 +162,7 @@
     margin-right: -10px;
 }
 
-.main__tabnine .row>.col {
+.main__tabnine .row > .col {
     padding-left: 10px;
     padding-right: 10px;
     margin-top: 20px;
@@ -205,7 +170,6 @@
 
 
 /* ====main Sale==== */
-
 .main__sale {
     background: var(--white-cl-3);
     padding: 50px 0;
@@ -284,13 +248,12 @@
 
 
 /* ---News---- */
-
 .news {
     display: flex;
 }
 
 .news__img {
-    flex: 2
+    flex: 2;
 }
 
 .news__img img {
@@ -308,7 +271,7 @@
     color: var(--black-cl-2);
     margin-bottom: 8px;
     line-height: 2rem;
-    height: calc(20px * 2);
+    height: calc(2rem * 2);
     overflow: hidden;
     display: block;
     display: -webkit-box;
@@ -327,7 +290,7 @@
     color: var(--black-cl-1);
     text-align: justify;
     line-height: 2rem;
-    height: calc(20px * 9);
+    height: calc(2rem * 9);
     overflow: hidden;
     display: block;
     display: -webkit-box;
@@ -337,7 +300,6 @@
 
 
 /* ====Main policy==== */
-
 .policy {
     display: flex;
     align-items: center;
@@ -348,8 +310,6 @@
 .policy__img {
     width: 60px;
 }
-
-.policy__info {}
 
 .policy__title {
     font-size: 1.8rem;
@@ -365,7 +325,6 @@
 
 
 /* Bands */
-
 .main__bands {
     background-color: var(--white-cl-);
 }
@@ -378,19 +337,26 @@
     background-size: contain;
 }
 
+/* =================================================================== */
+/* =================== ĐỊNH NGHĨA KEYFRAMES =================== */
+/* =================================================================== */
 
-/*========Responsive========*/
+@keyframes slide {
+    from { opacity: 0.5; transform: scale(1.1); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes textTranform {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ============================================================== */
+/* =================== RESPONSIVE CHO TRANG CHỦ ================== */
+/* ============================================================== */
 
 @media(max-width: 1023px) {
-    .header__nav,
-    .header.scrolling .header__nav {
-        background-color: var(--black-cl-2);
-    }
-    .header__nav-item,
-    .header.scrolling .header__nav-item {
-        border-top: none;
-        border-bottom: none;
-    }
     .main__slice .slider {
         height: 500px;
     }
@@ -398,15 +364,6 @@
         width: 70%;
         left: 50%;
         transform: translate(-50%, -50%);
-    }
-    .header.scrolling .header__nav .header__nav-item:last-child {
-        border-right: none;
-    }
-    .header.scrolling .header__search-wrap {
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    .header.scrolling .header__search-icon i {
-        color: var(--white-cl-1)
     }
 }
 

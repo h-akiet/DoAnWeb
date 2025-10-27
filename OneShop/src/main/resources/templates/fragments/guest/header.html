@@ -19,78 +19,115 @@
 						</a>
 					</div>
 				</div>
+
 				<div class="header__account">
 					<div sec:authorize="isAnonymous()"
 						class="header__account-guest-links">
-						<a href="#my-Login" class="header__account-login">Đăng Nhập</a> <a
-							href="#my-Register" class="header__account-register">Đăng Kí</a>
+						<a th:href="@{/login}" class="header__account-login">Đăng Nhập</a>
+						<a th:href="@{/register}" class="header__account-register">Đăng
+							Kí</a>
 					</div>
-					<div sec:authorize="isAuthenticated()" id="userAccountMenu">
-						<div class="account__avatar-btn">
-							<i class="fas fa-user"></i>
-						</div>
-						<div class="account__dropdown">
-							<div class="dropdown__header">
-								<span class="dropdown__user-name"
-									th:text="'Xin chào, ' + ${#authentication.principal.username}">
-									Xin chào, Tên Người Dùng
-								</span>
-							</div>
-							<div class="dropdown__actions">
-								<a th:href="@{/profile}" class="dropdown__item">
-									<i class="fas fa-address-card"></i> Tài khoản
-								</a>
-								<a th:href="@{/user/orders}" class="dropdown__item">
-									<i class="fas fa-box-open"></i> Đơn hàng
-								</a>
-								<a th:href="@{/logout}" class="dropdown__item"
-									onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
-									<i class="fas fa-sign-out-alt"></i> Đăng xuất
-								</a>
-								<form th:action="@{/logout}" method="post" id="logoutForm" style="display: none;"></form>
-							</div>
-						</div>
 
+					<div sec:authorize="isAuthenticated()" id="userAccountMenu"
+						class="user-account-widget">
+						<span class="user-greeting"
+							th:text="'Xin chào, ' + ${#authentication.principal.username}">
+							Xin chào, Tên Người Dùng </span>
+						<div class="avatar-dropdown-container">
+							<div class="account__avatar-btn">
+								<i class="fas fa-user"></i>
+							</div>
+							<div class="account__dropdown">
+								<div class="dropdown__actions">
+									<a th:href="@{/user/profile}" class="dropdown__item"> <i
+										class="fas fa-address-card"></i> Tài khoản
+									</a>
+									<a th:href="@{/user/orders}" class="dropdown__item"> <i
+										class="fas fa-box-open"></i> Đơn hàng
+									</a>
+
+									<th:block th:with="currentUserShop=${#authentication.principal.shop}">
+
+										<a th:if="${#authorization.expression('hasAuthority(''ROLE_VENDOR'')') and currentUserShop != null and currentUserShop.status.name() == 'APPROVED'}"
+										   th:href="@{/vendor/dashboard}" class="dropdown__item">
+											<i class="fas fa-store"></i> Kênh Người Bán
+										</a>
+
+										<a th:if="${#authorization.expression('hasAuthority(''ROLE_VENDOR'')') and currentUserShop != null and currentUserShop.status.name() != 'APPROVED'}"
+										   href="javascript:void(0);" class="dropdown__item"
+										   onclick="alert('Shop của bạn đang chờ duyệt hoặc đã bị từ chối. Vui lòng liên hệ quản trị viên.');">
+											<i class="fas fa-store"></i> Kênh Người Bán (Chờ duyệt)
+										</a>
+
+										<a th:if="${not #authorization.expression('hasAuthority(''ROLE_VENDOR'')') and currentUserShop == null}"
+										   th:href="@{/shop/register}" class="dropdown__item">
+											<i class="fas fa-plus-circle"></i> Đăng ký mở Shop
+										</a>
+
+										<a th:if="${not #authorization.expression('hasAuthority(''ROLE_VENDOR'')') and currentUserShop != null}"
+                                           href="javascript:void(0);" class="dropdown__item"
+                                           onclick="alert('Yêu cầu đăng ký shop của bạn đang chờ duyệt.');">
+                                             <i class="fas fa-info-circle"></i> Trạng thái đăng ký Shop
+                                        </a>
+
+									</th:block>
+									<a th:href="@{/logout}" class="dropdown__item"
+										onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
+										<i class="fas fa-sign-out-alt"></i> Đăng xuất
+									</a>
+									<form th:action="@{/logout}" method="post" id="logoutForm"
+										style="display: none;"></form>
+								</div>
+							</div>
+						</div>
 					</div>
-				</div>
+					</div>
+
 				<div class="header__cart"
-					th:classappend="${cart != null and !cart.items.isEmpty()} ? 'have' : ''">
+					th:classappend="${cart != null and cart.items != null and !cart.items.isEmpty()} ? 'have' : ''">
 					<a th:href="@{/cart}"><i class="fas fa-shopping-basket"></i></a>
 
 					<div class="header__cart-amount" th:text="${cart?.totalItems ?: 0}">0</div>
 
 					<div class="header__cart-wrap">
-						<div th:if="${cart == null or cart.items.isEmpty()}"
-							class="cart__empty">
+						<div class="cart__empty"
+							th:if="${cart == null or cart.items == null or cart.items.isEmpty()}">
 							<img th:src="@{/assets/img/cart-empty.png}" alt="Empty Cart"
 								class="cart__empty-img">
 							<p class="cart__empty-text">Giỏ hàng của bạn trống</p>
 						</div>
 
-						<div th:unless="${cart == null or cart.items.isEmpty()}">
+						<div id="header-cart-content"
+							th:unless="${cart == null or cart.items == null or cart.items.isEmpty()}">
 							<ul class="order__list">
-								<li class="item-order" th:each="cartItem : ${cart?.items?.values()}">
+								<li class="item-order" th:each="cartItemEntry : ${cart.items}"
+									th:with="cartItem=${cartItemEntry.value}"
+									th:data-variant-id="${cartItem.productId}">
 									<div class="order-wrap">
 										<a th:href="@{/product/{id}(id=${cartItem.productId})}"
-											class="order-img">
-											<img th:src="@{${cartItem.imageUrl}}"
-												alt="Product Image">
+											class="order-img"> <img th:src="@{${cartItem.imageUrl}}"
+											alt="Product Image">
 										</a>
 										<div class="order-main">
 											<a th:href="@{/product/{id}(id=${cartItem.productId})}"
-												class="order-main-name" th:text="${cartItem.name}">Tên sản phẩm</a>
+												class="order-main-name" th:text="${cartItem.name}">Tên
+												sản phẩm</a>
 											<div class="order-main-price"
-												th:text="${cartItem.quantity} + ' x ' + ${#numbers.formatDecimal(cartItem.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">2 x 45,000 đ</div>
+												th:text="${cartItem.quantity} + ' x ' + ${#numbers.formatDecimal(cartItem.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">2
+												x 45,000 đ</div>
 										</div>
-										<a th:href="@{/cart/remove/{id}(id=${cartItem.productId})}"
-											class="order-close" title="Xóa sản phẩm">
+										<button type="button"
+											class="order-close remove-item-header-btn"
+											title="Xóa sản phẩm"
+											th:data-variant-id="${cartItem.productId}">
 											<i class="far fa-times-circle"></i>
-										</a>
+										</button>
 									</div>
 								</li>
 							</ul>
 							<div class="total-money"
-								th:text="'Tổng cộng: ' + ${#numbers.formatDecimal(cart?.grandTotal ?: 0, 0, 'COMMA', 0, 'POINT')} + ' đ'">Tổng cộng: 0đ</div>
+								th:text="'Tổng cộng: ' + ${#numbers.formatDecimal(cart?.grandTotal ?: 0, 0, 'COMMA', 0, 'POINT')} + ' đ'">Tổng
+								cộng: 0đ</div>
 							<a th:href="@{/cart}" class="btn btn--default cart-btn">Xem
 								giỏ hàng</a> <a th:href="@{/pay}"
 								class="btn btn--default cart-btn orange">Thanh toán</a>
@@ -113,202 +150,156 @@
 			</ul>
 		</div>
 
-		<div class="modal" id="my-Login">
-			<a href="#" class="overlay-close"></a>
-			<div class="authen-modal login">
-				<h3 class="authen-modal__title">Đăng Nhập</h3>
-				<div id="loginError" class="alert alert-danger" role="alert"
-					style="display: none;"></div>
-				<form id="loginForm" th:action="@{/login}" method="post">
-					<div class="form-group">
-						<label for="account" class="form-label">Địa chỉ email *</label> <input
-							id="account" name="account" type="email" class="form-control"
-							required> <span class="form-message"></span>
-					</div>
-					<div class="form-group">
-						<label for="password" class="form-label">Mật khẩu *</label> <input
-							id="password" name="password" type="password"
-							class="form-control" required> <span class="form-message"></span>
-					</div>
-					<div class="authen__btns">
-						<button type="submit" class="btn btn--default">Đăng Nhập</button>
-						<input type="checkbox" class="authen-checkbox" name="remember-me">
-						<label class="form-label">Ghi nhớ mật khẩu</label>
-					</div>
-				</form>
-				<a class="authen__link" th:href="@{/forgot}">Quên mật khẩu?</a>
-			</div>
-		</div>
-
-		<div class="ModalForm">
-			<div class="modal" id="my-Register">
-				<a href="#" class="overlay-close"></a>
-				<div class="authen-modal register">
-					<h3 class="authen-modal__title">Đăng Ký</h3>
-					<div id="registerError" class="alert alert-danger" role="alert"
-						style="display: none;"></div>
-					<form id="registerForm" method="post">
-						<div class="form-group">
-							<label for="fullName" class="form-label">Họ Tên</label> <input
-								id="fullName" name="fullName" type="text" class="form-control"
-								required> <span class="form-message"></span>
-						</div>
-						<div class="form-group">
-							<label for="email" class="form-label">Tài khoản Email *</label> <input
-								id="email" name="email" type="email" class="form-control"
-								required> <span class="form-message"></span>
-						</div>
-						<div class="form-group">
-							<label for="password" class="form-label">Mật khẩu *</label> <input
-								id="password" name="password" type="password"
-								class="form-control" required> <span
-								class="form-message"></span>
-						</div>
-						<div class="form-group">
-							<label for="confirmPassword" class="form-label">Nhập lại
-								mật khẩu *</label> <input id="confirmPassword" name="confirmPassword"
-								type="password" class="form-control" required> <span
-								class="form-message"></span>
-						</div>
-						<div class="authen__btns">
-							<button type="submit" class="btn btn--default">Đăng Ký</button>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
-
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 		<script th:src="@{/assets/owlCarousel/owl.carousel.min.js}"></script>
-		<script th:src="@{/assets/js/homeScript.js}"></script>
-		<script th:src="@{/assets/js/commonscript.js}"></script>
-		<script>
-        // *** KHỐI JQUERY KHÔNG CẦN READY (Owl Carousel) ***
-        $('.owl-carousel.hight').owlCarousel({
-            loop: true, margin: 20, nav: true, dots: false,
-            autoplay: true, autoplayTimeout: 3000, autoplayHoverPause: true,
-            responsive: { 0: { items: 2 }, 600: { items: 3 }, 1000: { items: 5 } }
-        });
-        $('.owl-carousel.news').owlCarousel({
-            loop: true, margin: 20, nav: true, dots: false,
-            autoplay: true, autoplayTimeout: 4000, autoplayHoverPause: true,
-            responsive: { 0: { items: 1 }, 600: { items: 1 }, 1000: { items: 2 } }
-        });
-        $('.owl-carousel.bands').owlCarousel({
-            loop: true, margin: 20, nav: false, dots: false,
-            autoplay: true, autoplayTimeout: 2000, autoplayHoverPause: true,
-            responsive: { 0: { items: 2 }, 600: { items: 3 }, 1000: { items: 6 } }
-        });
-        
-        // *** KHỐI CHÍNH BỌC TẤT CẢ LOGIC DOM/AJAX ***
-        $(document).ready(function() {
-            // Xử lý form Đăng ký
-            $('#registerForm').submit(function(e) {
-                e.preventDefault(); 
-                $('#registerError').hide(); 
-                var formData = $(this).serialize();
-                $.ajax({
-                    type: 'POST', url: '/api/auth/signup', data: formData,
-                    success: function(response) {
-                        if (response.success) {
-                            window.location.href = response.redirect; 
-                        } else {
-                            $('#registerError').text(response.message).show(); 
-                        }
-                    },
-                    error: function() {
-                        $('#registerError').text('Có lỗi xảy ra!').show();
-                    }
-                });
-            });
-			
-            // Xử lý form Đăng nhập
-            $('#loginForm').submit(function(e) {
-                e.preventDefault(); 
-                $('#loginError').hide(); 
-                var formData = $(this).serialize();
-                $.ajax({
-                    type: 'POST', url: '/login', data: formData,
-                    beforeSend: function(xhr) {
-                        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest"); 
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            window.location.href = response.redirect; 
-                        } else {
-                            $('#loginError').text(response.message).show();
-                        }
-                    },
-                    error: function(xhr) {
-                        if (xhr.status === 401) {
-                            $('#loginError').text('Tài khoản hoặc mật khẩu không chính xác!').show();
-                        } else {
-                            $('#loginError').text('Có lỗi xảy ra!').show();
-                        }
-                    }
-                });
-            });
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+			// Helper định dạng tiền tệ
+			function formatCurrency(number) {
+				const numericValue = parseFloat(number);
+				if (isNaN(numericValue)) { return '0 đ'; }
+				return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(numericValue).replace('₫', 'đ');
+			}
 
-            // LOGIC HIỂN THỊ AVATAR DROPDOWN
-            const $accountMenu = $('#userAccountMenu');
-            if ($accountMenu.length) {
-                const $avatarBtn = $accountMenu.find('.account__avatar-btn');
-                $avatarBtn.on('click', function(event) {
-                    event.stopPropagation();
-                    $('.header__account div[id^="userAccountMenu"].active').not($accountMenu).removeClass('active');
-                    $accountMenu.toggleClass('active');
-                });
+			// Hàm cập nhật số lượng trên icon giỏ hàng
+			function updateCartHeaderCount(totalItems) {
+				const $cartAmount = $('.header__cart-amount');
+				if ($cartAmount.length) {
+					$cartAmount.text(totalItems || 0);
+					$('.header__cart').toggleClass('have', totalItems > 0);
+				}
+			}
 
-                $(document).on('click', function(event) {
-                    if ($accountMenu.hasClass('active') && !$accountMenu.has(event.target).length) {
-                        $accountMenu.removeClass('active');
-                    }
-                });
-            }
+			// Hàm tạo HTML cho nội dung giỏ hàng mini
+			function buildHeaderCartContent(cartData) {
+				const cartBaseUrl = /*[[@{/cart}]]*/ '/cart';
+				const payBaseUrl = /*[[@{/pay}]]*/ '/pay';
+				const productBaseUrl = /*[[@{/product/}]]*/ '/product/';
+				const emptyCartImageUrl = /*[[@{/assets/img/cart-empty.png}]]*/ '/assets/img/cart-empty.png';
 
-            // Logic mở/đóng modal
-           const toggleModal = (modalId, shouldOpen) => {
-                const $modal = $(modalId);
-                
-                if (shouldOpen) {
-                    $modal.show().addClass('active'); 
-                    $('body').css('overflow', 'hidden'); 
-                } else {
-                    $modal.hide().removeClass('active');
-                    $('body').css('overflow', 'auto'); 
-                }
-            };
+				if (!cartData || !cartData.items || Object.keys(cartData.items).length === 0) {
+					return `
+						<div class="cart__empty">
+							<img src="${emptyCartImageUrl}" alt="Empty Cart" class="cart__empty-img">
+							<p class="cart__empty-text">Giỏ hàng của bạn trống</p>
+						</div>`;
+				}
 
-            // Gán sự kiện cho các nút
-            $('.header__account-login').off('click').on('click', function(e) {
-                e.preventDefault();
-                toggleModal('#my-Login', true);
-                toggleModal('#my-Register', false); 
-            });
-            $('.header__account-register').off('click').on('click', function(e) {
-                e.preventDefault();
-                toggleModal('#my-Register', true);
-                toggleModal('#my-Login', false); 
-            });
-            $('.overlay-close').off('click').on('click', function(e) {
-                e.preventDefault();
-                const modalId = '#' + $(this).closest('.modal').attr('id');
-                toggleModal(modalId, false);
-            });
-            $('.modal').off('click').on('click', function(e) {
-                if ($(e.target).hasClass('modal')) {
-                    const modalId = '#' + $(this).attr('id');
-                    toggleModal(modalId, false);
-                }
-            });
+				let itemsHtml = '<ul class="order__list">';
+				for (const variantId in cartData.items) {
+					if (cartData.items.hasOwnProperty(variantId)) {
+						const item = cartData.items[variantId];
+						const imageUrl = item.imageUrl ? item.imageUrl : '/assets/img/product/no-image.jpg';
+						itemsHtml += `
+							<li class="item-order" data-variant-id="${item.productId}">
+								<div class="order-wrap">
+									<a href="${productBaseUrl}${item.productId}" class="order-img">
+										<img src="${imageUrl}" alt="Product Image">
+									</a>
+									<div class="order-main">
+										<a href="${productBaseUrl}${item.productId}" class="order-main-name">${item.name || 'Tên sản phẩm'}</a>
+										<div class="order-main-price">${item.quantity || 0} x ${formatCurrency(item.price || 0)}</div>
+									</div>
+									<button type="button" class="order-close remove-item-header-btn" title="Xóa sản phẩm" data-variant-id="${item.productId}">
+										<i class="far fa-times-circle"></i>
+									</button>
+								</div>
+							</li>`;
+					}
+				}
+				itemsHtml += '</ul>';
 
-            // Toggle navbar-icon
-            $('.navbar-icon').on('click', function() {
-                $(this).toggleClass('open');
-                $('.header__nav').toggleClass('show');
-            });
-        }); 
-    </script>
+				const totalHtml = `
+					<div class="total-money">Tổng cộng: ${formatCurrency(cartData.grandTotal || 0)}</div>
+					<a href="${cartBaseUrl}" class="btn btn--default cart-btn">Xem giỏ hàng</a>
+					<a href="${payBaseUrl}" class="btn btn--default cart-btn orange">Thanh toán</a>`;
+
+				return itemsHtml + totalHtml;
+			}
+
+
+			$(document).ready(function() {
+				// --- Owl Carousel --- (Giữ nguyên)
+				if ($('.owl-carousel.hight').length) { $('.owl-carousel.hight').owlCarousel({ loop: true, margin: 20, nav: true, dots: false, autoplay: true, autoplayTimeout: 3000, autoplayHoverPause: true, responsive: { 0: { items: 2 }, 600: { items: 3 }, 1000: { items: 5 } } }); }
+				if ($('.owl-carousel.news').length) { $('.owl-carousel.news').owlCarousel({ loop: true, margin: 20, nav: true, dots: false, autoplay: true, autoplayTimeout: 4000, autoplayHoverPause: true, responsive: { 0: { items: 1 }, 600: { items: 1 }, 1000: { items: 2 } } }); }
+				if ($('.owl-carousel.bands').length) { $('.owl-carousel.bands').owlCarousel({ loop: true, margin: 20, nav: false, dots: false, autoplay: true, autoplayTimeout: 2000, autoplayHoverPause: true, responsive: { 0: { items: 2 }, 600: { items: 3 }, 1000: { items: 6 } } }); }
+
+				// ========== XÓA BỎ PHẦN XỬ LÝ AJAX LOGIN/REGISTER CHO MODAL ==========
+				// $('#loginForm').submit(function(e) { ... }); 
+				// $('#registerForm').submit(function(e) { ... }); 
+				// ====================================================================
+
+				// --- Xử lý Avatar Dropdown --- (Giữ nguyên)
+				const $accountMenu = $('#userAccountMenu');
+				if ($accountMenu.length) {
+					$accountMenu.on('mouseenter', function() { $accountMenu.addClass('active'); });
+					$accountMenu.on('mouseleave', function() { $accountMenu.removeClass('active'); });
+				}
+
+				// ========== XÓA BỎ PHẦN XỬ LÝ MỞ/ĐÓNG MODAL ==========
+				// const toggleModal = (modalId, shouldOpen) => { ... };
+				// $('.header__account-login').off('click').on('click', function(e) { ... });
+				// $('.header__account-register').off('click').on('click', function(e) { ... });
+				// $('.overlay-close').off('click').on('click', function(e) { ... });
+				// $('.modal').off('click').on('click', function(e) { ... });
+				// ====================================================
+
+				// --- Toggle Navbar Mobile --- (Giữ nguyên)
+				$('.navbar-icon').on('click', function() { $(this).toggleClass('open'); $('.header__nav').toggleClass('show'); });
+
+				// --- XỬ LÝ XÓA ITEM TRONG GIỎ HÀNG MINI (AJAX) --- (Giữ nguyên)
+				$('.header__cart-wrap').on('click', '.remove-item-header-btn', function(e) {
+					e.preventDefault(); e.stopPropagation();
+					const $button = $(this); const variantId = $button.data('variant-id'); const $itemToRemove = $button.closest('.item-order');
+					if (!variantId) { console.error("Không tìm thấy variantId để xóa."); return; }
+					$button.prop('disabled', true).css('opacity', 0.5);
+					$.ajax({
+						type: 'POST', url: `/api/cart/remove/${variantId}`,
+						success: function(response) {
+							console.log('Xóa thành công:', response);
+							$itemToRemove.fadeOut(300, function() {
+								$(this).remove();
+								if (response.cart) {
+									const newContentHtml = buildHeaderCartContent(response.cart);
+									if ($('.header__cart-wrap').children().length === 1) {
+										$('.header__cart-wrap').html(newContentHtml);
+									} else {
+										$('#header-cart-content').html(newContentHtml);
+									}
+									updateCartHeaderCount(response.cart.totalItems);
+								} else {
+									updateCartHeaderCount(response.totalItems);
+									window.location.reload();
+								}
+							});
+						},
+						error: function(xhr) {
+							console.error('Lỗi khi xóa sản phẩm:', xhr);
+							let errorMsg = 'Lỗi khi xóa sản phẩm.';
+							if (xhr.status === 401) { errorMsg = 'Vui lòng đăng nhập lại.'; }
+							else if (xhr.responseJSON && xhr.responseJSON.message) { errorMsg = xhr.responseJSON.message; }
+							alert(errorMsg);
+							$button.prop('disabled', false).css('opacity', 1);
+						}
+					});
+				});
+
+				// Hàm cập nhật giỏ hàng mini từ trang khác (Giữ nguyên)
+				window.updateHeaderCart = function(response) {
+					if (response && response.cart) {
+						updateCartHeaderCount(response.totalItems);
+						const newContentHtml = buildHeaderCartContent(response.cart);
+						if ($('.header__cart-wrap').find('.cart__empty').length > 0) {
+							$('.header__cart-wrap').html(`<div id="header-cart-content">${newContentHtml}</div>`);
+						} else {
+							$('#header-cart-content').html(newContentHtml);
+						}
+					}
+				}
+
+			}); // Kết thúc document ready
+			/*]]>*/
+		</script>
 	</div>
 </body>
 </html>
