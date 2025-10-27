@@ -1323,3 +1323,176 @@ textarea.form-control {
         font-size: 1.5rem;
     }
 }
+/* ========================
+   Header User Account Menu
+   ======================== */
+.header__account {
+    position: relative; /* Cho dropdown định vị theo */
+}
+
+#userAccountMenu .account__avatar-btn {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; /* Kích thước nút avatar */
+    height: 36px;
+    border-radius: 50%; /* Bo tròn */
+    background-color: #f0f0f0; /* Màu nền nhẹ */
+    color: #555; /* Màu icon */
+    font-size: 18px; /* Kích thước icon */
+    transition: background-color 0.2s ease;
+    border: 1px solid #ddd;
+}
+
+#userAccountMenu .account__avatar-btn:hover {
+    background-color: #e0e0e0;
+}
+
+#userAccountMenu .account__dropdown {
+    position: absolute;
+    top: 110%; /* Hiển thị ngay dưới nút avatar */
+    right: 0;
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    min-width: 200px; /* Độ rộng tối thiểu */
+    z-index: 100;
+    display: none; /* Ẩn mặc định */
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    overflow: hidden; /* Để bo góc hoạt động */
+    border: 1px solid #eee;
+}
+
+/* Hiển thị dropdown khi container có class active */
+#userAccountMenu.active .account__dropdown {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.account__dropdown .dropdown__header {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #f9f9f9;
+}
+
+.account__dropdown .dropdown__user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    display: block; /* Để chiếm hết chiều rộng */
+    white-space: nowrap; /* Ngăn xuống dòng */
+    overflow: hidden; /* Ẩn phần thừa */
+    text-overflow: ellipsis; /* Hiển thị dấu ... */
+}
+
+.account__dropdown .dropdown__actions {
+    padding: 8px 0; /* Khoảng cách trên dưới cho nhóm link */
+}
+
+.account__dropdown .dropdown__item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    font-size: 14px;
+    color: #555;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+}
+
+.account__dropdown .dropdown__item i {
+    margin-right: 12px; /* Khoảng cách icon và chữ */
+    width: 18px; /* Đảm bảo icon thẳng hàng */
+    text-align: center;
+    color: #888;
+}
+
+.account__dropdown .dropdown__item:hover {
+    background-color: #f5f5f5;
+    color: var(--primary-color, #E85A70); /* Dùng màu chính nếu có */
+}
+
+.account__dropdown .dropdown__item:hover i {
+    color: var(--primary-color, #E85A70);
+}
+
+/* Nút xóa trong giỏ hàng mini */
+.header__cart-wrap .order-close {
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #999;
+    margin-left: 5px; /* Khoảng cách với nội dung */
+    line-height: 1; /* Căn giữa icon */
+}
+.header__cart-wrap .order-close:hover {
+    color: #dc3545; /* Màu đỏ khi hover */
+}
+/* Căn text "Xin chào" ở trên avatar */
+#userAccountMenu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+}
+
+#userAccountMenu .user-greeting {
+    font-size: 13px;
+    color: var(--black-cl-1);
+    font-weight: 500;
+    white-space: nowrap;
+    text-align: center;
+}
+
+#userAccountMenu .avatar-dropdown-container {
+    display: flex;
+    align-items: center;
+}
+
+/* Tạo vùng cầu nối giữa avatar và dropdown */
+#userAccountMenu::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 12px; /* Vùng an toàn để di chuột */
+    z-index: 1000;
+}
+
+/* Căn dropdown menu ở giữa dưới toàn bộ */
+#userAccountMenu .account__dropdown {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    z-index: 1001;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    overflow: hidden;
+    border: 1px solid #eee;
+}
+
+#userAccountMenu.active .account__dropdown {
+    display: block;
+    opacity: 1;
+}
+
+/* Giữ dropdown hiển thị khi hover vào nó */
+#userAccountMenu .account__dropdown:hover {
+    display: block;
+    opacity: 1;
+}

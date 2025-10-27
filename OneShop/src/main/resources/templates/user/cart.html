@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/guest}">
 <head>
@@ -28,7 +28,7 @@
                 <div class="main__notify-icon"><i class="fas fa-check"></i></div>
                 <div class="main__notify-text">Giỏ hàng đã được cập nhật.</div>
             </h3>
-            
+
             <div class="row">
                 <div class="col l-8 m-12 s-12">
                     <div class="main__cart">
@@ -50,17 +50,17 @@
                                         Giỏ hàng của bạn đang trống.
                                     </td>
                                 </tr>
-            
-                                <tr class="cart_item" 
-                                    th:each="itemEntry : ${cart.items}" th:with="item = ${itemEntry.value}" th:data-product-id="${item.productId}" th:data-price="${item.price}"  
+
+                                <tr class="cart_item"
+                                    th:each="itemEntry : ${cart.items}" th:with="item = ${itemEntry.value}" th:data-product-id="${item.productId}" th:data-price="${item.price}"
                                     th:unless="${cart == null or cart.items.isEmpty()}">
-                                    
+
                                     <td class="product-select" data-label="Chọn">
                                         <input type="checkbox" name="selectedItems" class="item-checkbox" th:value="${item.productId}">
                                     </td>
                                     <td class="product-thumbnail" data-label="Ảnh">
-                                        <img th:src="@{${item.imageUrl}}" alt="Product Image">
-                                    </td>
+                                        <img th:src="@{${item.imageUrl ?: '/assets/img/product/no-image.jpg'}}" alt="Product Image">
+                                        </td>
                                     <td class="product-name" data-label="Sản phẩm">
                                         <a href="#" th:text="${item.name}" class="name"></a>
                                     </td>
@@ -87,7 +87,7 @@
                         </table>
                     </div>
                 </div>
-                
+
                 <div class="col l-4 m-12 s-12">
                     <div class="main__pay">
                         <div class="main__pay-title">Tổng số lượng</div>
@@ -97,14 +97,14 @@
                         </div>
                         <div class="pay-info">
                             <div class="main__pay-text">Giao hàng</div>
-                            <div class="main__pay-text" id="shipping-fee">30.000 đ</div> 
+                            <div class="main__pay-text" id="shipping-fee">30.000 đ</div>
                         </div>
                         <div class="pay-info">
                             <div class="main__pay-text">Tổng thành tiền</div>
                             <div class="main__pay-price" id="grandtotal">0 đ</div>
                         </div>
                         <button type="button" id="checkoutBtn" class="btn btn--default orange">Tiến hành thanh toán</button>
-                        
+
                         <div class="main__pay-title">Phiếu ưu đãi</div>
                         <select class="form-control" style="margin-top: 15px;">
                             <option value="">-- Chọn phiếu ưu đãi --</option>
@@ -120,145 +120,15 @@
     <th:block layout:fragment="js">
         <script th:inline="javascript">
             $(document).ready(function() {
-                
-                // --- ĐÃ XÓA BỎ LOGIC GỬI JWT HEADER (Authorization) ---
-                // Trình duyệt sẽ tự động gửi cookie "jwtToken"
-
-                // THAY ĐỔI: Định nghĩa phí vận chuyển cố định
                 const SHIPPING_FEE = 30000;
-    
-                function formatCurrency(number) {
-                    const numericValue = parseFloat(number); // Chuyển BigDecimal (string) sang số
-                    if (isNaN(numericValue)) { return '0 đ'; }
-                    
-                    return new Intl.NumberFormat('vi-VN', { 
-                        style: 'currency', 
-                        currency: 'VND' 
-                    }).format(numericValue).replace('₫', 'đ');
-                }
-    
-                function calculateAndUpdateTotal() {
-                    let subTotal = 0; // Đổi tên biến để rõ ràng hơn: Tổng phụ (trước phí ship)
-                    let selectedCount = 0;
-                    
-                    $('.item-checkbox:checked').each(function() {
-                        selectedCount++;
-                        const row = $(this).closest('.cart_item');
-                        const price = parseFloat(row.data('price')); // Lấy giá từ data-price
-                        const quantity = parseInt(row.find('.input-qty').val());
-                        
-                        if (!isNaN(price) && !isNaN(quantity)) {
-                            subTotal += price * quantity;
-                        }
-                    });
-
-                    // Tính Tổng Thành Tiền = Tổng Phụ + Phí Vận Chuyển (nếu có sản phẩm được chọn)
-                    let grandTotal = subTotal;
-                    if (selectedCount > 0) {
-                         grandTotal += SHIPPING_FEE;
-                         $('#shipping-fee').text(formatCurrency(SHIPPING_FEE)).removeClass('main__pay-text').addClass('main__pay-price'); // Định dạng lại phí ship cho đẹp
-                    } else {
-                         // Nếu không có sản phẩm nào được chọn, phí ship là 0
-                         $('#shipping-fee').text('0 đ').removeClass('main__pay-price').addClass('main__pay-text');
-                    }
-    
-                    $('#subtotal').text(formatCurrency(subTotal));
-                    $('#grandtotal').text(formatCurrency(grandTotal));
-                    
-                    $('#checkoutBtn').prop('disabled', selectedCount === 0);
-                }
-                
-                function updateCartAjax(variantId, quantity) {
-                    $('.main__notify-text').text('Đang cập nhật giỏ hàng...');
-                    $('.main__notify').fadeIn();
-    
-                    $.ajax({
-                        type: "POST",
-                        url: /*[[@{/cart/update}]]*/ '/cart/update',
-                        contentType: "application/json",
-                        data: JSON.stringify({ 
-                            variantId: variantId, // Phải là "variantId"
-                            quantity: quantity 
-                        }),
-                        
-                        success: function(updatedCart) {
-                            var productRow = $('.cart_item[data-product-id="' + variantId + '"]');
-                            var updatedItem = updatedCart.items[variantId];
-    
-                            if (updatedItem) {
-                                 productRow.find('.product-subtotal .main__cart-price')
-                                           .text(formatCurrency(updatedItem.subtotal));
-                            } else {
-                                productRow.remove();
-                            }
-                           
-                            calculateAndUpdateTotal(); 
-    
-                            $('.main__notify-text').text('Giỏ hàng đã được cập nhật.');
-                            setTimeout(function() { $('.main__notify').fadeOut(); }, 2000);
-    
-                            if (Object.keys(updatedCart.items).length === 0) {
-                                $('tbody').html('<tr><td colspan="7" style="text-align: center; padding: 20px;">Giỏ hàng của bạn đang trống.</td></tr>');
-                            }
-                        },
-                        error: function(e) { 
-                            console.error("Lỗi cập nhật giỏ hàng: ", e);
-                            if (e.status === 401 || e.status === 403) {
-                                alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-                                window.location.href = '/login'; 
-                            } else {
-                                 $('.main__notify-text').text('Có lỗi xảy ra, vui lòng thử lại.');
-                            }
-                        }
-                    });
-                }
-                
-                // --- CÁC HÀM XỬ LÝ SỰ KIỆN ---
-                $('#checkAll').on('change', function() {
-                    $('.item-checkbox').prop('checked', $(this).is(':checked'));
-                    calculateAndUpdateTotal();
-                });
-    
-                $('body').on('change', '.item-checkbox', function() {
-                    if (!$(this).is(':checked')) {
-                        $('#checkAll').prop('checked', false);
-                    } else if ($('.item-checkbox:checked').length === $('.item-checkbox').length) {
-                        $('#checkAll').prop('checked', true);
-                    }
-                    calculateAndUpdateTotal();
-                });
-    
-                $('body').on('change', '.input-qty', function() {
-                    var qty = $(this).val();
-                    var variantId = $(this).closest('.cart_item').data('product-id'); 
-                    updateCartAjax(variantId, qty);
-                });
-    
-                $('body').on('click', '.plus, .minus', function() {
-                    var $input = $(this).closest('.buttons_added').find('.input-qty');
-                    var currentVal = parseInt($input.val());
-                    if ($(this).hasClass('plus')) {
-                        $input.val(currentVal + 1);
-                    } else {
-                        if (currentVal > 1) { 
-                            $input.val(currentVal - 1);
-                        }
-                    }
-                    $input.trigger('change');
-                });
-    
-                $('#checkoutBtn').on('click', function() {
-                    const selectedIds = [];
-                    $('.item-checkbox:checked').each(function() {
-                        selectedIds.push($(this).val());
-                    });
-                    if (selectedIds.length === 0) {
-                        alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán.');
-                        return;
-                    }
-                    window.location.href = '/pay?variantIds=' + selectedIds.join(',');
-                });
-                
+                function formatCurrency(number) { const numericValue = parseFloat(number); if (isNaN(numericValue)) { return '0 đ'; } return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(numericValue).replace('₫', 'đ'); }
+                function calculateAndUpdateTotal() { let subTotal = 0; let selectedCount = 0; $('.item-checkbox:checked').each(function() { selectedCount++; const row = $(this).closest('.cart_item'); const price = parseFloat(row.data('price')); const quantity = parseInt(row.find('.input-qty').val()); if (!isNaN(price) && !isNaN(quantity)) { subTotal += price * quantity; } }); let grandTotal = subTotal; if (selectedCount > 0) { grandTotal += SHIPPING_FEE; $('#shipping-fee').text(formatCurrency(SHIPPING_FEE)).removeClass('main__pay-text').addClass('main__pay-price'); } else { $('#shipping-fee').text('0 đ').removeClass('main__pay-price').addClass('main__pay-text'); } $('#subtotal').text(formatCurrency(subTotal)); $('#grandtotal').text(formatCurrency(grandTotal)); $('#checkoutBtn').prop('disabled', selectedCount === 0); }
+                function updateCartAjax(variantId, quantity) { $('.main__notify-text').text('Đang cập nhật giỏ hàng...'); $('.main__notify').fadeIn(); $.ajax({ type: "POST", url: /*[[@{/cart/update}]]*/ '/cart/update', contentType: "application/json", data: JSON.stringify({ variantId: variantId, quantity: quantity }), success: function(updatedCart) { var productRow = $('.cart_item[data-product-id="' + variantId + '"]'); var updatedItem = updatedCart.items[variantId]; if (updatedItem) { productRow.find('.product-subtotal .main__cart-price').text(formatCurrency(updatedItem.subtotal)); } else { productRow.remove(); } calculateAndUpdateTotal(); $('.main__notify-text').text('Giỏ hàng đã được cập nhật.'); setTimeout(function() { $('.main__notify').fadeOut(); }, 2000); if (Object.keys(updatedCart.items).length === 0) { $('tbody').html('<tr><td colspan="7" style="text-align: center; padding: 20px;">Giỏ hàng của bạn đang trống.</td></tr>'); } }, error: function(e) { console.error("Lỗi cập nhật giỏ hàng: ", e); if (e.status === 401 || e.status === 403) { alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'); window.location.href = '/login'; } else { $('.main__notify-text').text('Có lỗi xảy ra, vui lòng thử lại.'); } } }); }
+                $('#checkAll').on('change', function() { $('.item-checkbox').prop('checked', $(this).is(':checked')); calculateAndUpdateTotal(); });
+                $('body').on('change', '.item-checkbox', function() { if (!$(this).is(':checked')) { $('#checkAll').prop('checked', false); } else if ($('.item-checkbox:checked').length === $('.item-checkbox').length) { $('#checkAll').prop('checked', true); } calculateAndUpdateTotal(); });
+                $('body').on('change', '.input-qty', function() { var qty = $(this).val(); var variantId = $(this).closest('.cart_item').data('product-id'); updateCartAjax(variantId, qty); });
+                $('body').on('click', '.plus, .minus', function() { var $input = $(this).closest('.buttons_added').find('.input-qty'); var currentVal = parseInt($input.val()); if ($(this).hasClass('plus')) { $input.val(currentVal + 1); } else { if (currentVal > 1) { $input.val(currentVal - 1); } } $input.trigger('change'); });
+                $('#checkoutBtn').on('click', function() { const selectedIds = []; $('.item-checkbox:checked').each(function() { selectedIds.push($(this).val()); }); if (selectedIds.length === 0) { alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán.'); return; } window.location.href = '/pay?variantIds=' + selectedIds.join(','); });
                 calculateAndUpdateTotal();
             });
         </script>

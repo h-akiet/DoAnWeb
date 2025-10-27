@@ -1,26 +1,26 @@
-package com.oneshop.entity;
+package com.oneshop.entity; 
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference; // Dùng cho Address
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-@Entity
-@Table(name = "USERS")
+
+@Entity // Chỉ cần 1 @Entity
+@Table(name = "USERS") // Chỉ cần 1 @Table
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"addresses", "roles", "cart"}) // Loại trừ fields quan hệ
-@ToString(exclude = {"addresses", "roles", "cart"})
+@EqualsAndHashCode(exclude = {"addresses", "cart", "shop", "role"}) // Thêm role, shop vào exclude
+@ToString(exclude = {"addresses", "cart", "shop", "role"})      // Thêm role, shop vào exclude
 public class User implements UserDetails {
 
     @Id
@@ -28,85 +28,97 @@ public class User implements UserDetails {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(length = 100, nullable = false)
+    @Column(nullable = false, unique = true, length = 100) // Thêm length
     private String username;
 
-    @Column(length = 150, unique = true, nullable = false)
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false, unique = true, length = 150) // Thêm length
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+    @Column(name = "full_name", columnDefinition = "nvarchar(255)") // Đổi tên cột và giữ nvarchar
+    private String fullName;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "phone_number", length = 20) // Đổi tên cột và thêm length
+    private String phoneNumber;
+
+    @Column(columnDefinition = "nvarchar(500)") // Giữ nvarchar cho địa chỉ chung (nếu cần)
+    private String address; // Địa chỉ chung, có thể không cần thiết nếu dùng Address entity
 
     @Column(nullable = false)
-    private boolean activated = false;
-    
+    private boolean activated = false; // Trạng thái kích hoạt
+
+    // --- SỬA QUAN HỆ ROLE ---
+    // Bỏ: private Set<Role> roles = new HashSet<>();
+    // Bỏ: @Enumerated(EnumType.STRING) @Column(nullable = false) private Role role;
+
+    // Thêm: Quan hệ ManyToOne tới Entity Role mới
+    @ManyToOne(fetch = FetchType.EAGER) // EAGER để dễ lấy role khi xác thực
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+    // -------------------------
+
+    // --- CÁC QUAN HỆ KHÁC ---
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Cart cart;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles = new HashSet<>();
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference // Manages the forward reference to Address
+    @JsonManagedReference // Giữ lại để quản lý JSON two-way reference với Address
     private Set<Address> addresses = new HashSet<>();
 
-    // Spring Security methods
+    // Quan hệ OneToOne với Shop (Một User Vendor có một Shop)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Shop shop; // Shop thuộc về User này (nếu là Vendor)
+
+    // --- IMPLEMENT UserDetails ---
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-            .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role.getName().name()))
-            .collect(Collectors.toList());
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        // Quan trọng: Thêm tiền tố "ROLE_" và lấy tên từ Enum RoleName
+        if (this.role != null && this.role.getName() != null) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + this.role.getName().name()));
+        }
+        return authorities;
     }
 
     @Override
     public String getPassword() {
-        return passwordHash;
-    }
-
-    public void setPassword(String password) {
-        this.passwordHash = password;
+        return this.password;
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return true; // Hoặc logic kiểm tra hết hạn tài khoản nếu có
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return true; // Hoặc logic kiểm tra khóa tài khoản
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return true; // Hoặc logic kiểm tra hết hạn mật khẩu
     }
 
     @Override
     public boolean isEnabled() {
-        return activated;
+        return this.activated; // Tài khoản chỉ enabled khi đã activated
     }
 
-    // Getter cho user_id (tương thích với code cũ)
+    // --- GETTER/SETTER ID (Giữ lại để tương thích code cũ nếu cần) ---
     public Long getUserId() {
         return id;
     }
 
-    // Setter cho user_id (tương thích với code cũ)
-    public void setUserId(Long userId) {
-        this.id = userId;
+    public void setUserId(Long id) {
+        this.id = id;
     }
 }

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{vendor/layout/app}">
+<head>
+<title>Quản lý Sản phẩm</title>
+</head>
+<body>
+	<div layout:fragment="content">
+		<div
+			class="d-flex justify-content-between align-items-center mt-4 mb-3">
+			<h1 class="h3">Quản lý Sản phẩm</h1>
+			<a th:href="@{/vendor/products/add}"
+				class="btn btn-primary shadow-sm"> <i class="fas fa-plus me-2"></i>Thêm
+				Sản phẩm mới
+			</a>
+		</div>
+		<p class="lead mb-4">Xem, thêm mới, chỉnh sửa hoặc xóa các sản
+			phẩm của bạn.</p>
+
+		<div class="card shadow">
+			<div class="card-header py-3">
+				<h6 class="m-0 font-weight-bold">Danh sách sản phẩm của bạn</h6>
+			</div>
+			<div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover align-middle" id="productsTable"
+						width="100%" cellspacing="0">
+						<thead class="table-light">
+							<tr class="text-center">
+								<th>Ảnh</th>
+								<th class="text-start">Tên sản phẩm</th>
+								<th>Danh mục</th>
+								<th>Giá bán</th>
+								<th>Tồn kho</th>
+								<th>Trạng thái</th>
+								<th>Hành động</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="product : ${productPage.content}">
+								<td class="text-center"><img
+									th:if="${!#lists.isEmpty(product.images)}"
+									th:src="@{'/uploads/images/' + ${product.images[0]}}"
+									alt="Product Image" class="rounded" width="60"> <img
+									th:if="${#lists.isEmpty(product.images)}"
+									th:src="@{/assets/img/product-placeholder-1.jpg}"
+									alt="Product Image" class="rounded" width="60"></td>
+								<td class="text-start" th:text="${product.name}">Tên sản
+									phẩm</td>
+								<td class="text-center" th:text="${product.category.name}">Danh
+									mục</td>
+								<td class="text-center"
+									th:text="${#numbers.formatCurrency(product.price)}">Giá
+									bán</td>
+								<td class="text-center" th:text="${product.stock}">Tồn kho</td>
+								<td class="text-center"><span th:if="${product.stock > 0}"
+									class="badge bg-success">Đang bán</span> <span
+									th:if="${product.stock == 0}" class="badge bg-danger">Hết
+										hàng</span></td>
+								<td class="text-center"><a
+									th:href="@{/vendor/products/edit/{id}(id=${product.id})}"
+									class="btn btn-sm btn-info" title="Sửa"><i
+										class="fas fa-edit"></i></a> <a
+									th:href="@{/vendor/products/delete/{id}(id=${product.id})}"
+									class="btn btn-sm btn-danger" title="Xóa"
+									onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')"><i
+										class="fas fa-trash"></i></a></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</body>
+</html>

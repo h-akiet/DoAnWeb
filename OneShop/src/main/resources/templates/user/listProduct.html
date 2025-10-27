@@ -15,9 +15,8 @@
     <link rel="stylesheet" th:href="@{/assets/css/common.css}">
 
     <th:block layout:fragment="css">
-         <link rel="stylesheet" th:href="@{/assets/css/listProduct.css}"> <style>
-            /* --- COPY ALL YOUR CSS RULES HERE --- */
-            /* CSS Variables */
+         <link rel="stylesheet" th:href="@{/assets/css/listProduct.css}">
+         <style>
             :root {
                 --default-cl: #9e5bab;
                 --black-cl-1: #444444;
@@ -26,21 +25,16 @@
                 --white-cl-3: #f8f7fd;
                 --orange-cl: #d26e4b;
             }
-
-            /* Main Layout */
             .main {
-                margin-top: 20px; /* Adjust if needed based on header height */
+                margin-top: 20px;
                 background: #f5f5f5;
                 padding: 20px 0;
             }
-
             .product-container {
                 max-width: 1200px;
                 margin: 0 auto;
                 padding: 0 15px;
             }
-
-            /* Breadcrumb & Filter Bar */
             .filter-bar {
                 background: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px;
                 display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
@@ -53,12 +47,7 @@
             .filter-btn { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; font-size: 14px; cursor: pointer; transition: all 0.3s; text-decoration: none; color: #333; }
             .filter-btn:hover { border-color: var(--default-cl); color: var(--default-cl); }
             .filter-btn.active { background: var(--default-cl); color: white; border-color: var(--default-cl); }
-            /* Add .sort-select style if you use a dropdown */
-
-            /* Layout 2 cột */
             .content-layout { display: grid; grid-template-columns: 260px 1fr; gap: 20px; }
-
-            /* Sidebar Filter */
             .sidebar-filter { background: white; border-radius: 8px; padding: 20px; height: fit-content; position: sticky; top: 20px; }
             .filter-section { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #f0f0f0; }
             .filter-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
@@ -74,9 +63,6 @@
             .apply-filter-btn:hover { opacity: 0.9; }
             .clear-filter-btn { display: block; text-align: center; margin-top: 10px; color: #666; text-decoration: none; font-size: 14px; transition: all 0.3s; }
             .clear-filter-btn:hover { color: var(--default-cl); text-decoration: underline; }
-
-
-            /* Product Grid */
             .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
             .product-card { background: white; border-radius: 8px; overflow: hidden; transition: all 0.3s; position: relative; display: flex; flex-direction: column; }
             .product-card:hover { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15); transform: translateY(-2px); }
@@ -96,38 +82,22 @@
             .price-original { font-size: 13px; color: #999; text-decoration: line-through; }
             .product-actions { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; gap: 8px; z-index: 3; }
             .product-card:hover .product-actions { display: flex; }
-            .action-btn { flex: 1; padding: 10px; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; transition: all 0.3s; background: rgba(255, 255, 255, 0.95); color: #333; text-decoration: none; text-align: center; } /* Added text-decoration and text-align */
+            .action-btn { flex: 1; padding: 10px; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; transition: all 0.3s; background: rgba(255, 255, 255, 0.95); color: #333; text-decoration: none; text-align: center; }
             .action-btn:hover { background: var(--default-cl); color: white; }
-
-            /* Result Info */
             .result-info { background: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
             .result-text { font-size: 16px; color: #333; }
             .result-count { font-weight: 600; color: var(--default-cl); }
-
-            /* Pagination */
             .pagination-wrapper { display: flex; justify-content: center; margin-top: 30px; padding: 20px 0; }
-            .pagination { display: flex; gap: 8px; }
-            .page-item, .page-link { padding: 8px 14px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: all 0.3s; background: white; color: #333; font-size: 14px; text-decoration: none; display: block; }
-            .page-item:hover, .page-link:hover { border-color: var(--default-cl); color: var(--default-cl); }
-            .page-item.active, .page-link.active { background: var(--default-cl); color: white; border-color: var(--default-cl); }
-            .page-item.disabled, .page-link.disabled { color: #ccc; pointer-events: none; border-color: #ddd; }
-
-
-            /* Responsive */
-            @media (max-width: 1024px) {
-                .content-layout { grid-template-columns: 1fr; }
-                .sidebar-filter { display: none; }
-                .product-grid { grid-template-columns: repeat(3, 1fr); }
-            }
-            @media (max-width: 768px) {
-                .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-                .filter-bar { flex-direction: column; align-items: flex-start; }
-            }
-
-             /* Loading indicator */
+            .pagination { display: flex; list-style: none; padding: 0; } /* Use ul for pagination */
+            .page-item { margin: 0 4px; } /* Add margin to li */
+            .page-link { padding: 8px 14px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: all 0.3s; background: white; color: #333; font-size: 14px; text-decoration: none; display: block; }
+            .page-item:not(.disabled) .page-link:hover { border-color: var(--default-cl); color: var(--default-cl); }
+            .page-item.active .page-link { background: var(--default-cl); color: white; border-color: var(--default-cl); }
+            .page-item.disabled .page-link { color: #ccc; pointer-events: none; border-color: #ddd; }
             #product-list-container.loading { opacity: 0.6; pointer-events: none; }
-
-        </style>
+            @media (max-width: 1024px) { .content-layout { grid-template-columns: 1fr; } .sidebar-filter { display: none; } .product-grid { grid-template-columns: repeat(3, 1fr); } }
+            @media (max-width: 768px) { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } .filter-bar { flex-direction: column; align-items: flex-start; } }
+         </style>
     </th:block>
 </head>
 <body>
@@ -137,31 +107,38 @@
                 <div class="breadcrumb-custom">
                     <a th:href="@{/}">Trang chủ</a> <i class="fas fa-chevron-right" style="font-size: 10px; color: #999;"></i>
                     <span class="active">Tất cả sản phẩm</span>
-                    </div>
+                </div>
                 <div class="filter-controls">
                     <a th:href="@{/products(sort='salesCount,desc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
                        class="filter-btn"
-                       th:classappend="${#strings.equals(sort, 'salesCount,desc') ? 'active' : ''}">Bán chạy</a>
+                       th:classappend="${sort != null and #strings.equals(sort, 'salesCount,desc')} ? 'active' : ''">Bán chạy</a>
                     <a th:href="@{/products(sort='productId,desc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
                        class="filter-btn"
-                       th:classappend="${#strings.equals(sort, 'productId,desc') ? 'active' : ''}">Mới nhất</a>
+                       th:classappend="${sort != null and #strings.equals(sort, 'productId,desc')} ? 'active' : ''">Mới nhất</a>
+                    <a th:href="@{/products(sort='rating,desc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                       class="filter-btn"
+                       th:classappend="${sort != null and #strings.equals(sort, 'rating,desc')} ? 'active' : ''">Đánh giá cao</a>
                     <a th:href="@{/products(sort='price,asc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
                        class="filter-btn"
-                       th:classappend="${#strings.equals(sort, 'price,asc') ? 'active' : ''}">Giá thấp</a>
-                    </div>
+                       th:classappend="${sort != null and #strings.equals(sort, 'price,asc')} ? 'active' : ''">Giá thấp</a>
+                    <a th:href="@{/products(sort='price,desc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                       class="filter-btn"
+                       th:classappend="${sort != null and #strings.equals(sort, 'price,desc')} ? 'active' : ''">Giá cao</a>
+                </div>
             </div>
 
             <div class="content-layout">
                 <aside class="sidebar-filter">
                    <form id="filter-form" th:action="@{/products}" method="GET">
-                       <input type="hidden" name="sort" th:value="${sort}"> <div class="filter-section">
+                       <input type="hidden" name="sort" th:value="${sort}">
+                       <div class="filter-section">
                            <h3 class="filter-title">Danh mục</h3>
                            <div class="filter-option" th:each="category : ${categories}">
                                <input type="checkbox" name="categories"
-                                      th:value="${category.categoryId}"
-                                      th:id="'cat-' + ${category.categoryId}"
-                                      th:checked="${selectedCategories != null and #lists.contains(selectedCategories, category.categoryId)}">
-                               <label th:for="'cat-' + ${category.categoryId}"
+                                      th:value="${category.id}"
+                                      th:id="'cat-' + ${category.id}"
+                                      th:checked="${selectedCategories != null and #lists.contains(selectedCategories, category.id)}">
+                               <label th:for="'cat-' + ${category.id}"
                                       th:text="${category.name}">Category Name</label>
                            </div>
                        </div>
@@ -185,7 +162,8 @@
                                <input type="number" name="maxPrice" class="price-input" placeholder="Đến" th:value="${maxPrice}">
                            </div>
                            <button type="submit" class="apply-filter-btn">Áp dụng</button>
-                           <a href="#" class="clear-filter-btn"> <i class="fas fa-undo"></i> Xóa bộ lọc </a> </div>
+                           <a href="#" class="clear-filter-btn"> <i class="fas fa-undo"></i> Xóa bộ lọc </a>
+                       </div>
                    </form>
                 </aside>
 
@@ -204,7 +182,8 @@
                         <div class="product-grid" th:if="${productPage != null and !productPage.empty}">
                             <div class="product-card" th:each="product : ${productPage.content}">
                                 <div class="product-image"
-                                     th:style="'background-image: url(\'' + @{${product.primaryImageUrl ?: '/assets/img/product/no-image.jpg'}} + '\');'"> <div class="product-badge"
+                                     th:style="'background-image: url(\'' + @{${product.primaryImageUrl ?: '/assets/img/product/no-image.jpg'}} + '\');'">
+                                     <div class="product-badge"
                                          th:if="${product.originalPrice != null and product.originalPrice > product.price and product.originalPrice > 0}"
                                          th:text="'-' + ${#numbers.formatInteger(100 * (product.originalPrice - product.price) / product.originalPrice, 0)} + '%'">-10%</div>
                                 </div>
@@ -246,37 +225,45 @@
                             <p>Không tìm thấy sản phẩm nào phù hợp.</p>
                         </div>
 
-                        <div class="pagination-wrapper" th:if="${productPage != null and productPage.totalPages > 1}">
-                            <div class="pagination">
-                                <a class="page-link"
-                                   th:href="@{/products(page=${currentPage - 1}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
-                                   th:if="${productPage.hasPrevious()}" th:data-page="${currentPage - 1}">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                                <span class="page-link disabled" th:unless="${productPage.hasPrevious()}"><i class="fas fa-chevron-left"></i></span>
-
-                                <th:block th:each="i: ${#numbers.sequence(1, totalPages)}">
-                                    <a class="page-link"
-                                       th:href="@{/products(page=${i}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
-                                       th:text="${i}"
-                                       th:classappend="${i == currentPage} ? 'active' : ''"
-                                       th:data-page="${i}">
-                                    </a>
-                                </th:block>
-
-                                <a class="page-link"
-                                   th:href="@{/products(page=${currentPage + 1}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
-                                   th:if="${productPage.hasNext()}" th:data-page="${currentPage + 1}">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                                <span class="page-link disabled" th:unless="${productPage.hasNext()}"><i class="fas fa-chevron-right"></i></span>
-                            </div>
+                         <div class="pagination-wrapper" th:if="${productPage != null and productPage.totalPages > 1}">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    <li class="page-item" th:classappend="${productPage.first} ? 'disabled' : ''">
+                                        <a class="page-link"
+                                           th:href="@{/products(page=${currentPage - 1}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                                           aria-label="Previous" th:data-page="${currentPage - 1}">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                    <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                                        <li class="page-item" th:classappend="${i == currentPage} ? 'active' : ''">
+                                            <a class="page-link"
+                                               th:href="@{/products(page=${i}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                                               th:text="${i}"
+                                               th:data-page="${i}">
+                                            </a>
+                                        </li>
+                                    </th:block>
+                                    <li class="page-item" th:classappend="${productPage.last} ? 'disabled' : ''">
+                                        <a class="page-link"
+                                           th:href="@{/products(page=${currentPage + 1}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                                           aria-label="Next" th:data-page="${currentPage + 1}">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
-                    </div> </main> </div> </div> </div> <th:block layout:fragment="js">
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="js">
         <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
         <script th:src="@{/assets/js/commonscript.js}"></script>
         <script>
-            // --- COPY YOUR ENTIRE AJAX JAVASCRIPT BLOCK HERE ---
             $(document).ready(function() {
 
                 function fetchProducts(url) {
@@ -286,7 +273,7 @@
                         headers: { 'X-Requested-With': 'XMLHttpRequest' },
                         success: function(fragment) {
                             $('#product-list-container').html(fragment);
-                            history.pushState(null, '', url);
+                            history.pushState(null, '', url); // Update URL without reloading
                             $('#product-list-container').removeClass('loading');
                         },
                         error: function() {
@@ -297,23 +284,24 @@
                 }
 
                 function buildUrl() {
-                    const params = new URLSearchParams(); // Start fresh or use window.location.search
+                    const params = new URLSearchParams(); // Start fresh
                     const formParams = $('#filter-form').serializeArray();
-                    
-                     // Get current sort from hidden input or default
-                    let currentSort = $('input[name="sort"]').val() || 'productId,desc'; 
+
+                    let currentSort = $('input[name="sort"]').val() || 'productId,desc';
                     params.set('sort', currentSort);
 
-                    params.delete('categories'); // Clear multi-value params first
+                    // Clear multi-value params before adding from form
+                    params.delete('categories');
                     params.delete('brands');
 
                     formParams.forEach(item => {
-                        if (item.value && item.name !== 'sort') { // Add if value exists, ignore sort hidden input
-                             if (params.has(item.name) && (item.name === 'categories' || item.name === 'brands')) {
+                        if (item.value && item.name !== 'sort') {
+                             // Use append for multi-value params like categories and brands
+                             if (item.name === 'categories' || item.name === 'brands') {
                                 params.append(item.name, item.value);
-                            } else {
-                                params.set(item.name, item.value);
-                            }
+                             } else {
+                                params.set(item.name, item.value); // Use set for single-value params
+                             }
                         }
                     });
                     params.set('page', '1'); // Reset page when filters change
@@ -324,7 +312,7 @@
                     const params = new URLSearchParams(window.location.search);
                     params.set(paramName, paramValue);
                     if (paramName !== 'page') {
-                        params.set('page', '1'); // Reset page if filter/sort changes
+                        params.set('page', '1');
                     }
                     return '/products?' + params.toString();
                 }
@@ -335,32 +323,22 @@
                     fetchProducts(url);
                 });
 
-                // --- Optional: Instant fetch on filter change ---
-                // $('.sidebar-filter input[type="checkbox"], .price-input').on('change', function() {
-                //      const url = buildUrl();
-                //      fetchProducts(url);
-                // });
-                // $('.price-input').on('blur', function() { // Or 'input'
-                //     const url = buildUrl();
-                //     fetchProducts(url);
-                // });
-
                 $('.filter-controls .filter-btn').on('click', function(e) {
                     e.preventDefault();
                     const sortValue = new URL($(this).attr('href'), window.location.origin).searchParams.get('sort');
-                    // Update hidden sort input value for form submission consistency
-                    $('input[name="sort"]').val(sortValue); 
+                    $('input[name="sort"]').val(sortValue);
                     const url = buildUrlWithParam('sort', sortValue);
                     fetchProducts(url);
-                     // Visually update active button (optional but good UX)
                      $('.filter-controls .filter-btn').removeClass('active');
                      $(this).addClass('active');
                 });
 
-                $('#product-list-container').on('click', '.pagination a.page-link', function(e) {
+                // Correct selector for pagination links inside the container
+                $('#product-list-container').on('click', '.pagination .page-link', function(e) {
                     e.preventDefault();
                     const pageNumber = $(this).data('page');
-                    if (pageNumber) {
+                    // Ensure pageNumber is valid before proceeding
+                    if (pageNumber !== undefined && pageNumber !== null && !$(this).closest('.page-item').hasClass('disabled')) {
                        const url = buildUrlWithParam('page', pageNumber);
                        fetchProducts(url);
                     }
@@ -369,30 +347,29 @@
                 $('.clear-filter-btn').on('click', function(e) {
                     e.preventDefault();
                     $('#filter-form').trigger('reset');
-                    // Reset sort to default visually and fetch
-                    $('input[name="sort"]').val('productId,desc'); 
+                    $('input[name="sort"]').val('productId,desc');
                      $('.filter-controls .filter-btn').removeClass('active');
-                     $('.filter-controls .filter-btn[href*="sort=productId,desc"]').addClass('active'); // Re-activate default sort button
+                     $('.filter-controls .filter-btn[href*="sort=productId,desc"]').addClass('active');
                     fetchProducts('/products?sort=productId,desc&page=1');
                 });
 
+                // Handle browser back/forward buttons
                 window.onpopstate = function(event) {
                     fetchProducts(window.location.pathname + window.location.search);
-                     // Update form state based on URL (more advanced, optional)
+                     // Update form state based on URL
                      const params = new URLSearchParams(window.location.search);
                      $('#filter-form input[type="checkbox"]').each(function() {
                         $(this).prop('checked', params.getAll($(this).attr('name')).includes($(this).val()));
                      });
                       $('#filter-form input[name="minPrice"]').val(params.get('minPrice') || '');
                       $('#filter-form input[name="maxPrice"]').val(params.get('maxPrice') || '');
-                       // Update active sort button
                        let currentSort = params.get('sort') || 'productId,desc';
-                        $('input[name="sort"]').val(currentSort); 
+                        $('input[name="sort"]').val(currentSort);
                         $('.filter-controls .filter-btn').removeClass('active');
                         $('.filter-controls .filter-btn[href*="sort=' + currentSort + '"]').addClass('active');
                 };
 
-            }); // End document ready
+            });
         </script>
     </th:block>
 </body>
