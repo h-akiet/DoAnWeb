@@ -6,6 +6,11 @@
     <title>Quản lý Loại Khuyến mãi</title>
      <style> /* Style cho chữ đen */
         .list-group-item span { color: var(--text-dark); font-weight: 500; }
+        /* Thêm style cho select */
+        .form-select {
+            font-size: 1rem;
+            padding: 0.6rem 0.75rem;
+        }
     </style>
 </head>
 <body>
@@ -46,21 +51,27 @@
                 <div class="card-body">
                     <form th:action="@{/vendor/promotion-types/add}" th:object="${newPromotionType}" method="post">
                         <div class="mb-3">
-                            <label for="typeCode" class="form-label">Mã Loại (không dấu, viết liền)</label>
-                            <input type="text" class="form-control" id="typeCode" th:field="*{code}" required placeholder="Ví dụ: PERCENTAGE_SPECIAL">
-                             <div class="text-danger mt-1 small" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></div>
-                        </div>
+                            <label for="typeCode" class="form-label">Loại Khuyến Mãi <span class="text-danger">*</span></label> <select class="form-select" id="typeCode" th:field="*{code}" required
+                                    th:classappend="${#fields.hasErrors('code')} ? 'is-invalid' : ''">
+                                <option value="" disabled selected>-- Chọn loại khuyến mãi --</option>
+                                <option value="PERCENTAGE">Giảm theo %</option>
+                                <option value="FIXED_AMOUNT">Giảm tiền cố định</option>
+                                <option value="FREE_SHIPPING">Miễn phí vận chuyển</option>
+                                </select>
+                             <div class="invalid-feedback" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></div>
+                             <small class="form-text text-muted">Chọn một trong các loại khuyến mãi có sẵn.</small> </div>
                         <div class="mb-3">
-                            <label for="typeName" class="form-label">Tên Hiển thị</label>
-                            <input type="text" class="form-control" id="typeName" th:field="*{name}" required placeholder="Ví dụ: Giảm giá % đặc biệt">
-                             <div class="text-danger mt-1 small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
-                        </div>
+                            <label for="typeName" class="form-label">Tên Hiển thị <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="typeName" th:field="*{name}" required placeholder="Ví dụ: Giảm giá 10%, Giảm 50k toàn đơn"
+                                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''">
+                             <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                             <small class="form-text text-muted">Nhập tên cụ thể cho loại này (sẽ hiển thị khi tạo KM).</small> </div>
                         <button type="submit" class="btn btn-primary">Thêm mới</button>
                     </form>
                 </div>
             </div>
         </div>
-    </div> 
+    </div>
 </div>
 </body>
 </html>

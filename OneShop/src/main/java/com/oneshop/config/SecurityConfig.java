@@ -1,3 +1,4 @@
+// src/main/java/com/oneshop/config/SecurityConfig.java
 package com.oneshop.config;
 
 import org.springframework.beans.factory.annotation.Autowired;

@@ -239,6 +239,13 @@
             <div class="breadcrumb__item"><a th:href="@{/contact}" class="breadcrumb__link">Hệ thống cửa hàng</a></div>
         </div>
 
+<div class="main" layout:fragment="content">
+    <div class="store-locator-container">
+        <div class="main__breadcrumb" style="margin-bottom: 20px;">
+            <div class="breadcrumb__item"><a th:href="@{/}" class="breadcrumb__link">Trang chủ</a></div>
+            <div class="breadcrumb__item"><a th:href="@{/contact}" class="breadcrumb__link">Hệ thống cửa hàng</a></div>
+        </div>
+
         <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
 
         <div class="filter-area">
@@ -320,11 +327,10 @@
                 </div>
             </div>
 
-            <!-- Bản đồ -->
             <div class="map-area">
                 <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.4843336040823!2d106.76933067469711!3d10.850720457814913!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752763f23816ab%3A0x282f711441b6916f!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBTxrAgcGjhuqFtIEvhu7kgdGh14bqtdCBUcC4gSOG7kyBDaMOtIE1pbmg!5e0!3m2!1svi!2s!4v1715077051991!5m2!1svi!2s"
                         allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-            </div>
+                </div>
         </div>
     </div>
 </div>
@@ -335,7 +341,9 @@
             const storeItem = headerElement.closest('.store-item');
             if (storeItem) {
                 document.querySelectorAll('.store-item.active').forEach(item => {
-                    if (item !== storeItem) item.classList.remove('active');
+                    if (item !== storeItem) {
+                        item.classList.remove('active');
+                    }
                 });
                 storeItem.classList.toggle('active');
             }
@@ -345,7 +353,7 @@
             const provinceSelect = document.getElementById('provinceSelect');
             const districtSelect = document.getElementById('districtSelect');
 
-            const locationData = {
+            const locationData = { /* Dữ liệu tỉnh/huyện đã thêm ở bước trước */
                 "Hồ Chí Minh": ["Quận 1", "Quận 3", "Quận 4", "Quận 5", "Quận 6", "Quận 7", "Quận 8", "Quận 10", "Quận 11", "Quận 12", "Bình Tân", "Bình Thạnh", "Gò Vấp", "Phú Nhuận", "Tân Bình", "Tân Phú", "Thủ Đức", "Bình Chánh", "Cần Giờ", "Củ Chi", "Hóc Môn", "Nhà Bè"],
                 "Hà Nội": ["Ba Đình", "Hoàn Kiếm", "Tây Hồ", "Long Biên", "Cầu Giấy", "Đống Đa", "Hai Bà Trưng", "Hoàng Mai", "Thanh Xuân", "Hà Đông", "Bắc Từ Liêm", "Nam Từ Liêm", "Sơn Tây", "Ba Vì", "Chương Mỹ", "Đan Phượng", "Đông Anh", "Gia Lâm", "Hoài Đức", "Mê Linh", "Mỹ Đức", "Phú Xuyên", "Phúc Thọ", "Quốc Oai", "Sóc Sơn", "Thạch Thất", "Thanh Oai", "Thanh Trì", "Thường Tín", "Ứng Hòa"],
                 "Đà Nẵng": ["Hải Châu", "Thanh Khê", "Sơn Trà", "Ngũ Hành Sơn", "Liên Chiểu", "Cẩm Lệ", "Hòa Vang"],
@@ -353,79 +361,101 @@
                 "Cần Thơ": ["Ninh Kiều", "Bình Thủy", "Cái Răng", "Ô Môn", "Thốt Nốt", "Cờ Đỏ", "Phong Điền", "Thới Lai", "Vĩnh Thạnh"],
                 "An Giang": ["Long Xuyên", "Châu Đốc", "Tân Châu", "An Phú", "Châu Phú", "Châu Thành", "Chợ Mới", "Phú Tân", "Thoại Sơn", "Tịnh Biên", "Tri Tôn"],
                 "Bà Rịa - Vũng Tàu": ["Vũng Tàu", "Bà Rịa", "Phú Mỹ", "Châu Đức", "Côn Đảo", "Đất Đỏ", "Long Điền", "Xuyên Mộc"]
+                // ... (Thêm đầy đủ 63 tỉnh thành)
             };
 
-            // Load tỉnh
             for (const province in locationData) {
-                const option = document.createElement('option');
-                option.value = province;
-                option.textContent = province;
-                provinceSelect.appendChild(option);
+                if (locationData.hasOwnProperty(province)) {
+                    const option = document.createElement('option');
+                    option.value = province;
+                    option.textContent = province;
+                    provinceSelect.appendChild(option);
+                }
             }
             provinceSelect.disabled = false;
 
-            // Khi chọn tỉnh
             provinceSelect.addEventListener('change', function() {
-                const selected = this.value;
+                const selectedProvince = this.value;
                 districtSelect.innerHTML = '<option value="0">Chọn quận/huyện</option>';
-                if (selected !== "0" && locationData[selected]) {
-                    locationData[selected].forEach(d => {
-                        const opt = document.createElement('option');
-                        opt.value = d;
-                        opt.textContent = d;
-                        districtSelect.appendChild(opt);
+                if (selectedProvince !== "0" && locationData[selectedProvince]) {
+                    const districts = locationData[selectedProvince];
+                    districts.forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district;
+                        option.textContent = district;
+                        districtSelect.appendChild(option);
                     });
                     districtSelect.disabled = false;
                 } else {
                     districtSelect.disabled = true;
                 }
-                filterStores(provinceSelect.value, districtSelect.value);
+                filterStores(selectedProvince, districtSelect.value); // Gọi filter khi tỉnh thay đổi
             });
 
-            // Khi chọn quận
             districtSelect.addEventListener('change', function() {
-                filterStores(provinceSelect.value, this.value);
+                 const selectedProvince = provinceSelect.value;
+                 const selectedDistrict = this.value;
+                 filterStores(selectedProvince, selectedDistrict); // Gọi filter khi quận thay đổi
             });
 
-            // Lọc cửa hàng
             function filterStores(province, district) {
-                const items = document.querySelectorAll('.store-item');
-                let visible = 0;
-                let noResult = document.querySelector('#no-result-message');
-                if (!noResult) {
-                    noResult = document.createElement('div');
-                    noResult.id = 'no-result-message';
-                    noResult.className = 'text-center text-muted p-5';
-                    noResult.style.display = 'none';
-                    document.querySelector('.store-scroll-list').appendChild(noResult);
-                }
+                console.log("Filtering stores for:", province, district);
+                const storeItems = document.querySelectorAll('.store-item');
+                let visibleCount = 0;
+                let noResultMessage = document.querySelector('#no-result-message'); // Tìm phần tử thông báo
+                 // Nếu chưa có, tạo mới và thêm vào list
+                 if (!noResultMessage) {
+                     noResultMessage = document.createElement('div');
+                     noResultMessage.id = 'no-result-message';
+                     noResultMessage.className = 'text-center text-muted p-5';
+                     noResultMessage.style.display = 'none'; // Ẩn ban đầu
+                     document.querySelector('.store-scroll-list').appendChild(noResultMessage);
+                 }
 
-                items.forEach(item => {
-                    const addrSpan = item.querySelector('.store-item-body span');
-                    const addr = addrSpan ? addrSpan.textContent.toLowerCase() : '';
-                    const name = item.querySelector('.store-item-header strong').textContent.toLowerCase();
 
-                    let pMatch = province === "0" || addr.includes(province.toLowerCase()) || name.includes(province.toLowerCase());
-                    let dMatch = district === "0";
+                storeItems.forEach(item => {
+                    const addressElement = item.querySelector('.store-item-body span');
+                    const addressText = addressElement ? addressElement.textContent.toLowerCase() : '';
+                    const shopName = item.querySelector('.store-item-header strong').textContent.toLowerCase();
 
-                    if (pMatch && district !== "0") {
-                        const dLower = district.toLowerCase();
-                        const alts = [dLower, dLower.replace("quận ", "q."), dLower.replace("huyện ", "h.")];
-                        dMatch = alts.some(a => addr.includes(a) || name.includes(a));
+                    let provinceMatch = (province === "0");
+                    let districtMatch = (district === "0");
+
+                    if (province !== "0") {
+                        provinceMatch = addressText.includes(province.toLowerCase()) || shopName.includes(province.toLowerCase());
+                    }
+                    if (provinceMatch && district !== "0") {
+                         const districtLower = district.toLowerCase();
+                         const districtAlts = [districtLower, districtLower.replace("quận ", "q."), districtLower.replace("huyện ", "h.")];
+                         districtMatch = districtAlts.some(alt => addressText.includes(alt) || shopName.includes(alt));
                     }
 
-                    if (pMatch && dMatch) {
+                    if (provinceMatch && districtMatch) {
                         item.style.display = 'block';
-                        visible++;
+                        visibleCount++;
                     } else {
                         item.style.display = 'none';
                     }
                 });
 
-                const countSpan = document.querySelector('.store-list-area span');
-                if (countSpan) {
-                    countSpan.textContent = visible + ' cửa hàng phù hợp';
+                const countElement = document.querySelector('.store-list-area span');
+                if (countElement) {
+                    countElement.textContent = `${visibleCount} cửa hàng phù hợp`; // Cập nhật số lượng
                 }
+
+                // Hiển thị/ẩn thông báo "Không tìm thấy"
+                if(noResultMessage) {
+                     noResultMessage.style.display = (visibleCount === 0) ? 'block' : 'none';
+                     if(visibleCount === 0) {
+                        noResultMessage.textContent = 'Không tìm thấy cửa hàng nào phù hợp với bộ lọc.';
+                     }
+                 }
+            }
+             // Gọi filter lần đầu để xử lý (nếu có tham số trên URL chẳng hạn)
+             // filterStores(provinceSelect.value, districtSelect.value);
+        });
+    </script>
+</th:block>
 
                 noResult.style.display = visible === 0 ? 'block' : 'none';
                 if (visible === 0) {

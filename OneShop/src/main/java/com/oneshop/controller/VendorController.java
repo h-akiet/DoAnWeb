@@ -663,7 +663,8 @@ public class VendorController {
             getAndValidateVendorShop(authentication); // Check shop duyệt
 		    model.addAttribute("promotionDto", new PromotionDto());
 		    model.addAttribute("promotionTypes", promotionTypeService.findAll());
-		    return "vendor/promotion_add";
+            model.addAttribute("isEditMode", false); // Thêm cờ cho biết là form add
+		    return "vendor/promotion_add"; // Trả về view add/edit
         } catch (ShopNotApprovedException e) {
             model.addAttribute("shopStatus", e.getShopStatus());
             return "vendor/pending_approval";
@@ -677,37 +678,97 @@ public class VendorController {
         }
 	}
 
-	@PostMapping("/promotions/save")
-	public String savePromotion(@Valid @ModelAttribute PromotionDto promotionDto, BindingResult bindingResult,
-			Authentication authentication, RedirectAttributes redirectAttributes, Model model) {
+    @GetMapping("/promotions/edit/{id}")
+    public String editPromotionForm(@PathVariable("id") Long promotionId, Model model, Authentication authentication, RedirectAttributes redirectAttributes) {
         String username = authentication.getName();
+        logger.debug("Showing edit promotion form for ID: {} by user: {}", promotionId, username);
+        model.addAttribute("currentPage", "promotions");
+        try {
+            Long shopId = getAuthenticatedShopId(authentication); // Check duyệt và lấy shopId
+
+            // Lấy thông tin promotion cần sửa
+            Promotion promotion = promotionService.getPromotionByIdAndShopId(promotionId, shopId)
+                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy khuyến mãi hoặc bạn không có quyền sửa."));
+
+            // Chuyển entity sang DTO để hiển thị trên form
+            PromotionDto dto = mapPromotionToDto(promotion); // Cần tạo hàm map này
+
+            model.addAttribute("promotionDto", dto);
+            model.addAttribute("promotionTypes", promotionTypeService.findAll());
+            model.addAttribute("isEditMode", true); // Thêm cờ cho biết là form edit
+            return "vendor/promotion_add"; // Dùng lại view add/edit
+
+        } catch (ShopNotApprovedException e) {
+            model.addAttribute("shopStatus", e.getShopStatus());
+            return "vendor/pending_approval";
+        } catch (EntityNotFoundException e) {
+            logger.warn("Promotion edit failed for user {}: {}", username, e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/vendor/promotions";
+        } catch (Exception e) {
+            logger.error("Error loading edit promotion form for ID {} by user {}: {}", promotionId, username, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể tải thông tin khuyến mãi để sửa.");
+            return "redirect:/vendor/promotions";
+        }
+    }
+
+	@PostMapping("/promotions/save") // Giữ nguyên URL này cho cả thêm và sửa
+	public String saveOrUpdatePromotion(@Valid @ModelAttribute("promotionDto") PromotionDto promotionDto,
+                                        BindingResult bindingResult,
+                                        Authentication authentication,
+                                        RedirectAttributes redirectAttributes,
+                                        Model model) {
+        String username = authentication.getName();
+        boolean isEditMode = promotionDto.getId() != null; // Kiểm tra xem có ID không để biết là sửa hay thêm
+		model.addAttribute("currentPage", "promotions"); // Giữ currentPage
+
 		Long shopId = null;
 		try {
             shopId = getAuthenticatedShopId(authentication); // Check shop duyệt
 
-			if (bindingResult.hasErrors()) {
-                throw new ValidationException("Dữ liệu khuyến mãi không hợp lệ.");
+			// Kiểm tra validation cơ bản (@Valid)
+            if (bindingResult.hasErrors()) {
+                 logger.warn("Validation errors {} promotion for user {}", isEditMode ? "updating" : "saving", username);
+                 throw new ValidationException("Dữ liệu khuyến mãi không hợp lệ.");
 			}
 
-			promotionService.createPromotion(promotionDto, shopId);
-			redirectAttributes.addFlashAttribute("successMessage", "Tạo khuyến mãi thành công!");
-			return "redirect:/vendor/promotions";
+            // Gọi service tương ứng
+            if (isEditMode) {
+                logger.info("Attempting to update promotion ID: {} for user {}", promotionDto.getId(), username);
+                promotionService.updatePromotion(promotionDto.getId(), promotionDto, shopId);
+                redirectAttributes.addFlashAttribute("successMessage", "Cập nhật khuyến mãi thành công!");
+            } else {
+                logger.info("Attempting to create new promotion for user {}", username);
+                promotionService.createPromotion(promotionDto, shopId);
+                redirectAttributes.addFlashAttribute("successMessage", "Tạo khuyến mãi thành công!");
+            }
+			return "redirect:/vendor/promotions"; // Về trang danh sách
 
         } catch (ShopNotApprovedException e) {
-            return "vendor/pending_approval"; // Redirect nếu shop chưa duyệt
-        } catch (ValidationException | IllegalArgumentException e) { // Lỗi validation hoặc nghiệp vụ
-			model.addAttribute("currentPage", "promotions");
-			model.addAttribute("promotionTypes", promotionTypeService.findAll());
-            if (!(e instanceof ValidationException)) { // Chỉ add lỗi chung nếu không phải validation
+            return "vendor/pending_approval";
+        } catch (ValidationException | IllegalArgumentException | EntityNotFoundException e) {
+            // Lỗi validation (@Valid hoặc từ service) hoặc không tìm thấy entity khi sửa
+			logger.warn("Error {} promotion for user {}: {}", isEditMode ? "updating" : "saving", username, e.getMessage());
+            try {
+                model.addAttribute("promotionTypes", promotionTypeService.findAll()); // Load lại types
+            } catch (Exception loadEx) {
+                model.addAttribute("promotionTypes", Collections.emptyList());
+                model.addAttribute("errorMessage", "Lỗi tải lại loại khuyến mãi.");
+            }
+            // Nếu lỗi không phải do bindingResult (ví dụ lỗi nghiệp vụ từ service)
+            if (!(e instanceof ValidationException) && !bindingResult.hasErrors()) {
                  model.addAttribute("errorMessage", e.getMessage());
             }
-			return "vendor/promotion_add"; // Quay lại form add
-		} catch (Exception e) { // Lỗi khác
-             logger.error("Error saving promotion for user {}: {}", username, e.getMessage(), e);
-             redirectAttributes.addFlashAttribute("errorMessage", "Lưu khuyến mãi thất bại: " + e.getMessage());
-			 return "redirect:/vendor/promotions/add"; // Redirect về form add với lỗi
+            model.addAttribute("isEditMode", isEditMode); // Đặt lại cờ edit
+            // promotionDto đã có trong model
+			return "vendor/promotion_add"; // Quay lại form
+		} catch (Exception e) { // Lỗi hệ thống khác
+             logger.error("Error {} promotion for user {}: {}", isEditMode ? "updating" : "saving", username, e.getMessage(), e);
+             redirectAttributes.addFlashAttribute("errorMessage", (isEditMode ? "Cập nhật" : "Tạo") + " khuyến mãi thất bại: " + e.getMessage());
+			 return "redirect:/vendor/promotions"; // Về trang danh sách với lỗi
 		}
 	}
+
 
 	@PostMapping("/promotions/delete/{id}")
 	public String deletePromotion(@PathVariable("id") Long promotionId, Authentication authentication,
@@ -726,6 +787,22 @@ public class VendorController {
 		}
 		return "redirect:/vendor/promotions";
 	}
+
+    // --- HELPER MAP ENTITY SANG DTO CHO FORM SỬA ---
+    private PromotionDto mapPromotionToDto(Promotion promotion) {
+        PromotionDto dto = new PromotionDto();
+        dto.setId(promotion.getId());
+        dto.setCampaignName(promotion.getCampaignName());
+        dto.setDiscountCode(promotion.getDiscountCode());
+        if (promotion.getType() != null) {
+            dto.setPromotionTypeId(promotion.getType().getId());
+        }
+        dto.setDiscountValue(promotion.getValue());
+        dto.setStartDate(promotion.getStartDate());
+        dto.setEndDate(promotion.getEndDate());
+        return dto;
+    }
+
 
 	// --- Doanh thu ---
     // (Tương tự, thêm check shop duyệt)
@@ -998,13 +1075,29 @@ public class VendorController {
                  throw new ValidationException("Dữ liệu loại khuyến mãi không hợp lệ.");
 			}
 
-			String formattedCode = newType.getCode().trim().toUpperCase().replaceAll("\\s+", "_")
-					.replaceAll("[^A-Z0-9_]+", "");
-			if (formattedCode.isEmpty()) {
-				bindingResult.rejectValue("code", "Invalid", "Mã loại không hợp lệ (chỉ chữ cái, số, gạch dưới).");
-				throw new ValidationException("Mã loại không hợp lệ.");
-			}
-			newType.setCode(formattedCode);
+            // === XÓA ĐOẠN CODE ĐỊNH DẠNG CODE ===
+			// String formattedCode = newType.getCode().trim().toUpperCase().replaceAll("\\s+", "_")
+			// 		.replaceAll("[^A-Z0-9_]+", "");
+			// if (formattedCode.isEmpty()) {
+			// 	bindingResult.rejectValue("code", "Invalid", "Mã loại không hợp lệ (chỉ chữ cái, số, gạch dưới).");
+			// 	throw new ValidationException("Mã loại không hợp lệ.");
+			// }
+			// newType.setCode(formattedCode);
+            // ===================================
+
+            // Kiểm tra xem code có rỗng không (vẫn cần thiết)
+            if (!StringUtils.hasText(newType.getCode())) {
+                bindingResult.rejectValue("code", "NotBlank", "Vui lòng chọn mã loại.");
+                throw new ValidationException("Chưa chọn mã loại.");
+            }
+
+            // Kiểm tra tên hiển thị không rỗng (đã có @Valid nhưng check lại cho chắc)
+             if (!StringUtils.hasText(newType.getName())) {
+                bindingResult.rejectValue("name", "NotBlank", "Tên hiển thị không được để trống.");
+                throw new ValidationException("Chưa nhập tên hiển thị.");
+            }
+             newType.setName(newType.getName().trim()); // Trim tên hiển thị
+
 
 			promotionTypeService.savePromotionType(newType);
 			redirectAttributes.addFlashAttribute("successMessage", "Đã thêm loại khuyến mãi '" + newType.getName() + "'!");
@@ -1020,14 +1113,24 @@ public class VendorController {
 		} catch (Exception e) { // Lỗi DB, trùng constraint,...
 			logger.error("Error adding promotion type for user {}: {}", username, e.getMessage(), e);
             try { model.addAttribute("promotionTypes", promotionTypeService.findAll()); } catch (Exception ptEx) { /* Ignore */ }
-            if ((e.getMessage().contains("constraint") || e.getMessage().contains("duplicate")) && !bindingResult.hasFieldErrors("code")) {
-				bindingResult.rejectValue("code", "Unique", "Mã loại hoặc tên loại có thể đã tồn tại.");
+            // Xử lý lỗi trùng lặp (có thể xảy ra nếu user submit form 2 lần nhanh hoặc constraint DB)
+            if ((e.getMessage().contains("constraint") || e.getMessage().contains("duplicate"))) {
+                // Kiểm tra xem lỗi trùng code hay trùng name
+                boolean codeExists = promotionTypeService.findAll().stream().anyMatch(pt -> pt.getCode().equals(newType.getCode()));
+                boolean nameExists = promotionTypeService.findAll().stream().anyMatch(pt -> pt.getName().equalsIgnoreCase(newType.getName()));
+                if (codeExists && !bindingResult.hasFieldErrors("code")) {
+                    bindingResult.rejectValue("code", "Unique", "Mã loại này đã được thêm.");
+                }
+                if (nameExists && !bindingResult.hasFieldErrors("name")) {
+                    bindingResult.rejectValue("name", "Unique", "Tên hiển thị này đã tồn tại.");
+                }
 			} else {
                  model.addAttribute("errorMessage", "Lỗi không xác định: " + e.getMessage());
             }
 			return "vendor/promotion_type_management";
 		}
 	}
+
 
 	@PostMapping("/promotion-types/delete/{id}")
 	public String deletePromotionType(@PathVariable("id") Long id, RedirectAttributes redirectAttributes, Authentication authentication) {
