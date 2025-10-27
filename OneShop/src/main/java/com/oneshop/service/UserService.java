@@ -7,6 +7,7 @@ import com.oneshop.entity.User;
 import org.springframework.security.core.userdetails.UserDetailsService; // <<< KẾ THỪA
 import java.util.Optional;
 
+
 public interface UserService extends UserDetailsService {
 
     // --- Các chức năng quản lý User ---
@@ -28,4 +29,7 @@ public interface UserService extends UserDetailsService {
     void sendOtpForRegistration(String email);
 
     User updateUserProfile(String username, ProfileUpdateDto profileUpdateDto);
+    
+    User findById(Long id);
+    
 }
