@@ -101,7 +101,7 @@
 					<div class="modal-content">
 						<div class="modal-header">
 							<h5 class="modal-title" id="editCategoryModalLabel"
-								style="font-size: 2rem; font-weight: 700; color: #ffc107;">Chỉnh
+								style="font-size: 2rem; font-weight: 700; color: #0d6efd;">Chỉnh
 								Sửa Danh Mục</h5>
 							<button type="button" class="btn-close" data-bs-dismiss="modal"
 								aria-label="Close"></button>
@@ -141,8 +141,66 @@
 									<i class="fas fa-times"></i> Hủy
 								</button>
 								<button type="submit" class="btn btn-primary"
-									style="background-color: #ffc107 !important; color: #000 !important; padding: 9px 19px; font-size: 1.4rem; font-weight: 500; min-width: 120px;">
+									style="background-color: #0d6efd !important; color: #fff !important; padding: 9px 19px; font-size: 1.4rem; font-weight: 500; min-width: 120px;">
 									<i class="fas fa-save"></i> Cập Nhật
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal fade" id="deleteCategoryModal" tabindex="-1"
+				aria-labelledby="deleteCategoryModalLabel" aria-hidden="true"
+				th:if="${isDeleting}">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="deleteCategoryModalLabel"
+								style="font-size: 2rem; font-weight: 700; color: #0d6efd;">Xác
+								Nhận Xóa Danh Mục</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"
+								aria-label="Close"></button>
+						</div>
+
+						<form th:action="@{/admin/categories/delete}" method="post">
+							<div class="modal-body">
+								<input type="hidden" name="categoryId"
+									th:value="${categoryToDelete.categoryId}" />
+
+								<p class="mb-3" style="font-size: 1.6rem;">
+									Danh mục **<span th:text="${categoryToDelete.name}"
+										style="font-weight: bold; color: red;"></span>** có các danh
+									mục con. Vui lòng chọn một danh mục thay thế để chuyển các danh
+									mục con sang đó.
+								</p>
+
+								<div class="mb-3">
+									<select class="form-select" id="replacementCategory"
+										name="replacementId"
+										style="font-size: 14px; border: 2px solid #000; font-weight: 500;">
+
+										<option value="" disabled selected>-- Chọn danh mục
+											thay thế --</option>
+
+										<option value="">(Chọn Danh mục Gốc)</option>
+
+										<option th:each="cat : ${replacementCategories}"
+											th:value="${cat.categoryId}" th:text="${cat.name}">Tên
+											Danh Mục Thay Thế</option>
+									</select>
+								</div>
+							</div>
+
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary"
+									data-bs-dismiss="modal"
+									style="background-color: #6c757d !important; color: #fff !important; padding: 9px 19px; font-size: 1.4rem; font-weight: 500; min-width: 120px;">
+									<i class="fas fa-times"></i> Hủy
+								</button>
+								<button type="submit" class="btn btn-danger"
+									style="background-color: #0d6efd !important; color: #fff !important; padding: 9px 19px; font-size: 1.4rem; font-weight: 500; min-width: 120px;">
+									<i class="fas fa-trash"></i> Xác Nhận Xóa
 								</button>
 							</div>
 						</form>
@@ -183,12 +241,13 @@
 							th:href="@{/admin/categories/{id}/edit(id=${category.categoryId})}"
 							class="btn btn-sm btn-warning btn-edit" title="Chỉnh sửa"> <i
 								class="fas fa-pencil-alt" style="color: black !important;"></i>
-						</a> <a
-							th:href="@{/admin/categories/{id}/delete(id=${category.categoryId})}"
-							class="btn btn-warning btn-sm"
-							onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này không?')"
-							title="Xóa sản phẩm"> <i class="fas fa-trash"
-								style="color: black !important;"></i>
+						</a> <a href="javascript:void(0)"
+							class="btn btn-warning btn-sm delete-category-btn"
+							th:title="'Xóa danh mục: ' + ${category.name}"
+							th:data-category-name="${category.name}"
+							th:data-delete-url="@{/admin/categories/{id}/delete(id=${category.categoryId})}"
+							onclick="return handleCategoryDelete(this);"> <i
+								class="fas fa-trash" style="color: black !important;"></i>
 						</a></td>
 					</tr>
 				</tbody>
@@ -202,12 +261,21 @@
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	<script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
 	<script th:src="@{/assets/js/commonscript.js}"></script>
+
 	<script th:if="${isEditing}">
 		$(document).ready(
 				function() {
 					var editModal = new bootstrap.Modal(document
 							.getElementById('editCategoryModal'));
 					editModal.show();
+				});
+	</script>
+	<script th:if="${isDeleting}">
+		$(document).ready(
+				function() {
+					var deleteModal = new bootstrap.Modal(document
+							.getElementById('deleteCategoryModal'));
+					deleteModal.show();
 				});
 	</script>
 	<script th:src="@{/assets/js/admin/categories.js}"></script>

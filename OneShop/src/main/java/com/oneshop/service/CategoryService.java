@@ -31,4 +31,14 @@ public class CategoryService {
     public Category save(Category category) {
         return categoryRepository.save(category);
     }
+    
+    public static final Long UNCATEGORIZED_CATEGORY_ID = 1001L; 
+
+    @Transactional
+    public void deleteById(Long categoryId) {
+        if (categoryId.equals(UNCATEGORIZED_CATEGORY_ID)) {
+            throw new UnsupportedOperationException("Attempted to delete the default category ID: " + categoryId);
+        }
+        categoryRepository.deleteById(categoryId);
+    }
 }

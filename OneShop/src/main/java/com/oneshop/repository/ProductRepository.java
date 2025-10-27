@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.oneshop.entity.Product;
 import com.oneshop.enums.ProductStatus;
@@ -35,4 +37,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	 */
 	@Query("SELECT DISTINCT p.brand FROM Product p WHERE p.brand IS NOT NULL AND p.brand <> ''")
 	Set<String> findAllUniqueBrands();
+	
+	@Transactional
+    @Modifying
+    @Query("UPDATE Product p SET p.category.categoryId = :newId WHERE p.category.categoryId = :oldId")
+    int updateCategoryByCategoryId(@Param("oldId") Long oldCategoryId, @Param("newId") Long newCategoryId);
 }
