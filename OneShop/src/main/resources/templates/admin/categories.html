@@ -71,7 +71,7 @@
 										id="parentCategory" th:field="*{parentCategory.categoryId}"
 										style="font-size: 14px;">
 										<option value="">-- Chọn danh mục cha --</option>
-										<option th:each="cat : ${categories}"
+										<option th:each="cat : ${allCategories}"
 											th:value="${cat.categoryId}" th:text="${cat.name}">Tên
 											Danh Mục Cha</option>
 									</select>
@@ -88,6 +88,61 @@
 								<button type="submit" class="btn btn-primary"
 									style="background-color: #0d6efd !important; color: #fff !important; padding: 9px 19px; font-size: 1.4rem; font-weight: 500; min-width: 120px;">
 									<i class="fas fa-save"></i> Lưu
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal fade" id="editCategoryModal" tabindex="-1"
+				aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="editCategoryModalLabel"
+								style="font-size: 2rem; font-weight: 700; color: #ffc107;">Chỉnh
+								Sửa Danh Mục</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"
+								aria-label="Close"></button>
+						</div>
+
+						<form th:action="@{/admin/categories/save}" method="post"
+							th:object="${editCategory}">
+							<div class="modal-body">
+								<input type="hidden" th:field="*{categoryId}" />
+
+								<div class="mb-3">
+									<label for="editCategoryName" class="form-label">Tên
+										Danh Mục:</label> <input type="text" class="form-control"
+										id="editCategoryName" th:field="*{name}" required
+										placeholder="Nhập tên danh mục..." style="font-size: 14px;">
+								</div>
+
+								<div class="mb-3">
+									<label for="editParentCategory" class="form-label">Danh
+										Mục Cha (Tùy chọn):</label> <select class="form-select"
+										id="editParentCategory"
+										th:field="*{parentCategory.categoryId}"
+										style="font-size: 14px;">
+										<option value="">-- Chọn danh mục cha --</option>
+										<option th:each="cat : ${eligibleParentCategories}"
+											th:value="${cat.categoryId}" th:text="${cat.name}">Tên
+											Danh Mục Cha</option>
+									</select>
+								</div>
+
+							</div>
+
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary"
+									data-bs-dismiss="modal"
+									style="background-color: #6c757d !important; color: #fff !important; padding: 9px 19px; font-size: 1.4rem; font-weight: 500; min-width: 120px;">
+									<i class="fas fa-times"></i> Hủy
+								</button>
+								<button type="submit" class="btn btn-primary"
+									style="background-color: #ffc107 !important; color: #000 !important; padding: 9px 19px; font-size: 1.4rem; font-weight: 500; min-width: 120px;">
+									<i class="fas fa-save"></i> Cập Nhật
 								</button>
 							</div>
 						</form>
@@ -147,6 +202,15 @@
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	<script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
 	<script th:src="@{/assets/js/commonscript.js}"></script>
+	<script th:if="${isEditing}">
+		$(document).ready(
+				function() {
+					var editModal = new bootstrap.Modal(document
+							.getElementById('editCategoryModal'));
+					editModal.show();
+				});
+	</script>
+	<script th:src="@{/assets/js/admin/categories.js}"></script>
 
 </body>
 
