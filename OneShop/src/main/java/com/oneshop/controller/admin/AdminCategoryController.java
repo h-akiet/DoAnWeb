@@ -22,21 +22,39 @@ import com.oneshop.service.ProductService;
 @Controller
 @RequestMapping("/admin")
 public class AdminCategoryController {
-	private static final Long UNCATEGORIZED_CATEGORY_ID = 1001L;
+	private static final Long UNCATEGORIZED_CATEGORY_ID = 1L;
+	public static class CategoryNode {
+		private final Category category;
+		private final int level; 
+		public CategoryNode(Category category, int level) {
+			this.category = category;
+			this.level = level;
+		}
+
+		public Category getCategory() {
+			return category;
+		}
+
+		public int getLevel() {
+			return level;
+		}
+	}
+
 	@Autowired
 	private CategoryService categoryService;
 	@Autowired
-	private ProductService productService; 
+	private ProductService productService;
 
 	@GetMapping("/categories")
 	public String listCategories(Model model) {
-		List<Category> categories = categoryService.findAll();
-		model.addAttribute("categories", categories);
+		List<Category> allCategories = categoryService.findAll();
+		List<CategoryNode> hierarchicalCategories = buildCategoryTree(allCategories);
+		model.addAttribute("categoryNodes", hierarchicalCategories);
+		model.addAttribute("allCategories", allCategories);
 		model.addAttribute("newCategory", new Category());
 		if (!model.containsAttribute("editCategory")) {
 			model.addAttribute("editCategory", new Category());
 		}
-		model.addAttribute("allCategories", categories);
 		if (!model.containsAttribute("categoryToDelete")) {
 			model.addAttribute("categoryToDelete", new Category());
 		}
@@ -45,6 +63,32 @@ public class AdminCategoryController {
 		}
 
 		return "admin/categories";
+	}
+
+	private List<CategoryNode> buildCategoryTree(List<Category> allCategories) {
+		List<CategoryNode> result = new ArrayList<>();
+		List<Category> rootCategories = allCategories.stream().filter(cat -> cat.getParentCategory() == null)
+				.sorted((c1, c2) -> c1.getName().compareTo(c2.getName())) 
+				.collect(Collectors.toList());
+		for (Category root : rootCategories) {
+			traverseCategoryTree(root, allCategories, result, 0);
+		}
+
+		return result;
+	}
+
+	private void traverseCategoryTree(Category current, List<Category> allCategories, List<CategoryNode> result,
+			int level) {
+		result.add(new CategoryNode(current, level));
+		List<Category> children = allCategories.stream()
+				.filter(cat -> cat.getParentCategory() != null
+						&& cat.getParentCategory().getCategoryId().equals(current.getCategoryId()))
+				.sorted((c1, c2) -> c1.getName().compareTo(c2.getName())) 
+				.collect(Collectors.toList());
+
+		for (Category child : children) {
+			traverseCategoryTree(child, allCategories, result, level + 1);
+		}
 	}
 
 	@GetMapping("/categories/{id}/edit")
@@ -64,6 +108,7 @@ public class AdminCategoryController {
 
 		return "admin/categories";
 	}
+
 	@GetMapping("/categories/{id}/delete")
 	public String prepareDeleteCategory(@PathVariable("id") Long id, Model model,
 			RedirectAttributes redirectAttributes) {
@@ -78,12 +123,12 @@ public class AdminCategoryController {
 			redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy danh mục để xóa.");
 			return "redirect:/admin/categories";
 		}
-		long childCount = countDirectChildren(categoryToDelete, allCategories); 
+		long childCount = countDirectChildren(categoryToDelete, allCategories);
 		if (childCount > 0) {
 			List<Category> replacementCategories = getEligibleParentCategories(categoryToDelete, allCategories);
 			redirectAttributes.addFlashAttribute("categoryToDelete", categoryToDelete);
 			redirectAttributes.addFlashAttribute("replacementCategories", replacementCategories);
-			redirectAttributes.addFlashAttribute("isDeleting", true); 
+			redirectAttributes.addFlashAttribute("isDeleting", true);
 			redirectAttributes.addFlashAttribute("hasChildren", true);
 			return "redirect:/admin/categories";
 		} else {
@@ -120,6 +165,7 @@ public class AdminCategoryController {
 			return "redirect:/admin/categories";
 		}
 	}
+
 	@PostMapping("/categories/delete")
 	public String performDeleteCategory(@RequestParam("categoryId") Long categoryId,
 			@RequestParam(value = "replacementId", required = false) Long replacementId,
@@ -139,7 +185,7 @@ public class AdminCategoryController {
 			long childCount = countDirectChildren(categoryToDelete, allCategories);
 			if (childCount > 0) {
 				Category replacementCategory = null;
-				Long finalReplacementId = replacementId; 
+				Long finalReplacementId = replacementId;
 				String replacementName = "Danh mục Gốc";
 				if (finalReplacementId != null) {
 					replacementCategory = categoryService.findById(finalReplacementId).orElse(null);
@@ -180,10 +226,12 @@ public class AdminCategoryController {
 
 		return "redirect:/admin/categories";
 	}
+
 	private long countDirectChildren(Category category, List<Category> allCategories) {
 		return allCategories.stream().filter(cat -> cat.getParentCategory() != null
 				&& cat.getParentCategory().getCategoryId().equals(category.getCategoryId())).count();
 	}
+
 	private List<Category> getDescendants(Category category, List<Category> allCategories) {
 		List<Category> descendants = new ArrayList<>();
 		List<Category> directChildren = allCategories.stream()

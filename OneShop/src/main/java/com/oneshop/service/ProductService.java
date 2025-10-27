@@ -92,7 +92,6 @@ public class ProductService {
 		});
 	}
 
-// Xử lý xóa sản phẩm.
 	@Transactional
 	public void deleteById(Long id) {
 		productRepository.deleteById(id);

@@ -32,7 +32,7 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
     
-    public static final Long UNCATEGORIZED_CATEGORY_ID = 1001L; 
+    public static final Long UNCATEGORIZED_CATEGORY_ID = 1L; 
 
     @Transactional
     public void deleteById(Long categoryId) {
