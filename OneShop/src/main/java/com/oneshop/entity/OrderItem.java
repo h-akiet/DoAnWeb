@@ -1,38 +1,38 @@
 package com.oneshop.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "ORDER_ITEMS")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"order", "product", "variant"})  // Loại trừ fields gây cycle
 public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderItemId;
+    private Long id;
 
+    // Sản phẩm này là gì (Lưu ID và tên để truy xuất nhanh)
+    @Column(nullable = false)
+    private Long productId;
+    
+    @Column(nullable = false)
+    private String productName;
+
+    @Column(nullable = false)
+    private Integer quantity;
+
+    @Column(nullable = false)
+    private BigDecimal priceAtPurchase; // Giá tại thời điểm mua
+
+    // Một OrderItem thuộc về một Order
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "variant_id", nullable = false)
-    private ProductVariant variant;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
-
-    @Column(nullable = false)
-    private int quantity;
-
-    @Column(nullable = false)
-    private BigDecimal price;
 }

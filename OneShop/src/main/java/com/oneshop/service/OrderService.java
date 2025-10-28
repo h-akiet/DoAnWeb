@@ -1,28 +1,58 @@
+// src/main/java/com/oneshop/service/OrderService.java
 package com.oneshop.service;
 
+import com.oneshop.dto.PlaceOrderRequest;
+import com.oneshop.entity.Order;
+import com.oneshop.entity.OrderStatus;
+// Không import User, ResponseStatusException, ... ở interface
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.math.BigDecimal; // <<< THÊM IMPORT
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+public interface OrderService {
 
-import com.oneshop.entity.Order;
-import com.oneshop.repository.OrderRepository;
+    // --- Vendor ---
+    Page<Order> getOrdersByShop(Long shopId, Optional<OrderStatus> status, Pageable pageable);
+    Order getOrderDetails(Long orderId, Long shopId);
+    Order updateOrderStatus(Long orderId, OrderStatus newStatus, Long shopId);
+    long countNewOrdersByShop(Long shopId);
 
-@Service
-public class OrderService {
+    // ===>>> THÊM CÁC PHƯƠNG THỨC DOANH THU <<<===
+    /**
+     * Lấy tổng doanh thu của shop từ các đơn hàng đã giao.
+     */
+    BigDecimal getTotalRevenueByShop(Long shopId);
 
-    @Autowired
-    private OrderRepository orderRepository;
+    /**
+     * Lấy doanh thu tháng hiện tại của shop từ các đơn hàng đã giao.
+     */
+    BigDecimal getCurrentMonthRevenueByShop(Long shopId);
 
-    public List<Order> getAssignedOrders(Long shipperId) {
-        return orderRepository.findByShipperId(shipperId);
-    }
+    /**
+     * Đếm tổng số đơn hàng đã giao của shop.
+     */
+    long countDeliveredOrdersByShop(Long shopId);
 
-    public Map<String, Long> getOrderStats(Long shipperId) {
-        List<Order> orders = getAssignedOrders(shipperId);
-        return orders.stream().collect(Collectors.groupingBy(Order::getOrderStatus, Collectors.counting()));
+    /**
+     * Lấy dữ liệu doanh thu theo tháng cho biểu đồ (ví dụ: 6 tháng gần nhất).
+     * @return Map với key là "YYYY-MM" và value là doanh thu tháng đó.
+     */
+    Map<String, BigDecimal> getMonthlyRevenueData(Long shopId, int months);
+    // ===>>> KẾT THÚC PHẦN THÊM <<<===
 
-    }
+    // --- User ---
+    List<Order> findOrdersByCurrentUser(String username);
+    Order createOrderFromRequest(String username, PlaceOrderRequest orderRequest);
+    Order findOrderByIdAndUser(Long orderId, String username);
+    void cancelOrder(Long orderId, String username);
+    Order getOrderById(Long orderId); // Cần cho ReviewController
+
+    // --- Shipper ---
+    List<Order> getAssignedOrders(Long shipperId);
+    Map<String, Long> getOrderStats(Long shipperId);
+    void deliverOrder(Long orderId, Long shipperId);
 }

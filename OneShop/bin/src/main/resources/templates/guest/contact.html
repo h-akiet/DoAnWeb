@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/guest}"> 
+      <head>
+    <meta charset="UTF-8">
+    <title>Liên Hệ</title>
+
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" type="text/css" th:href="@{/assets/css/contact.css}">
+         <link th:href="@{/assets/css/home.css}" rel="stylesheet" />
+        <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+    </th:block>
+</head>
+
+<body>
+
+    <div class="main" layout:fragment="content">
+        <div class="grid wide">
+            <div class="main__breadcrumb">
+                <div class="breadcrumb__item"><a th:href="@{/}" class="breadcrumb__link">Trang chủ</a></div>
+                <div class="breadcrumb__item"><a th:href="@{/contact}" class="breadcrumb__link">Liên hệ</a></div>
+            </div>
+            <div class="row">
+                <div class="col l-7 m-12 s-12">
+                    <div class="contact-map">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.484232355037!2d106.76993897480579!3d10.850724889299718!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752763f23816ab%3A0x282f711441b6916f!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBTxrAgcGjhuqFtIEvhu7kgdGh14bqtdCBUaMOgbmggcGjhu5EgSOG7kyBDaMOtIE1pbmggKENTMSk!5e0!3m2!1svi!2s!4v1677257322956!5m2!1svi!2s" 
+                                width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+                <div class="col l-5 m-12 s-12">
+                    <div class="contact-wrapper">
+                        <div class="contact-info-card">
+                            <h2 class="contact-heading">Thông tin liên hệ</h2>
+                            <p class="contact-subheading">Chúng tôi luôn sẵn sàng lắng nghe bạn.</p>
+                            <ul class="info-list">
+                                <li class="info-item">
+                                    <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                    <div class="info-text">
+                                        <strong>Địa chỉ:</strong>
+                                        <span>Số 1 Võ Văn Ngân, Thủ Đức, TP. Hồ Chí Minh</span>
+                                    </div>
+                                </li>
+                                <li class="info-item">
+                                    <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                                    <div class="info-text">
+                                        <strong>Email:</strong>
+                                        <a href="mailto:2311xxxx@student.hcmute.edu.vn">2311xxxx@student.hcmute.edu.vn</a>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="social-links">
+                                <a href="#" class="social-item"><i class="fab fa-facebook-f"></i></a>
+                                <a href="#" class="social-item"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="social-item"><i class="fab fa-youtube"></i></a>
+                                <a href="#" class="social-item"><i class="fab fa-tiktok"></i></a>
+                            </div>
+                        </div>
+
+                        <div class="contact-form-card">
+                            <h2 class="contact-heading">Gửi tin nhắn cho chúng tôi</h2>
+                            <form class="contact-form">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Họ và tên của bạn" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" class="form-control" placeholder="Email liên hệ" required>
+                                </div>
+                                <div class="form-group">
+                                    <textarea class="form-control" rows="5" placeholder="Nội dung tin nhắn..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn--default orange w-100">Gửi tin nhắn</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <th:block layout:fragment="js">
+        </th:block>
+
+</body>
+</html>

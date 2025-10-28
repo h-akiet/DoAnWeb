@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/guest}">
+<head>
+    <meta charset="UTF-8">
+    <title>Giỏ hàng</title>
+
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" type="text/css" th:href="@{/assets/css/cart.css}">
+        <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+        <style>
+            /* Thêm style cho nút bị vô hiệu hóa để trực quan hơn */
+            .btn[disabled] {
+                background-color: #ccc;
+                cursor: not-allowed;
+                opacity: 0.6;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+
+    <div class="main" layout:fragment="content">
+        <div class="grid wide">
+            <h3 class="main__notify" style="display: none;">
+                <div class="main__notify-icon"><i class="fas fa-check"></i></div>
+                <div class="main__notify-text">Giỏ hàng đã được cập nhật.</div>
+            </h3>
+
+            <div class="row">
+                <div class="col l-8 m-12 s-12">
+                    <div class="main__cart">
+                        <table class="shop_table">
+                            <thead>
+                                <tr>
+                                    <th class="product-select"><input type="checkbox" id="checkAll"></th>
+                                    <th class="product-name" colspan="2">Sản phẩm</th>
+                                    <th class="product-price">Giá</th>
+                                    <th class="product-quantity">Số lượng</th>
+                                    <th class="product-subtotal">Tổng</th>
+                                    <th class="product-remove">Xóa</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr th:if="${cart == null or cart.items.isEmpty()}">
+                                    <td colspan="7" style="text-align: center; padding: 20px;">
+                                        Giỏ hàng của bạn đang trống.
+                                    </td>
+                                </tr>
+
+                                <tr class="cart_item"
+                                    th:each="itemEntry : ${cart.items}" th:with="item = ${itemEntry.value}" th:data-product-id="${item.productId}" th:data-price="${item.price}"
+                                    th:unless="${cart == null or cart.items.isEmpty()}">
+
+                                    <td class="product-select" data-label="Chọn">
+                                        <input type="checkbox" name="selectedItems" class="item-checkbox" th:value="${item.productId}">
+                                    </td>
+                                    <td class="product-thumbnail" data-label="Ảnh">
+                                        <img th:src="@{${item.imageUrl ?: '/assets/img/product/no-image.jpg'}}" alt="Product Image">
+                                        </td>
+                                    <td class="product-name" data-label="Sản phẩm">
+                                        <a href="#" th:text="${item.name}" class="name"></a>
+                                    </td>
+                                    <td class="product-price" data-label="Giá">
+                                        <div class="main__cart-price" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' đ'"></div>
+                                    </td>
+                                    <td class="product-quantity" data-label="Số lượng">
+                                        <div class="buttons_added">
+                                            <input class="minus is-form" type="button" value="-">
+                                            <input aria-label="quantity" class="input-qty" max="99" min="1" type="number" th:value="${item.quantity}">
+                                            <input class="plus is-form" type="button" value="+">
+                                        </div>
+                                    </td>
+                                    <td class="product-subtotal" data-label="Tổng">
+                                        <div class="main__cart-price" th:text="${#numbers.formatDecimal(item.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"></div>
+                                    </td>
+                                    <td class="product-remove" data-label="Xóa">
+                                        <a th:href="@{/cart/remove/{id}(id=${item.productId})}" class="main__cart-icon">
+                                            <i class="far fa-times-circle"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col l-4 m-12 s-12">
+                    <div class="main__pay">
+                        <div class="main__pay-title">Tổng số lượng</div>
+                        <div class="pay-info">
+                            <div class="main__pay-text">Tổng phụ</div>
+                            <div class="main__pay-price" id="subtotal">0 đ</div>
+                        </div>
+                        <div class="pay-info">
+                            <div class="main__pay-text">Giao hàng</div>
+                            <div class="main__pay-text" id="shipping-fee">30.000 đ</div>
+                        </div>
+                        <div class="pay-info">
+                            <div class="main__pay-text">Tổng thành tiền</div>
+                            <div class="main__pay-price" id="grandtotal">0 đ</div>
+                        </div>
+                        <button type="button" id="checkoutBtn" class="btn btn--default orange">Tiến hành thanh toán</button>
+
+                        <div class="main__pay-title">Phiếu ưu đãi</div>
+                        <select class="form-control" style="margin-top: 15px;">
+                            <option value="">-- Chọn phiếu ưu đãi --</option>
+                            <option value="GIAM10K">Giảm 10,000đ cho đơn hàng từ 200,000đ</option>
+                        </select>
+                        <button class="btn btn--default">Áp dụng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="js">
+        <script th:inline="javascript">
+            $(document).ready(function() {
+                const SHIPPING_FEE = 30000;
+                function formatCurrency(number) { const numericValue = parseFloat(number); if (isNaN(numericValue)) { return '0 đ'; } return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(numericValue).replace('₫', 'đ'); }
+                function calculateAndUpdateTotal() { let subTotal = 0; let selectedCount = 0; $('.item-checkbox:checked').each(function() { selectedCount++; const row = $(this).closest('.cart_item'); const price = parseFloat(row.data('price')); const quantity = parseInt(row.find('.input-qty').val()); if (!isNaN(price) && !isNaN(quantity)) { subTotal += price * quantity; } }); let grandTotal = subTotal; if (selectedCount > 0) { grandTotal += SHIPPING_FEE; $('#shipping-fee').text(formatCurrency(SHIPPING_FEE)).removeClass('main__pay-text').addClass('main__pay-price'); } else { $('#shipping-fee').text('0 đ').removeClass('main__pay-price').addClass('main__pay-text'); } $('#subtotal').text(formatCurrency(subTotal)); $('#grandtotal').text(formatCurrency(grandTotal)); $('#checkoutBtn').prop('disabled', selectedCount === 0); }
+                function updateCartAjax(variantId, quantity) { $('.main__notify-text').text('Đang cập nhật giỏ hàng...'); $('.main__notify').fadeIn(); $.ajax({ type: "POST", url: /*[[@{/cart/update}]]*/ '/cart/update', contentType: "application/json", data: JSON.stringify({ variantId: variantId, quantity: quantity }), success: function(updatedCart) { var productRow = $('.cart_item[data-product-id="' + variantId + '"]'); var updatedItem = updatedCart.items[variantId]; if (updatedItem) { productRow.find('.product-subtotal .main__cart-price').text(formatCurrency(updatedItem.subtotal)); } else { productRow.remove(); } calculateAndUpdateTotal(); $('.main__notify-text').text('Giỏ hàng đã được cập nhật.'); setTimeout(function() { $('.main__notify').fadeOut(); }, 2000); if (Object.keys(updatedCart.items).length === 0) { $('tbody').html('<tr><td colspan="7" style="text-align: center; padding: 20px;">Giỏ hàng của bạn đang trống.</td></tr>'); } }, error: function(e) { console.error("Lỗi cập nhật giỏ hàng: ", e); if (e.status === 401 || e.status === 403) { alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'); window.location.href = '/login'; } else { $('.main__notify-text').text('Có lỗi xảy ra, vui lòng thử lại.'); } } }); }
+                $('#checkAll').on('change', function() { $('.item-checkbox').prop('checked', $(this).is(':checked')); calculateAndUpdateTotal(); });
+                $('body').on('change', '.item-checkbox', function() { if (!$(this).is(':checked')) { $('#checkAll').prop('checked', false); } else if ($('.item-checkbox:checked').length === $('.item-checkbox').length) { $('#checkAll').prop('checked', true); } calculateAndUpdateTotal(); });
+                $('body').on('change', '.input-qty', function() { var qty = $(this).val(); var variantId = $(this).closest('.cart_item').data('product-id'); updateCartAjax(variantId, qty); });
+                $('body').on('click', '.plus, .minus', function() { var $input = $(this).closest('.buttons_added').find('.input-qty'); var currentVal = parseInt($input.val()); if ($(this).hasClass('plus')) { $input.val(currentVal + 1); } else { if (currentVal > 1) { $input.val(currentVal - 1); } } $input.trigger('change'); });
+                $('#checkoutBtn').on('click', function() { const selectedIds = []; $('.item-checkbox:checked').each(function() { selectedIds.push($(this).val()); }); if (selectedIds.length === 0) { alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán.'); return; } window.location.href = '/pay?variantIds=' + selectedIds.join(','); });
+                calculateAndUpdateTotal();
+            });
+        </script>
+    </th:block>
+
+</body>
+</html>

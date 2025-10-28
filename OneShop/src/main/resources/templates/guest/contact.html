@@ -1,311 +1,469 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layouts/guest}">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liên Hệ</title>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" xintegrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
-    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
-    <link rel="stylesheet" th:href="@{/assets/css/library.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/common.css}">
-    <link rel="stylesheet" type="text/css" th:href="@{/assets/css/contact.css}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Hệ thống Cửa hàng</title>
+
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            :root {
+                --primary-color: #E85A70;
+                --secondary-color: #f07b8d;
+                --text-color-dark: #333;
+                --text-color-light: #666;
+                --border-color: #e0e0e0;
+                --background-light: #f8f9fa;
+                --background-white: #ffffff;
+            }
+
+            .main {
+                background-color: var(--background-light);
+                padding-top: 20px;
+                padding-bottom: 40px;
+            }
+
+            .store-locator-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 15px;
+            }
+
+            .store-locator-grid {
+                display: grid;
+                grid-template-columns: 400px 1fr;
+                gap: 20px;
+            }
+
+            .filter-area {
+                background-color: var(--background-white);
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                margin-bottom: 20px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+            }
+
+            .filter-area select {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                font-size: 14px;
+                background-color: var(--background-white);
+                color: var(--text-color-light);
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%236c757d' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 0.75rem center;
+                background-size: 16px 12px;
+            }
+
+            .filter-area select:disabled {
+                background-color: #e9ecef;
+                opacity: 0.7;
+                cursor: not-allowed;
+            }
+
+            .store-list-area {
+                background-color: var(--primary-color);
+                color: var(--background-white);
+                padding: 15px 20px;
+                border-radius: 8px 8px 0 0;
+                font-size: 16px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .store-list-area i { font-size: 18px; }
+
+            .store-scroll-list {
+                background-color: var(--background-white);
+                border: 1px solid var(--border-color);
+                border-top: none;
+                border-radius: 0 0 8px 8px;
+                max-height: 500px;
+                overflow-y: auto;
+                padding: 10px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            }
+
+            .store-scroll-list::-webkit-scrollbar { width: 6px; }
+            .store-scroll-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+            .store-scroll-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+            .store-scroll-list::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+            .store-item {
+                border: 1px solid var(--border-color);
+                border-radius: 6px;
+                margin-bottom: 10px;
+                overflow: hidden;
+                transition: box-shadow 0.2s ease;
+            }
+
+            .store-item:hover {
+                box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            }
+
+            .store-item-header {
+                background-color: var(--background-light);
+                padding: 12px 15px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                cursor: pointer;
+            }
+
+            .store-item-header strong {
+                font-size: 15px;
+                color: var(--text-color-dark);
+                flex-grow: 1;
+                margin-right: 10px;
+            }
+
+            .store-item-header i {
+                color: var(--text-color-light);
+                transition: transform 0.3s ease;
+            }
+
+            .store-item-body {
+                padding: 15px;
+                font-size: 14px;
+                color: var(--text-color-light);
+                display: none;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .store-item-body p {
+                margin-bottom: 10px;
+                line-height: 1.5;
+                display: flex;
+                align-items: flex-start;
+            }
+
+            .store-item-body i {
+                width: 16px;
+                margin-right: 8px;
+                color: var(--primary-color);
+                flex-shrink: 0;
+            }
+
+            .store-item.active .store-item-header i {
+                transform: rotate(180deg);
+            }
+
+            .store-item.active .store-item-body {
+                display: block;
+            }
+
+            /* Nút trò chuyện */
+            .chat-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background-color: var(--primary-color);
+                color: white;
+                padding: 8px 14px;
+                border-radius: 6px;
+                font-size: 13px;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                margin-top: 8px;
+            }
+
+            .chat-btn:hover {
+                background-color: #d6485e;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 6px rgba(232, 90, 112, 0.3);
+            }
+
+            .chat-btn i {
+                font-size: 14px;
+            }
+
+            .map-area {
+                background-color: var(--background-white);
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                height: 600px;
+                position: sticky;
+                top: 20px;
+            }
+
+            .map-area iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+            }
+
+            @media (max-width: 992px) {
+                .store-locator-grid {
+                    grid-template-columns: 1fr;
+                }
+                .map-area {
+                    grid-row: 1;
+                    height: 400px;
+                    position: static;
+                    margin-bottom: 20px;
+                }
+                .store-scroll-list {
+                    max-height: none;
+                    overflow-y: visible;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .filter-area {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </th:block>
 </head>
 
 <body>
-    <!-- Header -->
-    <div class="header scrolling" id="myHeader">
-        <div class="grid wide">
-            <div class="header__top">
-                <div class="navbar-icon"><span></span><span></span><span></span></div>
-                <a th:href="@{/}" class="header__logo"><img th:src="@{/assets/logo.png}" alt="Logo"></a>
-                <div class="header__search">
-                    <div class="header__search-wrap">
-                        <input type="text" class="header__search-input" placeholder="Tìm kiếm sản phẩm...">
-                        <a class="header__search-icon" href="#"><i class="fas fa-search"></i></a>
-                    </div>
-                </div>
-                <div class="header__account">
-                    <a href="#my-Login" class="header__account-login">Đăng Nhập</a>
-                    <a href="#my-Register" class="header__account-register">Đăng Kí</a>
-                </div>
-                <div class="header__cart have">
-                    <i class="fas fa-shopping-basket"></i>
-                    <div class="header__cart-amount">3</div>
-                    <div class="header__cart-wrap">
-                        <ul class="order__list">
-                            <li class="item-order">
-                                <div class="order-wrap">
-                                    <a th:href="@{/product}" class="order-img"><img th:src="@{/assets/img/product/product1.jpg}" alt=""></a>
-                                    <div class="order-main">
-                                        <a th:href="@{/product}" class="order-main-name">Áo sơ mi caro kèm belt</a>
-                                        <div class="order-main-price">2 x 45,000 ₫</div>
-                                    </div>
-                                    <a th:href="@{/product}" class="order-close"><i class="far fa-times-circle"></i></a>
-                                </div>
-                            </li>
-                        </ul>
-                        <div class="total-money">Tổng cộng: 120.000đ</div>
-                        <a th:href="@{/cart}" class="btn btn--default cart-btn">Xem giỏ hàng</a>
-                        <a th:href="@{/pay}" class="btn btn--default cart-btn orange">Thanh toán</a>
-                    </div>
-                </div>
-            </div>
+<div class="main" layout:fragment="content">
+    <div class="store-locator-container">
+        <div class="main__breadcrumb" style="margin-bottom: 20px;">
+            <div class="breadcrumb__item"><a th:href="@{/}" class="breadcrumb__link">Trang chủ</a></div>
+            <div class="breadcrumb__item"><a th:href="@{/contact}" class="breadcrumb__link">Hệ thống cửa hàng</a></div>
         </div>
-        <div class="header__nav">
-            <ul class="header__nav-list">
-                <li class="header__nav-item index"><a th:href="@{/}" class="header__nav-link">Trang chủ</a></li>
-                <li class="header__nav-item"><a th:href="@{/list-product}" class="header__nav-link">Sản Phẩm</a></li>
-                <li class="header__nav-item"><a th:href="@{/news}" class="header__nav-link">Tin Tức</a></li>
-                <li class="header__nav-item"><a th:href="@{/contact}" class="header__nav-link">Liên Hệ</a></li>
-            </ul>
-        </div>
-    </div>
 
-    <!-- Main Content -->
-    <div class="main">
-        <div class="grid wide">
-            <div class="main__breadcrumb">
-                <div class="breadcrumb__item"><a th:href="@{/}" class="breadcrumb__link">Trang chủ</a></div>
-                <div class="breadcrumb__item"><a th:href="@{/contact}" class="breadcrumb__link">Liên hệ</a></div>
-            </div>
-            <div class="row">
-                <!-- Map Section -->
-                <div class="col l-7 m-12 s-12">
-                    <div class="contact-map">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.484231881473!2d106.76993931533475!3d10.85072066078831!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317527587e9ad5bf%3A0xafa66f9c8e3f91!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBTxrAgcGjhuqFtIEvhu7kgdGh14bqtdCBUcC4gSOG7kyBDaMOtIE1pbmg!5e0!3m2!1svi!2s!4v1668678253686!5m2!1svi!2s" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-                    </div>
+<div class="main" layout:fragment="content">
+    <div class="store-locator-container">
+        <div class="main__breadcrumb" style="margin-bottom: 20px;">
+            <div class="breadcrumb__item"><a th:href="@{/}" class="breadcrumb__link">Trang chủ</a></div>
+            <div class="breadcrumb__item"><a th:href="@{/contact}" class="breadcrumb__link">Hệ thống cửa hàng</a></div>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+
+        <div class="filter-area">
+            <select id="provinceSelect">
+                <option value="0">Chọn tỉnh/thành phố</option>
+            </select>
+            <select id="districtSelect" disabled>
+                <option value="0">Chọn quận/huyện</option>
+            </select>
+        </div>
+
+        <div class="store-locator-grid">
+            <div class="store-list-container">
+                <div class="store-list-area">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span th:text="${#lists.size(shops)} + ' cửa hàng OneShop trên toàn quốc'">... cửa hàng</span>
                 </div>
-                <!-- Contact Info & Form Section -->
-                <div class="col l-5 m-12 s-12">
-                    <div class="contact-wrapper">
-                        <div class="contact-info-card">
-                            <h2 class="contact-heading">Thông tin liên hệ</h2>
-                            <p class="contact-subheading">Chúng tôi luôn sẵn sàng lắng nghe bạn.</p>
-                            <ul class="info-list">
-                                <li class="info-item">
-                                    <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                    <div class="info-text">
-                                        <strong>Địa chỉ:</strong>
-                                        <span>Số 1 Võ Văn Ngân, Thủ Đức, TP. Hồ Chí Minh</span>
-                                    </div>
-                                </li>
-                                <li class="info-item">
-                                    <div class="info-icon"><i class="fas fa-envelope"></i></div>
-                                    <div class="info-text">
-                                        <strong>Email:</strong>
-                                        <a href="mailto:2311xxxx@student.hcmute.edu.vn">2311xxxx@student.hcmute.edu.vn</a>
-                                    </div>
-                                </li>
-                            </ul>
-                            <div class="social-links">
-                                <a href="#" class="social-item"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#" class="social-item"><i class="fab fa-instagram"></i></a>
-                                <a href="#" class="social-item"><i class="fab fa-youtube"></i></a>
-                                <a href="#" class="social-item"><i class="fab fa-tiktok"></i></a>
-                            </div>
+                <div class="store-scroll-list" th:classappend="${#lists.isEmpty(shops)} ? 'd-flex justify-content-center align-items-center' : ''">
+                    <div th:if="${#lists.isEmpty(shops)}" class="text-center text-muted p-5">
+                        <p>Hiện chưa có cửa hàng nào.</p>
+                    </div>
+
+                    <!-- Mỗi cửa hàng -->
+                    <div class="store-item" th:each="shop, iterStat : ${shops}" th:unless="${#lists.isEmpty(shops)}">
+                        <!-- Header: Click để mở/đóng -->
+                        <div class="store-item-header" th:attr="onclick='toggleStoreItem(this)'">
+                            <strong th:text="'CN ' + ${iterStat.count} + ': ' + ${shop.name}">Store Name</strong>
+                            <i class="fas fa-chevron-down"></i>
                         </div>
 
-                        <div class="contact-form-card">
-                            <h2 class="contact-heading">Gửi tin nhắn cho chúng tôi</h2>
-                            <form class="contact-form">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Họ và tên của bạn" required>
+                        <!-- Body: Thông tin chi tiết -->
+                        <div class="store-item-body">
+                            <!-- Địa chỉ -->
+                            <p th:if="${shop.user?.address != null and !#strings.isEmpty(shop.user.address)}">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span th:text="${shop.user.address}">Store Address</span>
+                            </p>
+                            <p th:unless="${shop.user?.address != null and !#strings.isEmpty(shop.user.address)}">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>(Chưa cập nhật địa chỉ)</span>
+                            </p>
+
+                            <!-- SĐT -->
+                            <p th:if="${shop.contactPhone != null and !#strings.isEmpty(shop.contactPhone)}">
+                                <i class="fas fa-phone-alt"></i>
+                                <span th:text="${shop.contactPhone}">Store Phone</span>
+                            </p>
+                            <p th:unless="${shop.contactPhone != null and !#strings.isEmpty(shop.contactPhone)}">
+                                <i class="fas fa-phone-alt"></i>
+                                <span>(Chưa cập nhật SĐT)</span>
+                            </p>
+
+                            <!-- NÚT TRÒ CHUYỆN – CHỈ HIỆN KHI CÓ VENDOR -->
+                            <div th:if="${shop.user?.id != null}" sec:authorize="isAuthenticated()">
+							    <a th:href="@{/chat/{id}(id=${shop.user.id})}"
+							       class="chat-btn"
+							       onclick="event.stopPropagation();">
+							        <i class="fas fa-comment-dots"></i>
+							        Trò chuyện ngay
+							    </a>
+							</div>
+
+                                <!-- CHƯA ĐĂNG NHẬP -->
+                                <div sec:authorize="!isAuthenticated()">
+                                    <a href="#" class="chat-btn"
+                                       onclick="event.stopPropagation(); alert('Vui lòng đăng nhập để trò chuyện!'); return false;">
+                                        <i class="fas fa-comment-dots"></i>
+                                        Trò chuyện ngay
+                                    </a>
                                 </div>
-                                <div class="form-group">
-                                    <input type="email" class="form-control" placeholder="Email liên hệ" required>
-                                </div>
-                                <div class="form-group">
-                                    <textarea class="form-control" rows="5" placeholder="Nội dung tin nhắn..." required></textarea>
-                                </div>
-                                <button type="submit" class="btn btn--default orange w-100">Gửi tin nhắn</button>
-                            </form>
+                            </div>
+
+                            <!-- Không có vendor -->
+                            <div th:unless="${shop.user?.id != null}" class="text-muted small">
+                                <em>(Chưa liên kết chủ shop)</em>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Footer -->
-    <div class="footer">
-        <div class="grid wide">
-            <div class="row">
-                <div class="col l-3 m-6 s-12">
-                    <h3 class="footer__title">Menu</h3>
-                    <ul class="footer__list">
-                        <li class="footer__item"><a href="#" class="footer__link">Trang điểm</a></li>
-                        <li class="footer__item"><a href="#" class="footer__link">Chăm sóc da</a></li>
-                        <li class="footer__item"><a href="#" class="footer__link">Chăm sóc tóc</a></li>
-                        <li class="footer__item"><a href="#" class="footer__link">Nước hoa</a></li>
-                    </ul>
+            <div class="map-area">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.4843336040823!2d106.76933067469711!3d10.850720457814913!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752763f23816ab%3A0x282f711441b6916f!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBTxrAgcGjhuqFtIEvhu7kgdGh14bqtdCBUcC4gSOG7kyBDaMOtIE1pbmg!5e0!3m2!1svi!2s!4v1715077051991!5m2!1svi!2s"
+                        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
-                <div class="col l-3 m-6 s-12">
-                    <h3 class="footer__title">Hỗ trợ khách hàng</h3>
-                    <ul class="footer__list">
-                        <li class="footer__item"><a href="#" class="footer__link">Hướng dẫn mua hàng</a></li>
-                        <li class="footer__item"><a href="#" class="footer__link">Chính sách mua hàng</a></li>
-                        <li class="footer__item"><a href="#" class="footer__link">Chính sách đổi trả</a></li>
-                    </ul>
-                </div>
-                <div class="col l-3 m-6 s-12">
-                    <h3 class="footer__title">Liên hệ</h3>
-                    <ul class="footer__list">
-                        <li class="footer__item">
-                            <span class="footer__text"><i class="fas fa-map-marked-alt"></i> Số 1 Võ Văn Ngân, Thủ Đức, TP. Hồ Chí Minh</span>
-                        </li>
-                        <li class="footer__item">
-                            <a href="mailto:2311xxxx@student.hcmute.edu.vn" class="footer__link"><i class="fas fa-envelope"></i> 2311xxxx@student.hcmute.edu.vn</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col l-3 m-6 s-12">
-                    <h3 class="footer__title">Đăng kí nhận tin</h3>
-                    <ul class="footer__list">
-                        <li class="footer__item"><span class="footer__text">Nhận thông tin ưu đãi mới nhất từ chúng tôi.</span></li>
-                        <li class="footer__item">
-                            <div class="send-email">
-                                <input class="send-email__input" type="email" placeholder="Nhập Email...">
-                                <a href="#" class="send-email__link"><i class="fas fa-paper-plane"></i></a>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
         </div>
-        <div class="copyright">
-            <span class="footer__text">© Bản quyền thuộc về <a class="footer__link" href="#">NHÓM 6</a></span>
-        </div>
-    </div>
-    
-    <!-- Modals and Go to Top button -->
-    <div class="ModalForm">
-        <div class="modal" id="my-Register">
-    <a href="#" class="overlay-close"></a>
-    <div class="authen-modal register">
-        <h3 class="authen-modal__title">Đăng Kí</h3>
-        <!-- Thêm thông báo lỗi -->
-        <div id="registerError" class="alert alert-danger" role="alert" style="display: none;"></div>
-        <form id="registerForm" method="post">
-            <div class="form-group">
-                <label for="fullName" class="form-label">Họ Tên</label>
-                <input id="fullName" name="fullName" type="text" class="form-control" required>
-                <span class="form-message"></span>
-            </div>
-            <div class="form-group">
-                <label for="email" class="form-label">Tài khoản Email *</label>
-                <input id="email" name="email" type="email" class="form-control" required>
-                <span class="form-message"></span>
-            </div>
-            <div class="form-group">
-                <label for="password" class="form-label">Mật khẩu *</label>
-                <input id="password" name="password" type="password" class="form-control" required>
-                <span class="form-message"></span>
-            </div>
-            <div class="form-group">
-                <label for="confirmPassword" class="form-label">Nhập lại mật khẩu *</label>
-                <input id="confirmPassword" name="confirmPassword" type="password" class="form-control" required>
-                <span class="form-message"></span>
-            </div>
-            <div class="authen__btns">
-                <button type="submit" class="btn btn--default">Đăng Kí</button>
-            </div>
-        </form>
     </div>
 </div>
 
-<div class="modal" id="my-Login">
-    <a href="#" class="overlay-close"></a>
-    <div class="authen-modal login">
-        <h3 class="authen-modal__title">Đăng Nhập</h3>
-        <!-- Thêm thông báo lỗi -->
-        <div id="loginError" class="alert alert-danger" role="alert" style="display: none;"></div>
-        <form id="loginForm" method="post">
-            <div class="form-group">
-                <label for="account" class="form-label">Địa chỉ email *</label>
-                <input id="account" name="account" type="email" class="form-control" required>
-                <span class="form-message"></span>
-            </div>
-            <div class="form-group">
-                <label for="password" class="form-label">Mật khẩu *</label>
-                <input id="password" name="password" type="password" class="form-control" required>
-                <span class="form-message"></span>
-            </div>
-            <div class="authen__btns">
-                <button type="submit" class="btn btn--default">Đăng Nhập</button>
-                <input type="checkbox" class="authen-checkbox" name="remember-me">
-                <label class="form-label">Ghi nhớ mật khẩu</label>
-            </div>
-        </form>
-        <a class="authen__link" href="/forgot">Quên mật khẩu ?</a>
-    </div>
-</div>
-        <div class="up-top" id="upTop" onclick="goToTop()">
-            <i class="fas fa-chevron-up"></i>
-        </div>
-
-    </div>
-
-    <script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
-    <script th:src="@{/assets/js/commonscript.js}"></script>
+<th:block layout:fragment="js">
     <script>
-    $(document).ready(function() {
-        // Xử lý form đăng ký
-        $('#registerForm').submit(function(e) {
-            e.preventDefault(); // Ngăn reload trang
-            $('#registerError').hide(); // Ẩn lỗi cũ
-            var formData = $(this).serialize();
-            $.ajax({
-                type: 'POST',
-                url: '/api/auth/signup',
-                data: formData,
-                success: function(response) {
-                    if (response.success) {
-                        window.location.href = response.redirect; // Chuyển trang nếu thành công
-                    } else {
-                        $('#registerError').text(response.message).show(); // Hiển thị lỗi trong modal đăng ký
+        function toggleStoreItem(headerElement) {
+            const storeItem = headerElement.closest('.store-item');
+            if (storeItem) {
+                document.querySelectorAll('.store-item.active').forEach(item => {
+                    if (item !== storeItem) {
+                        item.classList.remove('active');
                     }
-                },
-                error: function() {
-                    $('#registerError').text('Có lỗi xảy ra!').show();
-                }
-            });
-        });
+                });
+                storeItem.classList.toggle('active');
+            }
+        }
 
-        // Xử lý form đăng nhập
-        $('#loginForm').submit(function(e) {
-            e.preventDefault(); // Ngăn reload trang
-            $('#loginError').hide(); // Ẩn lỗi cũ
-            var formData = $(this).serialize();
-            $.ajax({
-                type: 'POST',
-                url: '/login',
-                data: formData,
-                beforeSend: function(xhr) {
-                    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest"); // Đánh dấu AJAX
-                },
-                success: function(response) {
-                    if (response.success) {
-                        window.location.href = response.redirect; // Chuyển trang nếu thành công
-                    } else {
-                        $('#loginError').text(response.message).show(); // Hiển thị lỗi trong modal đăng nhập
-                    }
-                },
-                error: function(xhr) {
-                    if (xhr.status === 401) {
-                        $('#loginError').text('Tài khoản hoặc mật khẩu không chính xác!').show();
-                    } else {
-                        $('#loginError').text('Có lỗi xảy ra!').show();
-                    }
+        document.addEventListener('DOMContentLoaded', function() {
+            const provinceSelect = document.getElementById('provinceSelect');
+            const districtSelect = document.getElementById('districtSelect');
+
+            const locationData = { /* Dữ liệu tỉnh/huyện đã thêm ở bước trước */
+                "Hồ Chí Minh": ["Quận 1", "Quận 3", "Quận 4", "Quận 5", "Quận 6", "Quận 7", "Quận 8", "Quận 10", "Quận 11", "Quận 12", "Bình Tân", "Bình Thạnh", "Gò Vấp", "Phú Nhuận", "Tân Bình", "Tân Phú", "Thủ Đức", "Bình Chánh", "Cần Giờ", "Củ Chi", "Hóc Môn", "Nhà Bè"],
+                "Hà Nội": ["Ba Đình", "Hoàn Kiếm", "Tây Hồ", "Long Biên", "Cầu Giấy", "Đống Đa", "Hai Bà Trưng", "Hoàng Mai", "Thanh Xuân", "Hà Đông", "Bắc Từ Liêm", "Nam Từ Liêm", "Sơn Tây", "Ba Vì", "Chương Mỹ", "Đan Phượng", "Đông Anh", "Gia Lâm", "Hoài Đức", "Mê Linh", "Mỹ Đức", "Phú Xuyên", "Phúc Thọ", "Quốc Oai", "Sóc Sơn", "Thạch Thất", "Thanh Oai", "Thanh Trì", "Thường Tín", "Ứng Hòa"],
+                "Đà Nẵng": ["Hải Châu", "Thanh Khê", "Sơn Trà", "Ngũ Hành Sơn", "Liên Chiểu", "Cẩm Lệ", "Hòa Vang"],
+                "Hải Phòng": ["Hồng Bàng", "Ngô Quyền", "Lê Chân", "Hải An", "Kiến An", "Đồ Sơn", "Dương Kinh", "An Dương", "An Lão", "Bạch Long Vĩ", "Cát Hải", "Kiến Thụy", "Thủy Nguyên", "Tiên Lãng", "Vĩnh Bảo"],
+                "Cần Thơ": ["Ninh Kiều", "Bình Thủy", "Cái Răng", "Ô Môn", "Thốt Nốt", "Cờ Đỏ", "Phong Điền", "Thới Lai", "Vĩnh Thạnh"],
+                "An Giang": ["Long Xuyên", "Châu Đốc", "Tân Châu", "An Phú", "Châu Phú", "Châu Thành", "Chợ Mới", "Phú Tân", "Thoại Sơn", "Tịnh Biên", "Tri Tôn"],
+                "Bà Rịa - Vũng Tàu": ["Vũng Tàu", "Bà Rịa", "Phú Mỹ", "Châu Đức", "Côn Đảo", "Đất Đỏ", "Long Điền", "Xuyên Mộc"]
+                // ... (Thêm đầy đủ 63 tỉnh thành)
+            };
+
+            for (const province in locationData) {
+                if (locationData.hasOwnProperty(province)) {
+                    const option = document.createElement('option');
+                    option.value = province;
+                    option.textContent = province;
+                    provinceSelect.appendChild(option);
                 }
+            }
+            provinceSelect.disabled = false;
+
+            provinceSelect.addEventListener('change', function() {
+                const selectedProvince = this.value;
+                districtSelect.innerHTML = '<option value="0">Chọn quận/huyện</option>';
+                if (selectedProvince !== "0" && locationData[selectedProvince]) {
+                    const districts = locationData[selectedProvince];
+                    districts.forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district;
+                        option.textContent = district;
+                        districtSelect.appendChild(option);
+                    });
+                    districtSelect.disabled = false;
+                } else {
+                    districtSelect.disabled = true;
+                }
+                filterStores(selectedProvince, districtSelect.value); // Gọi filter khi tỉnh thay đổi
             });
+
+            districtSelect.addEventListener('change', function() {
+                 const selectedProvince = provinceSelect.value;
+                 const selectedDistrict = this.value;
+                 filterStores(selectedProvince, selectedDistrict); // Gọi filter khi quận thay đổi
+            });
+
+            function filterStores(province, district) {
+                console.log("Filtering stores for:", province, district);
+                const storeItems = document.querySelectorAll('.store-item');
+                let visibleCount = 0;
+                let noResultMessage = document.querySelector('#no-result-message'); // Tìm phần tử thông báo
+                 // Nếu chưa có, tạo mới và thêm vào list
+                 if (!noResultMessage) {
+                     noResultMessage = document.createElement('div');
+                     noResultMessage.id = 'no-result-message';
+                     noResultMessage.className = 'text-center text-muted p-5';
+                     noResultMessage.style.display = 'none'; // Ẩn ban đầu
+                     document.querySelector('.store-scroll-list').appendChild(noResultMessage);
+                 }
+
+
+                storeItems.forEach(item => {
+                    const addressElement = item.querySelector('.store-item-body span');
+                    const addressText = addressElement ? addressElement.textContent.toLowerCase() : '';
+                    const shopName = item.querySelector('.store-item-header strong').textContent.toLowerCase();
+
+                    let provinceMatch = (province === "0");
+                    let districtMatch = (district === "0");
+
+                    if (province !== "0") {
+                        provinceMatch = addressText.includes(province.toLowerCase()) || shopName.includes(province.toLowerCase());
+                    }
+                    if (provinceMatch && district !== "0") {
+                         const districtLower = district.toLowerCase();
+                         const districtAlts = [districtLower, districtLower.replace("quận ", "q."), districtLower.replace("huyện ", "h.")];
+                         districtMatch = districtAlts.some(alt => addressText.includes(alt) || shopName.includes(alt));
+                    }
+
+                    if (provinceMatch && districtMatch) {
+                        item.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                const countElement = document.querySelector('.store-list-area span');
+                if (countElement) {
+                    countElement.textContent = `${visibleCount} cửa hàng phù hợp`; // Cập nhật số lượng
+                }
+
+                // Hiển thị/ẩn thông báo "Không tìm thấy"
+                if(noResultMessage) {
+                     noResultMessage.style.display = (visibleCount === 0) ? 'block' : 'none';
+                     if(visibleCount === 0) {
+                        noResultMessage.textContent = 'Không tìm thấy cửa hàng nào phù hợp với bộ lọc.';
+                     }
+                 }
+            }
+             // Gọi filter lần đầu để xử lý (nếu có tham số trên URL chẳng hạn)
+             // filterStores(provinceSelect.value, districtSelect.value);
         });
-    });
-</script>
+    </script>
+</th:block>
+
+                noResult.style.display = visible === 0 ? 'block' : 'none';
+                if (visible === 0) {
+                    noResult.textContent = 'Không tìm thấy cửa hàng nào phù hợp với bộ lọc.';
+                }
+            }
+        });
+    </script>
+</th:block>
 </body>
-
 </html>
