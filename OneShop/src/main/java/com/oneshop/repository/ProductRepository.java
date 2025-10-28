@@ -22,7 +22,7 @@ import java.util.Optional;
 import com.oneshop.entity.Product;
 import com.oneshop.enums.ProductStatus;
 
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 	List<Product> findBySalesCountGreaterThanOrderBySalesCountDesc(int minSales);
 
 	List<Product> findTop6ByOrderBySalesCountDesc();
