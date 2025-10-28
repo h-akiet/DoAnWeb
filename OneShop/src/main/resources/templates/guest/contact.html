@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layouts/guest}">
 <head>
     <meta charset="UTF-8">
@@ -8,9 +9,10 @@
 
     <th:block layout:fragment="css">
         <link rel="stylesheet" th:href="@{/assets/css/common.css}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <style>
             :root {
-                --primary-color: #E85A70; /* Màu hồng chính */
+                --primary-color: #E85A70;
                 --secondary-color: #f07b8d;
                 --text-color-dark: #333;
                 --text-color-light: #666;
@@ -26,18 +28,17 @@
             }
 
             .store-locator-container {
-                max-width: 1200px; /* Hoặc kích thước phù hợp */
+                max-width: 1200px;
                 margin: 0 auto;
                 padding: 0 15px;
             }
 
             .store-locator-grid {
                 display: grid;
-                grid-template-columns: 400px 1fr; /* Cột trái cho list, cột phải cho map */
+                grid-template-columns: 400px 1fr;
                 gap: 20px;
             }
 
-            /* Filter Area */
             .filter-area {
                 background-color: var(--background-white);
                 padding: 20px;
@@ -57,61 +58,59 @@
                 font-size: 14px;
                 background-color: var(--background-white);
                 color: var(--text-color-light);
-                 appearance: none; /* Ẩn mũi tên mặc định */
+                appearance: none;
                 background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%236c757d' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
                 background-repeat: no-repeat;
                 background-position: right 0.75rem center;
                 background-size: 16px 12px;
-                pointer-events: auto; /* Cho phép tương tác */
-                opacity: 1; /* Hiển thị bình thường */
-            }
-             .filter-area select:disabled {
-                 background-color: #e9ecef;
-                 opacity: 0.7;
-                 cursor: not-allowed;
             }
 
+            .filter-area select:disabled {
+                background-color: #e9ecef;
+                opacity: 0.7;
+                cursor: not-allowed;
+            }
 
-            /* Store List Area */
             .store-list-area {
-                background-color: #E85A70; /* Màu tím hồng */
+                background-color: var(--primary-color);
                 color: var(--background-white);
                 padding: 15px 20px;
-                border-radius: 8px 8px 0 0; /* Bo góc trên */
+                border-radius: 8px 8px 0 0;
                 font-size: 16px;
                 font-weight: 600;
                 display: flex;
                 align-items: center;
                 gap: 10px;
             }
-             .store-list-area i { font-size: 18px; }
+
+            .store-list-area i { font-size: 18px; }
 
             .store-scroll-list {
                 background-color: var(--background-white);
                 border: 1px solid var(--border-color);
-                border-top: none; /* Bỏ border trên vì đã có header */
-                border-radius: 0 0 8px 8px; /* Bo góc dưới */
-                max-height: 500px; /* Giới hạn chiều cao và tạo thanh cuộn */
+                border-top: none;
+                border-radius: 0 0 8px 8px;
+                max-height: 500px;
                 overflow-y: auto;
                 padding: 10px;
-                 box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             }
-             /* Custom scrollbar */
+
             .store-scroll-list::-webkit-scrollbar { width: 6px; }
             .store-scroll-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
             .store-scroll-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
             .store-scroll-list::-webkit-scrollbar-thumb:hover { background: #aaa; }
 
-
             .store-item {
                 border: 1px solid var(--border-color);
                 border-radius: 6px;
                 margin-bottom: 10px;
-                overflow: hidden; /* Để border-radius hoạt động */
-                 transition: box-shadow 0.2s ease;
+                overflow: hidden;
+                transition: box-shadow 0.2s ease;
             }
+
             .store-item:hover {
-                 box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+                box-shadow: 0 3px 8px rgba(0,0,0,0.1);
             }
 
             .store-item-header {
@@ -126,33 +125,79 @@
             .store-item-header strong {
                 font-size: 15px;
                 color: var(--text-color-dark);
-                flex-grow: 1; /* Cho tên chiếm hết không gian */
-                margin-right: 10px; /* Khoảng cách với icon */
+                flex-grow: 1;
+                margin-right: 10px;
             }
-            .store-item-header i { color: var(--text-color-light); transition: transform 0.3s ease;}
+
+            .store-item-header i {
+                color: var(--text-color-light);
+                transition: transform 0.3s ease;
+            }
 
             .store-item-body {
                 padding: 15px;
                 font-size: 14px;
                 color: var(--text-color-light);
-                display: none; /* Mặc định ẩn */
+                display: none;
                 border-top: 1px solid var(--border-color);
             }
-             .store-item-body p { margin-bottom: 8px; line-height: 1.5; }
-             .store-item-body i { width: 16px; margin-right: 8px; color: var(--primary-color);}
 
-            .store-item.active .store-item-header i { transform: rotate(180deg); }
-            .store-item.active .store-item-body { display: block; }
+            .store-item-body p {
+                margin-bottom: 10px;
+                line-height: 1.5;
+                display: flex;
+                align-items: flex-start;
+            }
 
-            /* Map Area */
+            .store-item-body i {
+                width: 16px;
+                margin-right: 8px;
+                color: var(--primary-color);
+                flex-shrink: 0;
+            }
+
+            .store-item.active .store-item-header i {
+                transform: rotate(180deg);
+            }
+
+            .store-item.active .store-item-body {
+                display: block;
+            }
+
+            /* Nút trò chuyện */
+            .chat-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background-color: var(--primary-color);
+                color: white;
+                padding: 8px 14px;
+                border-radius: 6px;
+                font-size: 13px;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                margin-top: 8px;
+            }
+
+            .chat-btn:hover {
+                background-color: #d6485e;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 6px rgba(232, 90, 112, 0.3);
+            }
+
+            .chat-btn i {
+                font-size: 14px;
+            }
+
             .map-area {
                 background-color: var(--background-white);
                 border-radius: 8px;
-                overflow: hidden; /* Đảm bảo iframe không tràn */
+                overflow: hidden;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                height: 600px; /* Chiều cao cố định cho map */
-                 position: sticky; /* Giữ map khi cuộn list */
-                 top: 20px;
+                height: 600px;
+                position: sticky;
+                top: 20px;
             }
 
             .map-area iframe {
@@ -161,33 +206,38 @@
                 border: none;
             }
 
-            /* Responsive */
             @media (max-width: 992px) {
                 .store-locator-grid {
-                    grid-template-columns: 1fr; /* Chuyển thành 1 cột */
+                    grid-template-columns: 1fr;
                 }
                 .map-area {
-                     grid-row: 1; /* Đẩy map lên đầu trên mobile */
-                     height: 400px; /* Giảm chiều cao map */
-                     position: static; /* Bỏ sticky */
-                     margin-bottom: 20px;
+                    grid-row: 1;
+                    height: 400px;
+                    position: static;
+                    margin-bottom: 20px;
                 }
                 .store-scroll-list {
-                    max-height: none; /* Bỏ giới hạn chiều cao */
+                    max-height: none;
                     overflow-y: visible;
                 }
             }
-             @media (max-width: 576px) {
-                .filter-area {
-                    grid-template-columns: 1fr; /* Filter thành 1 cột */
-                }
-             }
 
+            @media (max-width: 576px) {
+                .filter-area {
+                    grid-template-columns: 1fr;
+                }
+            }
         </style>
     </th:block>
 </head>
 
 <body>
+<div class="main" layout:fragment="content">
+    <div class="store-locator-container">
+        <div class="main__breadcrumb" style="margin-bottom: 20px;">
+            <div class="breadcrumb__item"><a th:href="@{/}" class="breadcrumb__link">Trang chủ</a></div>
+            <div class="breadcrumb__item"><a th:href="@{/contact}" class="breadcrumb__link">Hệ thống cửa hàng</a></div>
+        </div>
 
 <div class="main" layout:fragment="content">
     <div class="store-locator-container">
@@ -217,24 +267,61 @@
                     <div th:if="${#lists.isEmpty(shops)}" class="text-center text-muted p-5">
                         <p>Hiện chưa có cửa hàng nào.</p>
                     </div>
+
+                    <!-- Mỗi cửa hàng -->
                     <div class="store-item" th:each="shop, iterStat : ${shops}" th:unless="${#lists.isEmpty(shops)}">
+                        <!-- Header: Click để mở/đóng -->
                         <div class="store-item-header" th:attr="onclick='toggleStoreItem(this)'">
                             <strong th:text="'CN ' + ${iterStat.count} + ': ' + ${shop.name}">Store Name</strong>
                             <i class="fas fa-chevron-down"></i>
                         </div>
+
+                        <!-- Body: Thông tin chi tiết -->
                         <div class="store-item-body">
-                            <p th:if="${shop.user != null and shop.user.address != null and !#strings.isEmpty(shop.user.address)}">
-                                <i class="fas fa-map-marker-alt"></i> <span th:text="${shop.user.address}">Store Address</span>
+                            <!-- Địa chỉ -->
+                            <p th:if="${shop.user?.address != null and !#strings.isEmpty(shop.user.address)}">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span th:text="${shop.user.address}">Store Address</span>
                             </p>
-                            <p th:unless="${shop.user != null and shop.user.address != null and !#strings.isEmpty(shop.user.address)}">
-                                <i class="fas fa-map-marker-alt"></i> <span>(Chưa cập nhật địa chỉ)</span>
+                            <p th:unless="${shop.user?.address != null and !#strings.isEmpty(shop.user.address)}">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>(Chưa cập nhật địa chỉ)</span>
                             </p>
+
+                            <!-- SĐT -->
                             <p th:if="${shop.contactPhone != null and !#strings.isEmpty(shop.contactPhone)}">
-                                <i class="fas fa-phone-alt"></i> <span th:text="${shop.contactPhone}">Store Phone</span>
+                                <i class="fas fa-phone-alt"></i>
+                                <span th:text="${shop.contactPhone}">Store Phone</span>
                             </p>
-                             <p th:unless="${shop.contactPhone != null and !#strings.isEmpty(shop.contactPhone)}">
-                                <i class="fas fa-phone-alt"></i> <span>(Chưa cập nhật SĐT)</span>
-                             </p>
+                            <p th:unless="${shop.contactPhone != null and !#strings.isEmpty(shop.contactPhone)}">
+                                <i class="fas fa-phone-alt"></i>
+                                <span>(Chưa cập nhật SĐT)</span>
+                            </p>
+
+                            <!-- NÚT TRÒ CHUYỆN – CHỈ HIỆN KHI CÓ VENDOR -->
+                            <div th:if="${shop.user?.id != null}" sec:authorize="isAuthenticated()">
+							    <a th:href="@{/chat/{id}(id=${shop.user.id})}"
+							       class="chat-btn"
+							       onclick="event.stopPropagation();">
+							        <i class="fas fa-comment-dots"></i>
+							        Trò chuyện ngay
+							    </a>
+							</div>
+
+                                <!-- CHƯA ĐĂNG NHẬP -->
+                                <div sec:authorize="!isAuthenticated()">
+                                    <a href="#" class="chat-btn"
+                                       onclick="event.stopPropagation(); alert('Vui lòng đăng nhập để trò chuyện!'); return false;">
+                                        <i class="fas fa-comment-dots"></i>
+                                        Trò chuyện ngay
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Không có vendor -->
+                            <div th:unless="${shop.user?.id != null}" class="text-muted small">
+                                <em>(Chưa liên kết chủ shop)</em>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -370,5 +457,13 @@
     </script>
 </th:block>
 
+                noResult.style.display = visible === 0 ? 'block' : 'none';
+                if (visible === 0) {
+                    noResult.textContent = 'Không tìm thấy cửa hàng nào phù hợp với bộ lọc.';
+                }
+            }
+        });
+    </script>
+</th:block>
 </body>
 </html>

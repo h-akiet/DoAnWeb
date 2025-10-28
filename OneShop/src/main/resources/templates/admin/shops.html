@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản lý Sản phẩm - Admin</title>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link
+	href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+	integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
+	crossorigin="anonymous" />
+<link rel="stylesheet"
+	th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
+<link rel="stylesheet" th:href="@{/assets/css/library.css}">
+<link rel="stylesheet" th:href="@{/assets/css/common.css}">
+<link rel="stylesheet" th:href="@{/assets/css/admin/user.css}">
+</head>
+
+<body>
+
+	<div th:replace="~{admin/fragments/header :: header}"></div>
+
+	<div class="main admin-container">
+		<div class="grid wide">
+			<div class="breadcrumb-admin-static" style="padding: 20px 0;">
+				<span class="breadcrumb-item-admin"
+					style="font-weight: 500; text-transform: uppercase;">ADMIN</span> <span
+					style="font-weight: 500; margin: 0 5px;">/</span> <span
+					class="breadcrumb-item-admin"
+					style="font-weight: 500; text-transform: uppercase;">QUẢN LÝ
+					SẢN PHẨM</span>
+			</div>
+
+			<table class="table table-bordered table-striped">
+				<thead>
+					<tr>
+						<th scope="col">Mã Cửa Hàng</th>
+						<th scope="col">Tên Cửa Hàng</th>
+						<th scope="col">Email</th>
+						<th scope="col" class="text-center" style="width: 150px;">
+							Sản Phẩm Trong Cửa Hàng</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="shop : ${shops}">
+						<td th:text="${shop.Id}"></td>
+						<td th:text="${shop.Name}"></td>
+						<td th:text="${shop.user.email}"></td>
+						<td class="text-center"><a
+							th:href="@{/admin/shops/{Id}/products(Id=${shop.Id})}"
+							class="btn btn-sm btn-info" title="Xem danh sách sản phẩm"> <i
+								class="fas fa-eye"></i>
+						</a></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+	</div>
+
+	<div th:replace="~{admin/fragments/footer :: footer}"></div>
+
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
+	<script th:src="@{/assets/js/commonscript.js}"></script>
+
+</body>
+
+</html>
