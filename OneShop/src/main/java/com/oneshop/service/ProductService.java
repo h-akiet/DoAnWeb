@@ -7,6 +7,8 @@ import com.oneshop.entity.Category;
 import com.oneshop.entity.Product;
 import com.oneshop.enums.ProductStatus;
 
+import jakarta.transaction.Transactional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -191,6 +193,9 @@ public interface ProductService {
      * @return List<Product>.
      */
     List<Product> searchAndFilterPublic(String name, Long categoryId, Long brandId, BigDecimal minPrice, BigDecimal maxPrice); 
+    
+   
+ 
     
     void updateProductStockAndPriceFromVariants(Product product);
   //main 

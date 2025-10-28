@@ -20,15 +20,11 @@ public class ReviewMedia {
     @JoinColumn(name = "review_id", nullable = false)
     private ProductReview review;
 
-    @Column(name = "media_url", nullable = false)
+    @Column(name = "media_url", nullable = false, columnDefinition = "VARCHAR(500)") // Tăng độ dài cột
     private String mediaUrl;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "media_type", length = 20)
-    private MediaType mediaType;
+    @Column(name = "media_type", length = 10) // Giữ độ dài nhỏ
+    private MediaType mediaType; // <<< CẦN IMPORT TỪ FILE RIÊNG
 }
-
-enum MediaType {
-    IMAGE,
-    VIDEO
-}
+// KHÔNG ĐỊNH NGHĨA ENUM TẠI ĐÂY
