@@ -35,13 +35,16 @@
                 background: #f0f0f0; 
                 font-weight: 600; 
             }
-            .chat-area { 
-                flex: 1; 
-                background: white; 
-                border-radius: 10px; 
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
-                display: flex; 
-                flex-direction: column; 
+            .chat-area {
+                flex: 1;
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                display: flex;
+                flex-direction: column;
+                /* ---> THÊM DÒNG NÀY <--- */
+                max-height: 70vh; /* Giới hạn chiều cao giống user-list */
+                /* ---> KẾT THÚC THÊM <--- */
             }
             /* Đã thay đổi một chút tiêu đề để trông như hình ảnh (tên nổi bật hơn) */
             .chat-header { 

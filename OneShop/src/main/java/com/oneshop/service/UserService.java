@@ -28,4 +28,6 @@ public interface UserService extends UserDetailsService {
     void sendOtpForRegistration(String email);
 
     User updateUserProfile(String username, ProfileUpdateDto profileUpdateDto);
+    
+    User findById(Long id);
 }

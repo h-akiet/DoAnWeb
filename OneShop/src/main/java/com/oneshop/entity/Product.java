@@ -10,6 +10,8 @@ import java.util.HashSet; // Import HashSet
 import java.util.Locale;
 import java.util.Set;
 
+import com.oneshop.enums.ProductStatus;
+
 @Entity // Chỉ một @Entity
 @Table(name = "PRODUCTS") // Đổi tên bảng thành PRODUCTS cho nhất quán
 @Getter // Thêm @Getter
@@ -114,4 +116,8 @@ public class Product {
 		NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 		return currencyFormatter.format(amount).replace("₫", "đ");
 	}
+	
+	@Enumerated(EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    private ProductStatus status = ProductStatus.PENDING;
 }

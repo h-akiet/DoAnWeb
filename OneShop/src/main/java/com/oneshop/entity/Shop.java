@@ -1,9 +1,14 @@
 package com.oneshop.entity;
 
+import com.oneshop.enums.ShopStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -11,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "Shops")
+@Setter
 public class Shop {
 
     @Id
@@ -28,35 +34,26 @@ public class Shop {
     private String contactEmail;
     private String contactPhone;
 
-    // --- THÊM TRẠNG THÁI SHOP ---
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
-    private ShopStatus status = ShopStatus.PENDING; // Mặc định là PENDING
-    // ---------------------------
+    private ShopStatus status = ShopStatus.PENDING;
 
-    // Một Shop chỉ thuộc về một User
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    // Một Shop có nhiều Sản phẩm
     @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Product> products;
 
-    // Một Shop có nhiều Đơn hàng
     @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Order> orders;
 
-    // Một Shop có nhiều Khuyến mãi
     @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Promotion> promotions;
+    
+    @Column(name = "commission_rate", precision = 5, scale = 4, nullable = false, columnDefinition = "DECIMAL(5,4) DEFAULT 0.05")
+    private BigDecimal commissionRate = new BigDecimal("0.05");
 
-    // --- THÊM ENUM TRẠNG THÁI ---
-    public enum ShopStatus {
-        PENDING,    // Đang chờ duyệt
-        APPROVED,   // Đã duyệt
-        REJECTED,   // Bị từ chối
-        INACTIVE    // Tạm ngưng (nếu cần)
-    }
-    // --------------------------
+    @Column(name = "commission_updated_at")
+    private LocalDateTime commissionUpdatedAt;
 }

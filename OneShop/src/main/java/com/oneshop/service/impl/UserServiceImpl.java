@@ -1,4 +1,3 @@
-// src/main/java/com/oneshop/service/impl/UserServiceImpl.java
 package com.oneshop.service.impl;
 
 import com.oneshop.dto.ProfileUpdateDto;
@@ -11,7 +10,7 @@ import com.oneshop.repository.RoleRepository;
 import com.oneshop.repository.UserRepository;
 import com.oneshop.service.EmailService;
 import com.oneshop.service.OtpService;
-import com.oneshop.service.UserService; // <<< IMPORT INTERFACE
+import com.oneshop.service.UserService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-@Service("userService") // Đặt tên bean rõ ràng
-public class UserServiceImpl implements UserService { // <<< IMPLEMENTS INTERFACE
+@Service("userService")
+public class UserServiceImpl implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -104,17 +103,14 @@ public class UserServiceImpl implements UserService { // <<< IMPLEMENTS INTERFAC
     }
 
     @Override
-    @Transactional(readOnly = true) // Quan trọng: Nên để readOnly nếu chỉ đọc
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
         logger.debug("Attempting to load user by username or email: {}", usernameOrEmail);
 
-        // ===>>> SỬA LOGIC TÌM KIẾM <<<===
         Optional<User> userOptional;
 
-        // Ưu tiên tìm bằng Username trước
         userOptional = userRepository.findByUsername(usernameOrEmail);
 
-        // Nếu không tìm thấy bằng Username, thử tìm bằng Email
         if (userOptional.isEmpty()) {
             logger.debug("User not found by username '{}', trying by email...", usernameOrEmail);
             userOptional = userRepository.findByEmail(usernameOrEmail);
@@ -126,7 +122,6 @@ public class UserServiceImpl implements UserService { // <<< IMPLEMENTS INTERFAC
         }
         return userOptional.orElseThrow(() -> {
             logger.warn("User not found with username or email: {}", usernameOrEmail);
-            // Ném lỗi chuẩn của Spring Security
             return new UsernameNotFoundException("Không tìm thấy người dùng với username hoặc email: " + usernameOrEmail);
         });
     }
@@ -167,7 +162,6 @@ public class UserServiceImpl implements UserService { // <<< IMPLEMENTS INTERFAC
     public void deleteByEmail(String email) {
         userRepository.findByEmail(email)
                 .ifPresent(user -> {
-                    // SỬA LỖI: Gọi đúng hàm findByUser_IdAndType
                     otpRepository.findByUser_IdAndType(user.getId(), "REGISTRATION").ifPresent(otpRepository::delete);
                     otpRepository.findByUser_IdAndType(user.getId(), "FORGOT").ifPresent(otpRepository::delete);
                     userRepository.delete(user);
@@ -188,7 +182,7 @@ public class UserServiceImpl implements UserService { // <<< IMPLEMENTS INTERFAC
         User user = findByUsername(username);
 
         Optional<User> userByNewEmail = userRepository.findByEmail(profileUpdateDto.getEmail().trim().toLowerCase());
-        if (userByNewEmail.isPresent() && !userByNewEmail.get().getId().equals(user.getId())) { // So sánh bằng ID
+        if (userByNewEmail.isPresent() && !userByNewEmail.get().getId().equals(user.getId())) {
             throw new IllegalArgumentException("Email đã được sử dụng bởi tài khoản khác.");
         }
 
@@ -228,5 +222,12 @@ public class UserServiceImpl implements UserService { // <<< IMPLEMENTS INTERFAC
                      otpRepository.delete(otp);
                  });
         logger.debug("Hoàn tất dọn dẹp.");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User findById(Long id) {
+        logger.debug("Finding user by ID: {}", id);
+        return userRepository.findById(id).orElse(null);
     }
 }

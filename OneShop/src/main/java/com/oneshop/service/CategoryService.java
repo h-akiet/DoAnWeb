@@ -14,4 +14,10 @@ public interface CategoryService {
     Category saveCategory(Category category);
 
     void deleteCategory(Long id);
+    
+    void deleteById(Long Id);
+    
+    Category save(Category category);
+    
+    public static final Long UNCATEGORIZED_CATEGORY_ID = 1L;
 }

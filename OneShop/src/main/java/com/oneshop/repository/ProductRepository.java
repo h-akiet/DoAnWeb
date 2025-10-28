@@ -21,6 +21,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     Page<Product> findByShopIdAndNameContainingIgnoreCase(Long shopId, String name, Pageable pageable);
     long countByShopId(Long shopId);
     long countByCategoryId(Long categoryId);
+    List<Product> findByCategory_Id(Long categoryId);
 
     // --- Cho User (Public) ---
     /**

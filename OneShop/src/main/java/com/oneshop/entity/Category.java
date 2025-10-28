@@ -23,4 +23,8 @@ public class Category {
     // Một Danh mục có nhiều Sản phẩm
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     private List<Product> products;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id") // Column name for the foreign key
+    private Category parentCategory;
 }

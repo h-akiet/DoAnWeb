@@ -27,8 +27,3 @@ public class ReviewMedia {
     @Column(name = "media_type", length = 20)
     private MediaType mediaType;
 }
-
-enum MediaType {
-    IMAGE,
-    VIDEO
-}

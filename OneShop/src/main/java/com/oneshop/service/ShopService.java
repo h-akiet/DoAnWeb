@@ -3,8 +3,11 @@ package com.oneshop.service;
 
 import com.oneshop.dto.ShopDto;
 import com.oneshop.entity.Shop;
+import com.oneshop.enums.ShopStatus;
 
 import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal;
 import java.util.List; // <<< THÊM IMPORT NÀY
 
 public interface ShopService {
@@ -36,4 +39,17 @@ public interface ShopService {
      */
     List<Shop> findAllActiveShops();
     // ===>>> KẾT THÚC <<<===
+    List<Shop> findAll(); // <-- THÊM
+
+    /** Tìm shop bằng ID */
+    Shop findById(Long shopId); // <-- THÊM
+
+    /** Lấy danh sách shop đã duyệt */
+    List<Shop> getApprovedShops(); // <-- THÊM
+
+    /** Cập nhật tỉ lệ chiết khấu */
+    Shop updateShopCommissionRate(Long shopId, BigDecimal newRate); // <-- THÊM
+
+    /** Cập nhật trạng thái shop */
+    Shop updateShopStatus(Long shopId, ShopStatus newStatus); // <-- THÊM
 }

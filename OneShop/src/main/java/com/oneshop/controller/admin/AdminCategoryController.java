@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model; // <-- Import Model
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -19,10 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.oneshop.entity.Category;
-import com.oneshop.service.CategoryService; // <-- Import CategoryService
+import com.oneshop.service.CategoryService;
 import com.oneshop.service.ProductService;
 
-import jakarta.validation.Valid; // <-- Import @Valid
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/admin")
@@ -30,10 +30,8 @@ public class AdminCategoryController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminCategoryController.class);
 
-	// Giữ lại ID mặc định để sử dụng khi chuyển sản phẩm/danh mục con
-	private static final Long UNCATEGORIZED_CATEGORY_ID = 1L; // Hoặc CategoryService.UNCATEGORIZED_CATEGORY_ID;
+	private static final Long UNCATEGORIZED_CATEGORY_ID = 1L;
 
-	// Inner class CategoryNode giữ nguyên
 	public static class CategoryNode {
 		private final Category category;
 		private final int level;
@@ -52,26 +50,25 @@ public class AdminCategoryController {
 
 	@GetMapping("/categories")
 	public String listCategories(Model model) {
-		model.addAttribute("currentPage", "admin-categories"); // <-- Thêm dòng này
+		model.addAttribute("currentPage", "admin-categories");
 		logger.debug("Accessing categories management page.");
 		try {
 			List<Category> allCategories = categoryService.findAll();
 			List<CategoryNode> hierarchicalCategories = buildCategoryTree(allCategories);
 			model.addAttribute("categoryNodes", hierarchicalCategories);
-			model.addAttribute("allCategories", allCategories); // Cần cho dropdown thêm mới
+			model.addAttribute("allCategories", allCategories);
 
-			// Chuẩn bị các object rỗng cho modal (nếu chưa có từ flash attributes)
 			if (!model.containsAttribute("newCategory")) {
 				model.addAttribute("newCategory", new Category());
 			}
 			if (!model.containsAttribute("editCategory")) {
-				model.addAttribute("editCategory", new Category()); // Form sửa
+				model.addAttribute("editCategory", new Category());
 			}
 			if (!model.containsAttribute("categoryToDelete")) {
-				model.addAttribute("categoryToDelete", new Category()); // Modal xác nhận xóa
+				model.addAttribute("categoryToDelete", new Category());
 			}
 			if (!model.containsAttribute("replacementCategories")) {
-				model.addAttribute("replacementCategories", new ArrayList<Category>()); // Dropdown thay thế
+				model.addAttribute("replacementCategories", new ArrayList<Category>());
 			}
 		} catch (Exception e) {
             logger.error("Error fetching categories: {}", e.getMessage(), e);
@@ -82,7 +79,6 @@ public class AdminCategoryController {
 		return "admin/categories";
 	}
 
-	// Hàm buildCategoryTree và traverseCategoryTree giữ nguyên
 	private List<CategoryNode> buildCategoryTree(List<Category> allCategories) {
 		List<CategoryNode> result = new ArrayList<>();
 		List<Category> rootCategories = allCategories.stream().filter(cat -> cat.getParentCategory() == null)
@@ -132,8 +128,7 @@ public class AdminCategoryController {
 		return "redirect:/admin/categories";
 	}
 
-    // Hàm getEligibleParentCategories và getDescendants giữ nguyên
-    private List<Category> getEligibleParentCategories(Category categoryToExclude, List<Category> allCategories) {
+	private List<Category> getEligibleParentCategories(Category categoryToExclude, List<Category> allCategories) {
 		List<Category> descendants = getDescendants(categoryToExclude, allCategories);
 		List<Long> excludedIds = descendants.stream().map(Category::getId).collect(Collectors.toList());
 		excludedIds.add(categoryToExclude.getId());
@@ -154,12 +149,9 @@ public class AdminCategoryController {
 		return descendants;
 	}
 
-
 	@GetMapping("/categories/{id}/delete")
 	public String prepareDeleteCategory(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
 		logger.warn("Preparing to delete category ID: {}", id);
-		// **** ĐÃ XÓA KIỂM TRA ID MẶC ĐỊNH ****
-
 		try {
 			List<Category> allCategories = categoryService.findAll();
 			Category categoryToDelete = categoryService.findById(id).orElse(null);
@@ -170,10 +162,9 @@ public class AdminCategoryController {
 			}
 
 			long childCount = countDirectChildren(categoryToDelete, allCategories);
-            // Giả sử ProductService có hàm countProductsByCategory(Long categoryId)
-            long productCount = productService.countProductsByCategory(id); // Sử dụng hàm đếm
+            long productCount = productService.countProductsByCategory(id);
 
-			if (childCount > 0 || productCount > 0) { // Sửa: kiểm tra cả productCount
+			if (childCount > 0 || productCount > 0) {
 				List<Category> replacementCategories = getEligibleParentCategories(categoryToDelete, allCategories);
 				redirectAttributes.addFlashAttribute("categoryToDelete", categoryToDelete);
 				redirectAttributes.addFlashAttribute("replacementCategories", replacementCategories);
@@ -192,7 +183,6 @@ public class AdminCategoryController {
 		return "redirect:/admin/categories";
 	}
 
-    // Hàm countDirectChildren giữ nguyên
 	private long countDirectChildren(Category category, List<Category> allCategories) {
 		return allCategories.stream().filter(cat -> cat.getParentCategory() != null
 				&& cat.getParentCategory().getId().equals(category.getId())).count();
@@ -200,10 +190,9 @@ public class AdminCategoryController {
 
 	@PostMapping("/categories/delete")
 	public String performDeleteCategory(@RequestParam("categoryId") Long categoryId,
-			@RequestParam(value = "replacementId", required = true) Long replacementId, // Yêu cầu phải chọn replacement
+			@RequestParam(value = "replacementId", required = true) Long replacementId,
 			RedirectAttributes redirectAttributes) {
 		logger.warn("Performing delete for category ID: {}, moving children/products to {}", categoryId, replacementId);
-		// **** ĐÃ XÓA KIỂM TRA ID MẶC ĐỊNH ****
 
 		Category categoryToDelete = categoryService.findById(categoryId).orElse(null);
 		if (categoryToDelete == null) {
@@ -215,8 +204,7 @@ public class AdminCategoryController {
 		String replacementName;
 		Long finalReplacementId = replacementId;
 
-        // Xác định danh mục thay thế
-		if (!replacementId.equals(UNCATEGORIZED_CATEGORY_ID)) {
+        if (!replacementId.equals(UNCATEGORIZED_CATEGORY_ID)) {
              replacementCategory = categoryService.findById(replacementId).orElse(null);
              if (replacementCategory == null) {
                  redirectAttributes.addFlashAttribute("errorMessage", "Danh mục thay thế không hợp lệ.");
@@ -230,7 +218,6 @@ public class AdminCategoryController {
 		try {
 			List<Category> allCategories = categoryService.findAll();
 
-			// Chuyển danh mục con
 			List<Category> directChildren = allCategories.stream()
 					.filter(cat -> cat.getParentCategory() != null
 							&& cat.getParentCategory().getId().equals(categoryId))
@@ -238,22 +225,19 @@ public class AdminCategoryController {
 
 			if (!directChildren.isEmpty()) {
 				for (Category child : directChildren) {
-                    // Nếu replacement là UNCATEGORIZED thì set parent = null
 					child.setParentCategory(replacementId.equals(UNCATEGORIZED_CATEGORY_ID) ? null : replacementCategory);
-					categoryService.save(child);
+					categoryService.saveCategory(child);
 				}
 				redirectAttributes.addFlashAttribute("infoMessage",
 						"Đã chuyển **" + directChildren.size() + "** danh mục con sang **" + replacementName + "**.");
 			}
 
-			// Chuyển sản phẩm
 			int productsMoved = productService.updateCategoryForProducts(categoryId, finalReplacementId);
 			if (productsMoved > 0) {
 				redirectAttributes.addFlashAttribute("infoMessage2",
 						"Đã chuyển **" + productsMoved + "** sản phẩm sang **" + replacementName + "**.");
 			}
 
-			// Xóa danh mục gốc
 			categoryService.deleteById(categoryId);
 			redirectAttributes.addFlashAttribute("successMessage",
 					"Xóa danh mục **" + categoryToDelete.getName() + "** và chuyển mục con/sản phẩm thành công!");
@@ -276,7 +260,6 @@ public class AdminCategoryController {
 
         Long parentId = null;
 		if (category.getParentCategory() != null && category.getParentCategory().getId() != null) {
-            // Kiểm tra self-parent
             if (category.getId() != null && category.getId().equals(category.getParentCategory().getId())) {
                  bindingResult.rejectValue("parentCategory.id", "SelfParent", "Không thể chọn chính nó làm danh mục cha.");
             } else {
@@ -284,18 +267,16 @@ public class AdminCategoryController {
             }
 		}
 
-        // Trim tên
         if (category.getName() != null) {
             category.setName(category.getName().trim());
         }
 
         if (bindingResult.hasErrors()) {
             logger.warn("Validation errors saving category: {}", bindingResult.getAllErrors());
-            // Gửi lỗi và dữ liệu về modal tương ứng (thêm hoặc sửa)
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult." + (isNew ? "newCategory" : "editCategory"), bindingResult);
             redirectAttributes.addFlashAttribute(isNew ? "newCategory" : "editCategory", category);
             redirectAttributes.addFlashAttribute(isNew ? "isAddingWithError" : "isEditingWithError", true);
-            if (!isNew) { // Nếu là sửa lỗi, gửi lại ds parent hợp lệ
+            if (!isNew) {
                 try {
                     List<Category> all = categoryService.findAll();
                     redirectAttributes.addFlashAttribute("eligibleParentCategories", getEligibleParentCategories(category, all));
@@ -305,7 +286,6 @@ public class AdminCategoryController {
         }
 
 		try {
-			// Gán Parent Category entity
 			if (parentId != null) {
 				Category parent = categoryService.findById(parentId)
                         .orElseThrow(() -> new IllegalArgumentException("Danh mục cha không tồn tại."));
@@ -314,17 +294,15 @@ public class AdminCategoryController {
 				category.setParentCategory(null);
 			}
 
-            // Gọi service để lưu (bao gồm kiểm tra trùng tên)
 			categoryService.saveCategory(category);
 
 			String message = isNew ? "Thêm danh mục **" + category.getName() + "** thành công!"
 					: "Cập nhật danh mục **" + category.getName() + "** thành công!";
 			redirectAttributes.addFlashAttribute("successMessage", message);
 
-		} catch (IllegalArgumentException e) { // Bắt lỗi nghiệp vụ (trùng tên, cha không tồn tại)
+		} catch (IllegalArgumentException e) {
             logger.warn("Error saving category: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            // Gửi lại dữ liệu form
             redirectAttributes.addFlashAttribute(isNew ? "newCategory" : "editCategory", category);
             redirectAttributes.addFlashAttribute(isNew ? "isAddingWithError" : "isEditingWithError", true);
              if (!isNew) {
@@ -333,10 +311,9 @@ public class AdminCategoryController {
                     redirectAttributes.addFlashAttribute("eligibleParentCategories", getEligibleParentCategories(category, all));
                 } catch (Exception ex) { logger.error("Error reloading eligible parents on save error: {}", ex.getMessage()); }
             }
-        } catch (Exception e) { // Bắt lỗi hệ thống khác
+        } catch (Exception e) {
 			logger.error("Unexpected error saving category: {}", e.getMessage(), e);
 			redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi lưu danh mục: " + e.getMessage());
-             // Gửi lại dữ liệu form
             redirectAttributes.addFlashAttribute(isNew ? "newCategory" : "editCategory", category);
              redirectAttributes.addFlashAttribute(isNew ? "isAddingWithError" : "isEditingWithError", true);
              if (!isNew) {

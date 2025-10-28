@@ -1,6 +1,7 @@
 // src/main/java/com/oneshop/controller/ProductController.java
 package com.oneshop.controller;
 
+import com.oneshop.dto.ReviewDTO;
 // --- THÊM LẠI CÁC IMPORT CẦN THIẾT ---
 import com.oneshop.entity.Brand;
 import com.oneshop.entity.Category;
@@ -8,6 +9,7 @@ import com.oneshop.entity.Product;
 import com.oneshop.entity.ProductImage; // <<< Đã thêm
 import com.oneshop.entity.ProductReview;
 import com.oneshop.entity.ProductVariant; // <<< Đã thêm
+import com.oneshop.entity.ReviewMedia;
 import com.oneshop.service.BrandService;
 import com.oneshop.service.CategoryService;
 import com.oneshop.service.ProductReviewService;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.util.StringUtils; // <<< Đã thêm
+
 
 import java.math.BigDecimal;
 import java.util.ArrayList;   // <<< Đã thêm
@@ -56,42 +59,7 @@ public class ProductController {
      * Tìm kiếm sản phẩm (sử dụng method riêng trong service).
      * @deprecated Nên tích hợp vào listProducts với tham số `name`.
      */
-    @GetMapping("/search")
-    public String search(@RequestParam(required = false) String name,
-                         @RequestParam(required = false) Long categoryId,
-                         @RequestParam(required = false) Long brandId,
-                         @RequestParam(required = false) BigDecimal minPrice,
-                         @RequestParam(required = false) BigDecimal maxPrice,
-                         Model model) {
-        logger.debug("Searching products with criteria - name: {}, categoryId: {}, brandId: {}, minPrice: {}, maxPrice: {}",
-                     name, categoryId, brandId, minPrice, maxPrice);
-        try {
-            List<Product> products = productService.searchAndFilterPublic(name, categoryId, brandId, minPrice, maxPrice);
-            model.addAttribute("products", products);
-            model.addAttribute("categories", categoryService.findAll());
-            model.addAttribute("brands", brandService.findAll());
-            model.addAttribute("searchTerm", name);
-            model.addAttribute("selectedCategory", categoryId);
-            model.addAttribute("selectedBrand", brandId);
-            model.addAttribute("minPrice", minPrice);
-            model.addAttribute("maxPrice", maxPrice);
-
-            return "guest/search_results";
-        } catch (Exception e) {
-            logger.error("Error during product search: {}", e.getMessage(), e);
-            model.addAttribute("errorMessage", "Lỗi khi tìm kiếm sản phẩm.");
-            model.addAttribute("products", Collections.emptyList());
-            // Vẫn cần load categories/brands để hiển thị lại form filter
-            try {
-                 model.addAttribute("categories", categoryService.findAll());
-                 model.addAttribute("brands", brandService.findAll());
-            } catch (Exception loadEx) {
-                 model.addAttribute("categories", Collections.emptyList());
-                 model.addAttribute("brands", Collections.emptyList());
-            }
-            return "guest/search_results";
-        }
-    }
+   
 
     /**
      * Hiển thị trang chi tiết sản phẩm.
@@ -187,14 +155,16 @@ public class ProductController {
             // --- KẾT THÚC TẠO LIST ẢNH ---
 
             // Lấy reviews và related products (không đổi)
-            List<ProductReview> reviews = reviewService.getReviewsByProductId(productId);
+            List<ReviewDTO> reviews = reviewService.getReviewsByProductId(productId);
             List<Product> relatedProducts = productService.findRelatedProducts(product, 6);
-
+            
+            
             // Truyền dữ liệu ra Model
             model.addAttribute("product", product); // Vẫn truyền product gốc
             model.addAttribute("displayImages", displayImageUrls); // <<< TRUYỀN LIST MỚI RA VIEW
             model.addAttribute("relatedProducts", relatedProducts);
             model.addAttribute("reviews", reviews);
+            
 
             return "user/product";
 
@@ -215,83 +185,75 @@ public class ProductController {
     @GetMapping("/products")
     public String listProducts(
             Model model,
-            // Filter Parameters (giữ nguyên)
-            @RequestParam(name = "name", required = false) String name,
+            // Tham số tìm kiếm từ header VÀ form filter
+            @RequestParam(name = "name", required = false) String name, // <<< ĐÂY LÀ KEYWORD TÌM KIẾM
+            // Filter Parameters
             @RequestParam(name = "categories", required = false) List<Long> categoryIds,
             @RequestParam(name = "brands", required = false) List<Long> brandIds,
             @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
             @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
-            // Pagination/Sorting (CẬP NHẬT SIZE MẶC ĐỊNH)
+            // Pagination/Sorting
             @RequestParam(name = "page", defaultValue = "1") int page,
-            // ========== THAY ĐỔI SIZE ==========
-            @RequestParam(name = "size", defaultValue = "20") int size, // <-- Tăng lên 20
-            // ===================================
-            @RequestParam(name = "sort", defaultValue = "productId,desc") String sort, // Giữ mặc định là mới nhất
-            // Request Info (giữ nguyên)
+            @RequestParam(name = "size", defaultValue = "20") int size, // Tăng size
+            @RequestParam(name = "sort", defaultValue = "productId,desc") String sort, // Mặc định mới nhất
             HttpServletRequest request) {
 
-        logger.debug("Listing products - Page: {}, Size: {}, Sort: {}, Name: {}, Categories: {}, Brands: {}, Price: {}-{}",
+        logger.debug("Listing/Searching products - Page: {}, Size: {}, Sort: {}, Name: {}, Categories: {}, Brands: {}, Price: {}-{}",
                      page, size, sort, name, categoryIds, brandIds, minPrice, maxPrice);
 
         try {
-            // --- 1. Build Specification (giữ nguyên) ---
-            Specification<Product> spec = Specification.where(ProductSpecification.isPublished()); // Bắt đầu với isPublished()
-            if (name != null && !name.trim().isEmpty()) spec = spec.and(ProductSpecification.hasName(name.trim()));
+            // 1. Build Specification (bao gồm cả tìm kiếm theo 'name')
+            Specification<Product> spec = Specification.where(ProductSpecification.isPublished());
+            if (StringUtils.hasText(name)) { // Sử dụng StringUtils.hasText để kiểm tra null và rỗng
+                spec = spec.and(ProductSpecification.hasName(name.trim()));
+            }
             spec = spec.and(ProductSpecification.hasCategory(categoryIds))
                        .and(ProductSpecification.hasBrand(brandIds))
                        .and(ProductSpecification.priceBetween(minPrice, maxPrice));
 
-            // --- 2. Build Pageable (CẬP NHẬT VALIDATION SORT) ---
+            // 2. Build Pageable (Đã có validation sort)
             int zeroBasedPage = Math.max(0, page - 1);
             String[] sortParams = sort.split(",");
             Sort.Direction direction = sortParams.length > 1 ? Sort.Direction.fromString(sortParams[1]) : Sort.Direction.DESC;
             String property = sortParams[0];
-            // ========== BỔ SUNG THUỘC TÍNH SORT ==========
-            List<String> allowedSortProperties = List.of("productId", // Mới nhất
-                                                         "price",     // Giá (thấp->cao: asc, cao->thấp: desc)
-                                                         "salesCount",// Bán chạy
-                                                         "rating",    // Đánh giá cao
-                                                         "name"       // Tên A-Z (asc), Z-A (desc)
-                                                         /* Thêm "favoriteCount" nếu có chức năng yêu thích */
-                                                         );
-            // ============================================
+            List<String> allowedSortProperties = List.of("productId", "price", "salesCount", "rating", "name");
             if (!allowedSortProperties.contains(property)) {
-                property = "productId"; // Mặc định về mới nhất nếu sort không hợp lệ
+                property = "productId";
                 direction = Sort.Direction.DESC;
             }
-            // Sửa lại để sort=rating,desc hoạt động (cần trường rating trong Product entity)
-            // Nếu dùng @Transient rating thì cần query khác hoặc sort sau khi lấy dữ liệu (phức tạp hơn)
-            // Giả sử đã thêm @Column(name="avg_rating") chẳng hạn vào Product Entity
             Sort sortOrder = Sort.by(direction, property);
             Pageable pageable = PageRequest.of(zeroBasedPage, size, sortOrder);
 
-            // --- 3. Fetch data ---
-            Page<Product> productPage = productService.findAllPublishedProducts(spec, pageable); // Service đã gọi setProductDetails
+            // 3. Fetch data (Sử dụng Service trả về Page)
+            // Đảm bảo Service `findAllPublishedProducts` nhận Specification và Pageable
+            Page<Product> productPage = productService.findAllPublishedProducts(spec, pageable);
 
-            // --- 4. Add data to Model ---
+            // 4. Add data to Model
             model.addAttribute("productPage", productPage);
             model.addAttribute("categories", categoryService.findAll());
             model.addAttribute("brands", brandService.findAll());
-            model.addAttribute("searchTerm", name);
+            model.addAttribute("searchTerm", name); // Giữ lại giá trị tìm kiếm
             model.addAttribute("selectedCategories", categoryIds);
             model.addAttribute("selectedBrands", brandIds);
             model.addAttribute("minPrice", minPrice);
             model.addAttribute("maxPrice", maxPrice);
             model.addAttribute("sort", sort);
-            model.addAttribute("currentPage", page); // 1-based
+            model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", productPage.getTotalPages());
             model.addAttribute("totalItems", productPage.getTotalElements());
 
-            // --- 5. Check AJAX request ---
+            // 5. Check AJAX request (giữ nguyên)
             String requestedWithHeader = request.getHeader("X-Requested-With");
             boolean isAjaxRequest = "XMLHttpRequest".equals(requestedWithHeader);
 
             if (isAjaxRequest) {
                 logger.trace("AJAX request detected, returning product list fragment.");
+                // Trả về fragment chứa danh sách sản phẩm và phân trang
                 return "user/listProduct :: product_list_fragment";
             } else {
                 logger.trace("Normal request detected, returning full product list page.");
-                return "user/listProduct";
+                // Trả về trang HTML đầy đủ
+                return "user/listProduct"; // Đảm bảo view này tồn tại
             }
         } catch (Exception e) {
              logger.error("Error listing products: {}", e.getMessage(), e);
@@ -300,11 +262,12 @@ public class ProductController {
                  model.addAttribute("categories", categoryService.findAll());
                  model.addAttribute("brands", brandService.findAll());
              } catch (Exception loadEx) {
+                 logger.error("Error loading categories/brands on list error page", loadEx);
                  model.addAttribute("categories", Collections.emptyList());
                  model.addAttribute("brands", Collections.emptyList());
              }
              model.addAttribute("productPage", Page.empty(PageRequest.of(Math.max(0, page - 1), size))); // Trả về page rỗng
-             // Giữ lại các tham số filter để hiển thị lại
+             // Giữ lại các tham số filter
              model.addAttribute("searchTerm", name);
              model.addAttribute("selectedCategories", categoryIds);
              model.addAttribute("selectedBrands", brandIds);
@@ -313,5 +276,5 @@ public class ProductController {
              model.addAttribute("sort", sort);
              return "user/listProduct"; // Trả về trang chính với lỗi
         }
-    } // <<< ĐẢM BẢO CÓ DẤU NGOẶC NHỌN NÀY
+    }
 } // <<< ĐẢM BẢO CÓ DẤU NGOẶC NHỌN CUỐI CÙNG CỦA CLASS

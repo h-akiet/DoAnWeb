@@ -1,22 +1,24 @@
-// src/main/java/com/oneshop/service/impl/ProductServiceImpl.java
 package com.oneshop.service.impl;
 
 import com.oneshop.dto.ProductDto;
 import com.oneshop.dto.VariantDto;
 import com.oneshop.entity.*;
+import com.oneshop.enums.ProductStatus;
 import com.oneshop.repository.*;
 import com.oneshop.service.BrandService;
+import com.oneshop.service.CategoryService;
 import com.oneshop.service.FileStorageService;
 import com.oneshop.service.ProductService;
 import com.oneshop.specification.ProductSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.hibernate.Hibernate; 
+import jakarta.persistence.criteria.Predicate;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.dao.DataIntegrityViolationException; 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +34,6 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
 @Service
 public class ProductServiceImpl implements ProductService {
 
@@ -42,7 +43,7 @@ public class ProductServiceImpl implements ProductService {
     @Autowired private ShopRepository shopRepository;
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private ProductImageRepository productImageRepository;
-    @Autowired @Lazy private ProductReviewRepository reviewRepository; 
+    @Autowired @Lazy private ProductReviewRepository reviewRepository;
     @Autowired private FileStorageService fileStorageService;
     @Autowired private BrandService brandService;
     @Autowired private ProductVariantRepository variantRepository;
@@ -55,9 +56,9 @@ public class ProductServiceImpl implements ProductService {
         logger.debug("Fetching products for shop ID: {} with pageable: {}", shopId, pageable);
         Page<Product> productPage = productRepository.findByShopId(shopId, pageable);
         productPage.getContent().forEach(p -> {
-            Hibernate.initialize(p.getVariants()); 
-            Hibernate.initialize(p.getImages());   
-            setProductDetails(p); 
+            Hibernate.initialize(p.getVariants());
+            Hibernate.initialize(p.getImages());
+            setProductDetails(p);
         });
         return productPage;
     }
@@ -77,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class) 
+    @Transactional(rollbackFor = Exception.class)
     public Product addProduct(ProductDto productDto, List<MultipartFile> images, Long shopId) {
         logger.info("Adding new product '{}' for shop ID: {}", productDto.getProductName(), shopId);
         Shop shop = shopRepository.findById(shopId)
@@ -90,14 +91,14 @@ public class ProductServiceImpl implements ProductService {
 
         List<String> savedGeneralImageFilenames = new ArrayList<>();
         List<String> savedVariantImageFilenames = new ArrayList<>();
-        Product product = new Product(); 
+        Product product = new Product();
 
         try {
             savedGeneralImageFilenames.addAll(saveImages(images));
-            setProductImages(product, savedGeneralImageFilenames); 
+            setProductImages(product, savedGeneralImageFilenames);
 
             mapDtoToEntity(productDto, product, category, shop, brand);
-            product.setPublished(true); 
+            product.setPublished(true);
 
             mapAndSaveVariants(productDto.getVariants(), product, savedVariantImageFilenames);
             updateProductPriceAndStockFromVariants(product);
@@ -120,7 +121,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class) 
+    @Transactional(rollbackFor = Exception.class)
     public Product updateProduct(Long productId, ProductDto productDto, List<MultipartFile> newImages, Long shopId) {
         logger.info("Updating product ID: {} for shop ID: {}", productId, shopId);
         Product existingProduct = productRepository.findById(productId)
@@ -137,7 +138,7 @@ public class ProductServiceImpl implements ProductService {
 
         List<String> savedNewGeneralImageFilenames = new ArrayList<>();
         List<String> savedNewVariantImageFilenames = new ArrayList<>();
-        List<String> oldVariantImagesToDelete = new ArrayList<>(); 
+        List<String> oldVariantImagesToDelete = new ArrayList<>();
 
         try {
             savedNewGeneralImageFilenames.addAll(saveImages(newImages));
@@ -168,9 +169,8 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-
     @Override
-    @Transactional 
+    @Transactional
     public void deleteProduct(Long productId, Long shopId) {
         logger.warn("Attempting to delete product ID: {} for shop ID: {}", productId, shopId);
         Product product = productRepository.findById(productId)
@@ -213,7 +213,6 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public long countProductsByShop(Long shopId) {
@@ -241,7 +240,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public List<Product> findBestSellingProducts(int limit) {
         logger.debug("Fetching {} best selling published products", limit);
-        Pageable pageable = PageRequest.of(0, limit); 
+        Pageable pageable = PageRequest.of(0, limit);
         Page<Product> productPage = productRepository.findTopSellingPublished(pageable);
         List<Product> products = productPage.getContent();
         products.forEach(p -> {
@@ -251,31 +250,26 @@ public class ProductServiceImpl implements ProductService {
         return products;
     }
 
-    // ===>>> SỬA PHƯƠNG THỨC NÀY <<<===
     @Override
     @Transactional(readOnly = true)
     public Page<Product> findNewestProducts(Pageable pageable) {
         logger.debug("Fetching newest published products with pageable: {}", pageable);
         
-        // Sửa: Gọi findByPublishedTrue thay vì findTopNewestPublished
-        // findByPublishedTrue không có ORDER BY cứng, nó sẽ nhận sắp xếp từ Pageable
-        Page<Product> productPage = productRepository.findByPublishedTrue(pageable); 
+        Page<Product> productPage = productRepository.findByPublishedTrue(pageable);
         
-        // Vẫn phải gọi setProductDetails cho nội dung của trang hiện tại
         productPage.getContent().forEach(p -> {
             Hibernate.initialize(p.getImages());
             setProductDetails(p);
         });
         
-        return productPage; // Trả về đối tượng Page
+        return productPage;
     }
-    // ===>>> KẾT THÚC SỬA <<<===
 
     @Override
     @Transactional(readOnly = true)
     public List<Product> findBestPriceProducts(int limit) {
         logger.debug("Fetching {} best discount published products", limit);
-        Pageable pageable = PageRequest.of(0, limit); 
+        Pageable pageable = PageRequest.of(0, limit);
         Page<Product> productPage = productRepository.findTopDiscountedPublished(pageable);
         List<Product> products = productPage.getContent();
         products.forEach(p -> {
@@ -308,7 +302,7 @@ public class ProductServiceImpl implements ProductService {
                     logger.trace("Product {} - Checking variant '{}' image URL: '{}'", productId, variant.getName(), variantImageUrl);
                     if (StringUtils.hasText(variantImageUrl)) {
                         ProductImage variantImgAsProductImage = new ProductImage();
-                        variantImgAsProductImage.setProduct(p); 
+                        variantImgAsProductImage.setProduct(p);
                         variantImgAsProductImage.setImageUrl(variantImageUrl);
                         variantImgAsProductImage.setIsPrimary(false);
                         boolean added = combinedImages.add(variantImgAsProductImage);
@@ -323,7 +317,7 @@ public class ProductServiceImpl implements ProductService {
                 });
             }
             logger.debug("Product {} - Final combinedImages count before setting to product: {}", productId, combinedImages.size());
-            p.setImages(combinedImages); 
+            p.setImages(combinedImages);
             logger.debug("Product {} - Final p.getImages() count after setting: {}", productId, p.getImages().size());
             
             setProductDetails(p);
@@ -413,7 +407,7 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
         }
-        return brand; 
+        return brand;
     }
 
     private void validateVariants(List<VariantDto> variants) {
@@ -546,14 +540,13 @@ public class ProductServiceImpl implements ProductService {
                .filter(v -> v.getPrice().compareTo(minPrice) == 0 && v.getOriginalPrice() != null)
                .map(ProductVariant::getOriginalPrice).max(BigDecimal::compareTo).orElse(null);
        
-       // Tính tổng tồn kho
        int totalStock = product.getVariants().stream()
-                           .mapToInt(ProductVariant::getStock) // Lấy kho của từng variant
-                           .sum(); // Cộng tất cả lại
+                           .mapToInt(ProductVariant::getStock)
+                           .sum();
 
        product.setPrice(minPrice);
        product.setOriginalPrice(correspondingOriginalPrice);
-       product.setStock(totalStock); // Gán tổng kho mới
+       product.setStock(totalStock);
    }
 
     private List<String> saveImages(List<MultipartFile> images) {
@@ -615,27 +608,181 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    // ===>>> THÊM PHƯƠNG THỨC NÀY TỪ INTERFACE <<<===
     @Override
-    @Transactional // Quan trọng: Cần Transactional để lưu thay đổi
+    @Transactional
     public void updateProductStockAndPriceFromVariants(Product product) {
         if (product == null || product.getProductId() == null) {
             logger.warn("Attempted to update stock for a null or unsaved product.");
             return;
         }
 
-        // Tải lại entity trong phiên làm việc (managed state) để tránh lỗi
         Product managedProduct = productRepository.findById(product.getProductId())
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sản phẩm để cập nhật kho: " + product.getProductId()));
 
-        // Phải load các variants để tính toán
         Hibernate.initialize(managedProduct.getVariants());
 
-        // Gọi hàm helper (hàm private đã có sẵn trong file của bạn) để tính toán
         updateProductPriceAndStockFromVariants(managedProduct);
 
-        // Lưu lại Product cha với tổng kho và giá mới
         productRepository.save(managedProduct);
         logger.debug("Updated aggregate stock/price for product ID: {}", managedProduct.getProductId());
     }
+
+    // --- Implement các phương thức mới ---
+
+    @Override
+    @Transactional
+    public void deleteById(Long productId) {
+        logger.warn("ADMIN action: Attempting to delete product ID: {}", productId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with ID: " + productId));
+
+        List<String> imageFilenamesToDelete = new ArrayList<>();
+        Hibernate.initialize(product.getImages());
+        Hibernate.initialize(product.getVariants());
+        if (product.getImages() != null) {
+            product.getImages().stream().map(ProductImage::getImageUrl).filter(StringUtils::hasText).forEach(imageFilenamesToDelete::add);
+        }
+        if (product.getVariants() != null) {
+            product.getVariants().stream().map(ProductVariant::getImageUrl).filter(StringUtils::hasText).forEach(imageFilenamesToDelete::add);
+        }
+
+        try {
+            productRepository.delete(product);
+            logger.info("ADMIN action: Successfully deleted product entity ID: {}", productId);
+            deleteImageFiles(imageFilenamesToDelete);
+        } catch (DataIntegrityViolationException e) {
+            logger.error("ADMIN action: ConstraintViolationException deleting product ID {}: {}", productId, e.getMessage());
+            throw new RuntimeException("Không thể xóa sản phẩm đã tồn tại trong đơn hàng.", e);
+        } catch (Exception e) {
+            logger.error("ADMIN action: Unexpected error deleting product ID {}: {}", productId, e.getMessage(), e);
+            throw new RuntimeException("Lỗi không xác định khi xóa sản phẩm: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countProductsByCategory(Long categoryId) { // <-- Sửa tên hàm này nếu bạn gọi nó
+        logger.debug("Counting products for category ID: {}", categoryId);
+        if (categoryId == null) {
+            return 0;
+        }
+        // Gọi phương thức countByCategoryId từ ProductRepository
+        return productRepository.countByCategoryId(categoryId); // <-- Sửa thành countByCategoryId
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Product> findFilteredProducts(Long shopId, String productCode, ProductStatus status, Long categoryId, String brandName) {
+        logger.debug("Admin filtering products for shopId: {}, code: {}, status: {}, category: {}, brand: {}", shopId, productCode, status, categoryId, brandName);
+
+        Specification<Product> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(criteriaBuilder.equal(root.get("shop").get("id"), shopId));
+
+            if (StringUtils.hasText(productCode)) {
+                try {
+                    Long prodId = Long.parseLong(productCode);
+                    predicates.add(criteriaBuilder.equal(root.get("productId"), prodId));
+                } catch (NumberFormatException e) {
+                     logger.warn("Invalid productCode format received: {}", productCode);
+                }
+            }
+            if (status != null) {
+                 predicates.add(criteriaBuilder.equal(root.get("status"), status));
+            }
+            if (categoryId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("category").get("id"), categoryId));
+            }
+            if (StringUtils.hasText(brandName)) {
+                predicates.add(criteriaBuilder.equal(root.get("brand").get("name"), brandName));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        List<Product> products = productRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "productId"));
+        products.forEach(p -> {
+            Hibernate.initialize(p.getImages());
+            Hibernate.initialize(p.getVariants());
+            setProductDetails(p);
+        });
+        return products;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<String> findAllUniqueBrands() {
+        logger.debug("Fetching all unique brand names");
+         return brandService.findAll().stream()
+                 .map(Brand::getName)
+                 .filter(StringUtils::hasText)
+                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    @Transactional
+    public void updateStatus(Long productId, ProductStatus newStatus) {
+        logger.info("ADMIN action: Updating status for product ID: {} to {}", productId, newStatus);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with ID: " + productId));
+
+         product.setStatus(newStatus); 
+         productRepository.save(product);
+        logger.info("ADMIN action: Product {} status updated successfully.", productId);
+    }
+
+    @Override
+    @Transactional
+    public void updateAdminFields(Product productData) {
+        if (productData == null || productData.getProductId() == null) {
+            throw new IllegalArgumentException("Product data or Product ID cannot be null for update.");
+        }
+        Long productId = productData.getProductId();
+        logger.info("ADMIN action: Updating fields for product ID: {}", productId);
+
+        Product existingProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with ID: " + productId));
+
+        existingProduct.setName(productData.getName());
+        existingProduct.setDescription(productData.getDescription());
+        if (productData.getCategory() != null && productData.getCategory().getId() != null) {
+            Category category = categoryRepository.findById(productData.getCategory().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Category not found with ID: " + productData.getCategory().getId()));
+            existingProduct.setCategory(category);
+        } else {
+             existingProduct.setCategory(null);
+        }
+
+        productRepository.save(existingProduct);
+        logger.info("ADMIN action: Product {} fields updated successfully.", productId);
+    }
+
+    @Override
+    @Transactional
+    public int updateCategoryForProducts(Long oldCategoryId, Long newCategoryId) {
+        logger.warn("ADMIN action: Moving products from category {} to category {}", oldCategoryId, newCategoryId);
+        Category newCategory = null;
+        // SỬA LỖI THAM CHIẾU HẰNG SỐ (Dòng 765 cũ)
+        boolean setToUncategorized = newCategoryId != null && newCategoryId.equals(CategoryService.UNCATEGORIZED_CATEGORY_ID);
+
+        if (!setToUncategorized) {
+            newCategory = categoryRepository.findById(newCategoryId)
+                    .orElseThrow(() -> new EntityNotFoundException("Replacement category not found: " + newCategoryId));
+        }
+
+        List<Product> productsToUpdate = productRepository.findByCategory_Id(oldCategoryId); // 
+
+        if (!productsToUpdate.isEmpty()) {
+            for (Product product : productsToUpdate) {
+                product.setCategory(newCategory);
+            }
+            productRepository.saveAll(productsToUpdate);
+            logger.info("ADMIN action: Moved {} products to category ID {}", productsToUpdate.size(), newCategoryId);
+            return productsToUpdate.size();
+        } else {
+            logger.info("ADMIN action: No products found in category {} to move.", oldCategoryId);
+            return 0;
+        }
+    }
+
 }
