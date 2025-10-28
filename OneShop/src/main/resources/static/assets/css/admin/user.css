@@ -36,6 +36,7 @@
 	color: #333;
 	white-space: nowrap;
 }
+
 .header__admin-info {
 	display: flex;
 	align-items: center;
@@ -86,20 +87,19 @@
 }
 
 .table thead th {
-	font-size: 16px; 
+	font-size: 16px;
 	font-weight: 700;
 	color: #333;
 	white-space: nowrap;
 }
 
 .table tbody td {
-	font-size: 15px; 
+	font-size: 15px;
 }
 
 .table-bordered th, .table-bordered td {
-	border: 1px solid #dee2e6 !important; 
+	border: 1px solid #dee2e6 !important;
 }
-
 
 /* .table tbody td:nth-child(3) {
 	Cột Email có thể cần kích thước nhỏ hơn nếu tên cửa hàng dài
@@ -108,7 +108,7 @@
 }
  */
 .table tbody .text-center a i.fas.fa-eye {
-	font-size: 18px; 
+	font-size: 18px;
 }
 
 .table th, .table td {
@@ -127,7 +127,7 @@
 }
 
 .product-status-checkbox {
-	transform: scale(1.2); 
+	transform: scale(1.2);
 }
 
 .form-control, .form-select {
@@ -142,17 +142,20 @@
 	padding-right: 5px;
 	padding-left: 5px;
 }
+
 .table-dark th {
 	color: #ffffff !important;
 	font-weight: bold;
 }
+
 .btn-success i, .btn-danger i {
-	color: #000000 !important; 
+	color: #000000 !important;
 }
 
 .btn-warning i {
 	color: #000000 !important;
 }
+
 .table td.action-btns .btn {
 	padding: 5px 8px;
 	font-size: 13px;
@@ -164,12 +167,12 @@
 }
 
 .table td a.btn-success {
-	background-color: #198754 !important; 
-	color: #FFFFFF !important; 
+	background-color: #198754 !important;
+	color: #FFFFFF !important;
 }
 
 .table td a.btn-danger {
-	background-color: #dc3545 !important; 
+	background-color: #dc3545 !important;
 	color: #FFFFFF !important;
 }
 
@@ -178,8 +181,8 @@
 }
 
 .modal-footer .btn-secondary {
-	background-color: #6c757d !important; 
-	color: #fff !important; 
+	background-color: #6c757d !important;
+	color: #fff !important;
 	border: 1px solid #6c757d !important;
 }
 
@@ -189,30 +192,57 @@
 }
 /* TÙY CHỈNH KÍCH THƯỚC VÀ KIỂU NÚT TRONG MODAL FOOTER */
 .modal-footer button.btn {
-    padding: 9px 19px; 
-    font-size: 1.4rem;
-    font-weight: 500;
-    min-width: 120px; 
-    border-radius: 5px; 
+	padding: 9px 19px;
+	font-size: 1.4rem;
+	font-weight: 500;
+	min-width: 120px;
+	border-radius: 5px;
 }
+
 .modal-header {
-    background-color: #f0f8ff;
-    border-bottom: 2px solid var(--default-cl); 
-    padding: 15px 20px; 
+	background-color: #f0f8ff;
+	border-bottom: 2px solid var(--default-cl);
+	padding: 15px 20px;
 }
+
 .modal-header .modal-title {
-    font-size: 2rem; 
-    font-weight: 700;
-    color: var(--default-cl); 
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+	font-size: 2rem;
+	font-weight: 700;
+	color: var(--default-cl);
+	text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .filter-controls .btn-secondary {
-    background-color: #6c757d !important;
-    color: #fff !important; 
-    border: 1px solid #6c757d !important;
+	background-color: #6c757d !important;
+	color: #fff !important;
+	border: 1px solid #6c757d !important;
 }
 
 .filter-controls .btn-secondary i {
-    color: #fff !important; 
+	color: #fff !important;
+}
+/* Giữ lại style scale switch nếu cần */
+.custom-switch-container {
+	transform: scale(0.9); /* Thu nhỏ nhẹ switch để vừa cột */
+	display: inline-block;
+	vertical-align: middle;
+}
+
+/* === CSS GHI ĐÈ ĐỂ KHẮC PHỤC LỖI CHECKBOX KÉP TỪ common.css === */
+
+/* Sử dụng selector có độ ưu tiên cao hơn (dùng class mới) để ghi đè CSS xung đột */
+.shipping-status-switch .form-check-input:before {
+	content: none !important;
+	/* Vô hiệu hóa hộp vuông tùy chỉnh từ common.css */
+}
+
+.shipping-status-switch .form-check-input:checked:after {
+	content: none !important;
+	/* Vô hiệu hóa dấu tích tùy chỉnh từ common.css */
+}
+
+/* Đảm bảo Switch hiện thị đúng vị trí */
+.shipping-status-switch .form-check-input {
+	margin-right: 0;
+	/* Loại bỏ margin-right nếu có, để switch căn chỉnh tốt hơn */
 }
