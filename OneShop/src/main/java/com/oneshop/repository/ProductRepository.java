@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal; // Import BigDecimal
@@ -68,4 +69,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
            "AND (?4 IS NULL OR p.price >= ?4) " + // BigDecimal
            "AND (?5 IS NULL OR p.price <= ?5)") // BigDecimal
     List<Product> searchAndFilterPublic(String name, Long categoryId, Long brandId, BigDecimal minPrice, BigDecimal maxPrice); // Sửa kiểu giá
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.variants LEFT JOIN FETCH p.images WHERE p.productId = :id AND p.published = true")
+    Optional<Product> findByIdWithDetails(@Param("id") Long id);
 }

@@ -17,10 +17,13 @@ import java.util.UUID;
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
 
-    // Đường dẫn tới thư mục lưu file (sẽ lưu trong /uploads/images)
-    // Bạn cần tạo thư mục 'uploads' này ở thư mục gốc của dự án
+    // Đường dẫn gốc của thư mục lưu file
     private final Path root = Paths.get("uploads");
     private final Path imageRoot = root.resolve("images");
+    
+    // === THƯ MỤC MỚI CHO REVIEW MEDIA ===
+    private final Path reviewRoot = root.resolve("reviews"); 
+    // ======================================
 
 
     @Override
@@ -32,8 +35,13 @@ public class FileStorageServiceImpl implements FileStorageService {
             if (!Files.exists(imageRoot)) {
                 Files.createDirectory(imageRoot);
             }
+            // === KHỞI TẠO THƯ MỤC REVIEWS ===
+            if (!Files.exists(reviewRoot)) {
+                Files.createDirectory(reviewRoot);
+            }
+            // =================================
         } catch (IOException e) {
-            throw new RuntimeException("Could not initialize folder for upload!");
+            throw new RuntimeException("Could not initialize folder for upload!", e);
         }
     }
 
@@ -44,24 +52,46 @@ public class FileStorageServiceImpl implements FileStorageService {
                 throw new RuntimeException("Failed to store empty file.");
             }
             
-            // Tạo tên file duy nhất để tránh trùng lặp
             String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            // Lấy phần mở rộng (extension), an toàn hơn khi kiểm tra lastIndexOf
+            String extension = originalFilename.contains(".") ? originalFilename.substring(originalFilename.lastIndexOf(".")) : "";
             String uniqueFilename = UUID.randomUUID().toString() + extension;
 
             // Lưu file vào thư mục /uploads/images
             Files.copy(file.getInputStream(), this.imageRoot.resolve(uniqueFilename));
             
-            return uniqueFilename;
+            return uniqueFilename; // Trả về tên file duy nhất
         } catch (Exception e) {
-            throw new RuntimeException("Failed to store file. Error: " + e.getMessage());
+            throw new RuntimeException("Failed to store file. Error: " + e.getMessage(), e);
         }
     }
+    
+    // === TRIỂN KHAI PHƯƠNG THỨC MỚI CHO REVIEW MEDIA ===
+    @Override
+    public String storeReviewFile(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new IOException("Failed to store empty file.");
+        }
+        
+        // Tạo tên file duy nhất
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename.contains(".") ? originalFilename.substring(originalFilename.lastIndexOf(".")) : "";
+        String uniqueFilename = UUID.randomUUID().toString() + extension;
+
+        // Lưu file vào thư mục /uploads/reviews
+        Files.copy(file.getInputStream(), this.imageRoot.resolve(uniqueFilename));
+        
+        // Trả về đường dẫn tương đối (ví dụ: /uploads/reviews/unique-name.jpg)
+        return uniqueFilename; 
+    }
+    // ======================================================
 
     @Override
     public Resource load(String filename) {
         try {
-            Path file = imageRoot.resolve(filename);
+            // CÂN NHẮC: Hàm này chỉ load từ imageRoot. Nếu bạn muốn load cả reviews,
+            // bạn sẽ cần truyền thêm tham số (vd: loại thư mục)
+            Path file = imageRoot.resolve(filename); 
             Resource resource = new UrlResource(file.toUri());
 
             if (resource.exists() || resource.isReadable()) {
@@ -70,17 +100,18 @@ public class FileStorageServiceImpl implements FileStorageService {
                 throw new RuntimeException("Could not read the file!");
             }
         } catch (MalformedURLException e) {
-            throw new RuntimeException("Error: " + e.getMessage());
+            throw new RuntimeException("Error: " + e.getMessage(), e);
         }
     }
 
     @Override
     public void delete(String filename) {
         try {
+            // CÂN NHẮC: Hàm này chỉ xóa từ imageRoot. Nếu file là review, nó sẽ không xóa được.
             Path file = imageRoot.resolve(filename);
             Files.deleteIfExists(file);
         } catch (IOException e) {
-            throw new RuntimeException("Could not delete the file. Error: " + e.getMessage());
+            throw new RuntimeException("Could not delete the file. Error: " + e.getMessage(), e);
         }
     }
 }

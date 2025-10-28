@@ -7,7 +7,9 @@ import com.oneshop.entity.*;
 import com.oneshop.repository.*;
 import com.oneshop.service.BrandService;
 import com.oneshop.service.FileStorageService;
+import com.oneshop.service.ProductReviewService;
 import com.oneshop.service.ProductService;
+import com.oneshop.service.ReviewService;
 import com.oneshop.specification.ProductSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -46,6 +48,9 @@ public class ProductServiceImpl implements ProductService {
     @Autowired private FileStorageService fileStorageService;
     @Autowired private BrandService brandService;
     @Autowired private ProductVariantRepository variantRepository;
+    @Autowired private ProductReviewService reviewService;
+   
+    
 
     // --- Vendor Methods ---
 
@@ -638,4 +643,5 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(managedProduct);
         logger.debug("Updated aggregate stock/price for product ID: {}", managedProduct.getProductId());
     }
+   
 }

@@ -60,7 +60,16 @@
                 <td colspan="4" class="text-end">Phí vận chuyển:</td>
                 <td th:text="${#numbers.formatDecimal(order.shippingCost, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'">30.000 VNĐ</td>
             </tr>
-             <tr class="table-primary fw-bold">
+
+            <tr th:if="${order.discountAmount != null and order.discountAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}" style="color: green; font-weight: bold;">
+                <td colspan="4" class="text-end">
+                    Giảm giá voucher 
+                    <span th:if="${order.promotion != null}" 
+                          th:text="'(' + ${order.promotion.discountCode} + ')'">(VOUCHERCODE)</span>:
+                </td>
+                <td th:text="'-' + ${#numbers.formatDecimal(order.discountAmount, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'">-50.000 VNĐ</td>
+            </tr>
+            <tr class="table-primary fw-bold">
                 <td colspan="4" class="text-end">TỔNG THANH TOÁN:</td>
                 <td th:text="${#numbers.formatDecimal(order.total, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'">1.030.000 VNĐ</td>
             </tr>

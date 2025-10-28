@@ -1,8 +1,11 @@
 package com.oneshop.controller;
 
+import com.oneshop.dto.ApplyVoucherRequest;
 import com.oneshop.dto.CartDto;
 import com.oneshop.dto.UpdateCartRequest; // DTO cho AJAX cập nhật
+import com.oneshop.entity.Promotion;
 import com.oneshop.service.CartService;
+import com.oneshop.service.PromotionService;
 
 import org.slf4j.Logger; // Thêm Logger
 import org.slf4j.LoggerFactory; // Thêm LoggerFactory
@@ -15,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes; // Thêm RedirectAttributes
 
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -24,6 +28,9 @@ public class CartController {
 
     @Autowired
     private CartService cartService;
+    
+    @Autowired
+    private PromotionService promotion;
 
     /** Lấy trang giỏ hàng (GET) */
     @GetMapping("/cart")
@@ -35,8 +42,14 @@ public class CartController {
         String username = authentication.getName();
         logger.debug("Viewing cart for user: {}", username);
         CartDto cart = cartService.getCartForUser(username);
+
+      
+        List<Promotion> promos = promotion.findApplicablePromotions(cart, username);
+        // Use the key expected by your cart.html template
+        model.addAttribute("applicableVouchers", promos); // Or "applicablePromotions" if your template uses that
+
         model.addAttribute("cart", cart);
-        return "user/cart";
+        return "user/cart"; // Return the view name
     }
 
     /** Thêm sản phẩm vào giỏ (Dùng cho redirect cũ, có thể xóa nếu không cần) */
@@ -84,7 +97,7 @@ public class CartController {
     }
 
     /** Cập nhật số lượng (POST bằng AJAX - Dùng trong cart.html) */
-    @PostMapping("/cart/update")
+    @PostMapping("/api/cart/update")
     @ResponseBody
     public ResponseEntity<?> updateCartItem(
             @RequestBody UpdateCartRequest request,
@@ -176,6 +189,68 @@ public class CartController {
              logger.error("API system error removing item variantId {} for user {}: {}", variantId, username, e.getMessage(), e);
              return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                   .body(Map.of("message", "Lỗi hệ thống khi xóa sản phẩm."));
+        }
+    }
+    
+    @PostMapping("/api/cart/apply-voucher")
+    @ResponseBody
+    public ResponseEntity<?> applyVoucher(
+            @RequestBody ApplyVoucherRequest request, // Nhận code từ body JSON
+            Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                 .body(Map.of("message", "Vui lòng đăng nhập."));
+        }
+        String username = authentication.getName();
+        String voucherCode = request.getCode(); // Lấy code từ DTO
+        logger.info("User {} attempting to apply voucher code: {}", username, voucherCode);
+
+        if (voucherCode == null || voucherCode.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Vui lòng cung cấp mã voucher."));
+        }
+
+        try {
+            
+            CartDto updatedCart = promotion.applyVoucher(username, voucherCode); // Giả sử service có hàm này
+
+            logger.info("Voucher code {} applied successfully for user {}", voucherCode, username);
+            return ResponseEntity.ok(updatedCart); // Trả về cart mới
+        } catch (IllegalArgumentException e) {
+            // Bắt lỗi cụ thể từ service (vd: mã không tồn tại, không đủ điều kiện)
+            logger.warn("Failed to apply voucher code {} for user {}: {}", voucherCode, username, e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            // Các lỗi khác không mong muốn
+            logger.error("Error applying voucher code {} for user {}: {}", voucherCode, username, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(Map.of("message", "Lỗi hệ thống khi áp dụng voucher."));
+        }
+    }
+    
+    @PostMapping("/api/cart/remove-voucher")
+    @ResponseBody // Ensure JSON response
+    public ResponseEntity<?> removeVoucher(Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                 .body(Map.of("message", "Vui lòng đăng nhập."));
+        }
+        String username = authentication.getName();
+        logger.info("User {} attempting to remove voucher.", username);
+
+        try {
+            // Gọi PromotionService (hoặc CartService) để gỡ bỏ voucher
+            // Service này cần trả về CartDto đã cập nhật (discountAmount=0, appliedVoucherCode=null)
+            CartDto updatedCart = promotion.removeVoucher(username); // Assumes service has this method
+
+            logger.info("Voucher removed successfully for user {}", username);
+            return ResponseEntity.ok(updatedCart); // Trả về cart mới
+        } catch (Exception e) {
+            // Lỗi không mong muốn
+            logger.error("Error removing voucher for user {}: {}", username, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(Map.of("message", "Lỗi hệ thống khi gỡ bỏ voucher."));
         }
     }
     // =========================================================

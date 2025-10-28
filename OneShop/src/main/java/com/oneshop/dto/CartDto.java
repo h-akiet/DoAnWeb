@@ -1,34 +1,52 @@
 package com.oneshop.dto;
 
+// KHÔNG IMPORT PromotionType ENUM
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal; // Import
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects; 
 
 @Data
 @NoArgsConstructor
 public class CartDto {
 
-    // Key là productId (thực chất là variantId từ CartItemDto)
     private Map<Long, CartItemDto> items = new HashMap<>();
+    private BigDecimal subtotal; 
+
+    private String appliedVoucherCode; 
+    private BigDecimal discountAmount; 
     
-    // Tổng tiền (đã đổi sang BigDecimal)
+    // === TRƯỜNG MỚI ĐỂ ĐỒNG BỘ CLIENT/SERVER ===
+    /** Code của loại voucher (vd: PERCENT, FIXED, FREESHIP) */
+    private String appliedVoucherTypeCode; // <-- THAY PromotionType ENUM
+
+    /** Giá trị gốc của voucher (vd: 10, 50000) */
+    private BigDecimal appliedVoucherValue; // <-- GIỮ NGUYÊN
+    // ===========================================
+
     private BigDecimal grandTotal;
 
-    /**
-     * Tính toán lại tổng tiền toàn giỏ hàng.
-     * Được gọi bởi CartServiceImpl sau khi mapToCartDto.
-     */
     public void calculateTotals() {
-        this.grandTotal = items.values().stream()
-                .map(CartItemDto::getSubtotal) // Lấy BigDecimal subtotal từ mỗi item
-                .reduce(BigDecimal.ZERO, BigDecimal::add); // Cộng tất cả lại, bắt đầu từ 0
+        // ... (Logic tính subtotal không đổi)
+        this.subtotal = items.values().stream()
+                .map(CartItemDto::getSubtotal)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // ... (Logic tính grandTotal không đổi)
+        this.grandTotal = this.subtotal;
+        if (this.discountAmount != null && this.discountAmount.compareTo(BigDecimal.ZERO) > 0) {
+            this.grandTotal = this.grandTotal.subtract(this.discountAmount);
+        }
+        if (this.grandTotal.compareTo(BigDecimal.ZERO) < 0) {
+            this.grandTotal = BigDecimal.ZERO;
+        }
     }
+
     public int getTotalItems() {
-        // Lấy tất cả CartItemDto, lấy số lượng (quantity) của từng cái,
-        // và cộng tất cả lại với nhau.
         return items.values().stream()
                 .mapToInt(CartItemDto::getQuantity)
                 .sum();

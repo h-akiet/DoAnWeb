@@ -88,13 +88,13 @@
             .result-text { font-size: 16px; color: #333; }
             .result-count { font-weight: 600; color: var(--default-cl); }
             .pagination-wrapper { display: flex; justify-content: center; margin-top: 30px; padding: 20px 0; }
-            .pagination { display: flex; list-style: none; padding: 0; } /* Use ul for pagination */
-            .page-item { margin: 0 4px; } /* Add margin to li */
+            .pagination { display: flex; list-style: none; padding: 0; }
+            .page-item { margin: 0 4px; }
             .page-link { padding: 8px 14px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: all 0.3s; background: white; color: #333; font-size: 14px; text-decoration: none; display: block; }
             .page-item:not(.disabled) .page-link:hover { border-color: var(--default-cl); color: var(--default-cl); }
             .page-item.active .page-link { background: var(--default-cl); color: white; border-color: var(--default-cl); }
             .page-item.disabled .page-link { color: #ccc; pointer-events: none; border-color: #ddd; }
-            #product-list-container.loading { opacity: 0.6; pointer-events: none; }
+            #product-content-area.loading { opacity: 0.6; pointer-events: none; }
             @media (max-width: 1024px) { .content-layout { grid-template-columns: 1fr; } .sidebar-filter { display: none; } .product-grid { grid-template-columns: repeat(3, 1fr); } }
             @media (max-width: 768px) { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } .filter-bar { flex-direction: column; align-items: flex-start; } }
          </style>
@@ -109,19 +109,16 @@
                     <span class="active">Tất cả sản phẩm</span>
                 </div>
                 <div class="filter-controls">
-                    <a th:href="@{/products(sort='salesCount,desc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                    <a th:href="@{/products(sort='salesCount,desc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice}, keyword=${param.keyword})}"
                        class="filter-btn"
                        th:classappend="${sort != null and #strings.equals(sort, 'salesCount,desc')} ? 'active' : ''">Bán chạy</a>
-                    <a th:href="@{/products(sort='productId,desc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                    <a th:href="@{/products(sort='productId,desc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice}, keyword=${param.keyword})}"
                        class="filter-btn"
                        th:classappend="${sort != null and #strings.equals(sort, 'productId,desc')} ? 'active' : ''">Mới nhất</a>
-                    <a th:href="@{/products(sort='rating,desc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
-                       class="filter-btn"
-                       th:classappend="${sort != null and #strings.equals(sort, 'rating,desc')} ? 'active' : ''">Đánh giá cao</a>
-                    <a th:href="@{/products(sort='price,asc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                    <a th:href="@{/products(sort='price,asc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice}, keyword=${param.keyword})}"
                        class="filter-btn"
                        th:classappend="${sort != null and #strings.equals(sort, 'price,asc')} ? 'active' : ''">Giá thấp</a>
-                    <a th:href="@{/products(sort='price,desc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                    <a th:href="@{/products(sort='price,desc', categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice}, keyword=${param.keyword})}"
                        class="filter-btn"
                        th:classappend="${sort != null and #strings.equals(sort, 'price,desc')} ? 'active' : ''">Giá cao</a>
                 </div>
@@ -131,6 +128,9 @@
                 <aside class="sidebar-filter">
                    <form id="filter-form" th:action="@{/products}" method="GET">
                        <input type="hidden" name="sort" th:value="${sort}">
+                       
+                       <input type="hidden" name="keyword" th:value="${param.keyword}">
+
                        <div class="filter-section">
                            <h3 class="filter-title">Danh mục</h3>
                            <div class="filter-option" th:each="category : ${categories}">
@@ -162,14 +162,13 @@
                                <input type="number" name="maxPrice" class="price-input" placeholder="Đến" th:value="${maxPrice}">
                            </div>
                            <button type="submit" class="apply-filter-btn">Áp dụng</button>
-                           <a href="#" class="clear-filter-btn"> <i class="fas fa-undo"></i> Xóa bộ lọc </a>
+                           <a th:href="@{/products(sort='productId,desc')}" class="clear-filter-btn"> <i class="fas fa-undo"></i> Xóa bộ lọc </a>
                        </div>
                    </form>
                 </aside>
 
-                <main id="product-list-container">
-                    <div th:fragment="product_list_fragment">
-                        <div class="result-info">
+                <main id="product-content-area">
+                    <div th:fragment="product_list_fragment"> <div class="result-info">
                             <div class="result-text" th:if="${productPage != null}">
                                 Hiển thị <span class="result-count" th:text="${productPage.numberOfElements}"></span>
                                 trên tổng số <span class="result-count" th:text="${productPage.totalElements}"></span> sản phẩm
@@ -230,7 +229,7 @@
                                 <ul class="pagination">
                                     <li class="page-item" th:classappend="${productPage.first} ? 'disabled' : ''">
                                         <a class="page-link"
-                                           th:href="@{/products(page=${currentPage - 1}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                                           th:href="@{/products(page=${currentPage - 1}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice}, keyword=${param.keyword})}"
                                            aria-label="Previous" th:data-page="${currentPage - 1}">
                                             <span aria-hidden="true">&laquo;</span>
                                         </a>
@@ -238,7 +237,7 @@
                                     <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
                                         <li class="page-item" th:classappend="${i == currentPage} ? 'active' : ''">
                                             <a class="page-link"
-                                               th:href="@{/products(page=${i}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                                               th:href="@{/products(page=${i}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice}, keyword=${param.keyword})}"
                                                th:text="${i}"
                                                th:data-page="${i}">
                                             </a>
@@ -246,7 +245,7 @@
                                     </th:block>
                                     <li class="page-item" th:classappend="${productPage.last} ? 'disabled' : ''">
                                         <a class="page-link"
-                                           th:href="@{/products(page=${currentPage + 1}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                                           th:href="@{/products(page=${currentPage + 1}, size=${productPage.size}, sort=${sort}, categories=${selectedCategories}, brands=${selectedBrands}, minPrice=${minPrice}, maxPrice=${maxPrice}, keyword=${param.keyword})}"
                                            aria-label="Next" th:data-page="${currentPage + 1}">
                                             <span aria-hidden="true">&raquo;</span>
                                         </a>
@@ -267,44 +266,42 @@
             $(document).ready(function() {
 
                 function fetchProducts(url) {
-                    $('#product-list-container').addClass('loading');
+                    $('#product-content-area').addClass('loading'); 
                     $.ajax({
                         type: 'GET', url: url,
                         headers: { 'X-Requested-With': 'XMLHttpRequest' },
                         success: function(fragment) {
-                            $('#product-list-container').html(fragment);
-                            history.pushState(null, '', url); // Update URL without reloading
-                            $('#product-list-container').removeClass('loading');
+                            $('#product-content-area').html(fragment); 
+                            history.pushState(null, '', url); 
+                            $('#product-content-area').removeClass('loading'); 
                         },
                         error: function() {
                             alert('Lỗi khi tải sản phẩm!');
-                            $('#product-list-container').removeClass('loading');
+                            $('#product-content-area').removeClass('loading'); 
                         }
                     });
                 }
 
                 function buildUrl() {
-                    const params = new URLSearchParams(); // Start fresh
+                    const params = new URLSearchParams(); 
                     const formParams = $('#filter-form').serializeArray();
 
                     let currentSort = $('input[name="sort"]').val() || 'productId,desc';
                     params.set('sort', currentSort);
 
-                    // Clear multi-value params before adding from form
                     params.delete('categories');
                     params.delete('brands');
 
                     formParams.forEach(item => {
                         if (item.value && item.name !== 'sort') {
-                             // Use append for multi-value params like categories and brands
                              if (item.name === 'categories' || item.name === 'brands') {
                                 params.append(item.name, item.value);
                              } else {
-                                params.set(item.name, item.value); // Use set for single-value params
+                                params.set(item.name, item.value); 
                              }
                         }
                     });
-                    params.set('page', '1'); // Reset page when filters change
+                    params.set('page', '1'); 
                     return '/products?' + params.toString();
                 }
 
@@ -333,11 +330,9 @@
                      $(this).addClass('active');
                 });
 
-                // Correct selector for pagination links inside the container
-                $('#product-list-container').on('click', '.pagination .page-link', function(e) {
+                $('#product-content-area').on('click', '.pagination .page-link', function(e) {
                     e.preventDefault();
                     const pageNumber = $(this).data('page');
-                    // Ensure pageNumber is valid before proceeding
                     if (pageNumber !== undefined && pageNumber !== null && !$(this).closest('.page-item').hasClass('disabled')) {
                        const url = buildUrlWithParam('page', pageNumber);
                        fetchProducts(url);
@@ -347,22 +342,22 @@
                 $('.clear-filter-btn').on('click', function(e) {
                     e.preventDefault();
                     $('#filter-form').trigger('reset');
+                    $('input[name="keyword"]').val(''); 
                     $('input[name="sort"]').val('productId,desc');
                      $('.filter-controls .filter-btn').removeClass('active');
                      $('.filter-controls .filter-btn[href*="sort=productId,desc"]').addClass('active');
-                    fetchProducts('/products?sort=productId,desc&page=1');
+                    fetchProducts('/products?sort=productId,desc&page=1'); 
                 });
 
-                // Handle browser back/forward buttons
                 window.onpopstate = function(event) {
                     fetchProducts(window.location.pathname + window.location.search);
-                     // Update form state based on URL
                      const params = new URLSearchParams(window.location.search);
                      $('#filter-form input[type="checkbox"]').each(function() {
                         $(this).prop('checked', params.getAll($(this).attr('name')).includes($(this).val()));
                      });
                       $('#filter-form input[name="minPrice"]').val(params.get('minPrice') || '');
                       $('#filter-form input[name="maxPrice"]').val(params.get('maxPrice') || '');
+                       $('#filter-form input[name="keyword"]').val(params.get('keyword') || '');
                        let currentSort = params.get('sort') || 'productId,desc';
                         $('input[name="sort"]').val(currentSort);
                         $('.filter-controls .filter-btn').removeClass('active');
