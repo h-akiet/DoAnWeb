@@ -48,7 +48,7 @@ public class AdminAppDiscountController {
 
 			if (updatedShop != null) {
 				redirectAttributes.addFlashAttribute("message",
-						"Cập nhật chiết khấu cho cửa hàng " + updatedShop.getShopName() + " thành công !");
+						"Cập nhật chiết khấu cho cửa hàng " + updatedShop.getName() + " thành công !");
 				redirectAttributes.addFlashAttribute("status", "Success"); 
 			} else {
 				redirectAttributes.addFlashAttribute("message", "Lỗi: Không tìm thấy cửa hàng với ID " + shopId + ".");

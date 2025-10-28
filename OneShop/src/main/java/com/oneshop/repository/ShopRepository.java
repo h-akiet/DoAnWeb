@@ -11,7 +11,7 @@ import com.oneshop.entity.Shop;
 import com.oneshop.enums.ShopStatus;
 @Repository
 public interface ShopRepository extends JpaRepository<Shop, Long> {
-	@Query("SELECT s FROM Shop s JOIN FETCH s.vendor")
+	@Query("SELECT s FROM Shop s JOIN FETCH s.user")
     List<Shop> findAllWithVendor();
 	
 	 List<Shop> findByStatus(ShopStatus status);

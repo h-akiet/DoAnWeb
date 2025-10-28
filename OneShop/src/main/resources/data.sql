@@ -1,7 +1,7 @@
 
 SET IDENTITY_INSERT CATEGORIES ON; 
 
-INSERT INTO CATEGORIES (category_id, name, parent_id) 
+INSERT INTO CATEGORIES (id, name, parent_id) 
 VALUES (1, N'Chưa Phân Loại', NULL);
 
 SET IDENTITY_INSERT CATEGORIES OFF;

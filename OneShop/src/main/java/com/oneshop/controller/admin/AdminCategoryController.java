@@ -82,7 +82,7 @@ public class AdminCategoryController {
 		result.add(new CategoryNode(current, level));
 		List<Category> children = allCategories.stream()
 				.filter(cat -> cat.getParentCategory() != null
-						&& cat.getParentCategory().getCategoryId().equals(current.getCategoryId()))
+						&& cat.getParentCategory().getId().equals(current.getId()))
 				.sorted((c1, c2) -> c1.getName().compareTo(c2.getName())) 
 				.collect(Collectors.toList());
 
@@ -134,7 +134,7 @@ public class AdminCategoryController {
 		} else {
 			try {
 				Long parentId = categoryToDelete.getParentCategory() != null
-						? categoryToDelete.getParentCategory().getCategoryId()
+						? categoryToDelete.getParentCategory().getId()
 						: null;
 
 				Long replacementProductId = parentId;
@@ -198,7 +198,7 @@ public class AdminCategoryController {
 				}
 				List<Category> directChildren = allCategories.stream()
 						.filter(cat -> cat.getParentCategory() != null
-								&& cat.getParentCategory().getCategoryId().equals(categoryId))
+								&& cat.getParentCategory().getId().equals(categoryId))
 						.collect(Collectors.toList());
 				for (Category child : directChildren) {
 					child.setParentCategory(replacementCategory);
@@ -229,14 +229,14 @@ public class AdminCategoryController {
 
 	private long countDirectChildren(Category category, List<Category> allCategories) {
 		return allCategories.stream().filter(cat -> cat.getParentCategory() != null
-				&& cat.getParentCategory().getCategoryId().equals(category.getCategoryId())).count();
+				&& cat.getParentCategory().getId().equals(category.getId())).count();
 	}
 
 	private List<Category> getDescendants(Category category, List<Category> allCategories) {
 		List<Category> descendants = new ArrayList<>();
 		List<Category> directChildren = allCategories.stream()
 				.filter(cat -> cat.getParentCategory() != null
-						&& cat.getParentCategory().getCategoryId().equals(category.getCategoryId()))
+						&& cat.getParentCategory().getId().equals(category.getId()))
 				.collect(Collectors.toList());
 		for (Category child : directChildren) {
 			descendants.add(child);
@@ -247,9 +247,9 @@ public class AdminCategoryController {
 
 	private List<Category> getEligibleParentCategories(Category categoryToExclude, List<Category> allCategories) {
 		List<Category> descendants = getDescendants(categoryToExclude, allCategories);
-		List<Long> excludedIds = descendants.stream().map(Category::getCategoryId).collect(Collectors.toList());
-		excludedIds.add(categoryToExclude.getCategoryId());
-		return allCategories.stream().filter(cat -> !excludedIds.contains(cat.getCategoryId()))
+		List<Long> excludedIds = descendants.stream().map(Category::getId).collect(Collectors.toList());
+		excludedIds.add(categoryToExclude.getId());
+		return allCategories.stream().filter(cat -> !excludedIds.contains(cat.getId()))
 				.collect(Collectors.toList());
 	}
 
@@ -258,10 +258,10 @@ public class AdminCategoryController {
 			RedirectAttributes redirectAttributes) {
 
 		try {
-			boolean isNew = category.getCategoryId() == null;
+			boolean isNew = category.getId() == null;
 			Long parentId = null;
 			if (category.getParentCategory() != null) {
-				parentId = category.getParentCategory().getCategoryId();
+				parentId = category.getParentCategory().getId();
 			}
 			if (parentId != null) {
 				Category parent = categoryService.findById(parentId).orElse(null);

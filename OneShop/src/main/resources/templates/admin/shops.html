@@ -47,11 +47,11 @@
 				</thead>
 				<tbody>
 					<tr th:each="shop : ${shops}">
-						<td th:text="${shop.shopId}"></td>
-						<td th:text="${shop.shopName}"></td>
-						<td th:text="${shop.vendor.email}"></td>
+						<td th:text="${shop.Id}"></td>
+						<td th:text="${shop.Name}"></td>
+						<td th:text="${shop.user.email}"></td>
 						<td class="text-center"><a
-							th:href="@{/admin/shops/{shopId}/products(shopId=${shop.shopId})}"
+							th:href="@{/admin/shops/{Id}/products(Id=${shop.Id})}"
 							class="btn btn-sm btn-info" title="Xem danh sách sản phẩm"> <i
 								class="fas fa-eye"></i>
 						</a></td>

@@ -53,6 +53,10 @@ public class Product {
 
 	@Column(columnDefinition = "nvarchar(500)")
 	private String tags;
+//ADMIN
+	@Enumerated(EnumType.STRING) // Trạng thái duyệt đơn của admin
+	@Column(name = "status", nullable = false)
+	private ProductStatus status = ProductStatus.PENDING; // Mặc định là 'Chờ duyệt'
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "category_id", nullable = false)

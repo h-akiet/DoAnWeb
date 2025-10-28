@@ -24,8 +24,6 @@ public class Category {
     @JoinColumn(name = "parent_id")
     private Category parentCategory;
     
-
-    
     // Một Danh mục có nhiều Sản phẩm
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     private List<Product> products;

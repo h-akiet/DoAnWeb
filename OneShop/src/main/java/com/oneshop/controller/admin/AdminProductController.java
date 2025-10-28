@@ -66,7 +66,7 @@ public class AdminProductController {
 		model.addAttribute("categories", categories);
 		model.addAttribute("brands", brands);
 		model.addAttribute("currentShopId", shopId);
-		model.addAttribute("currentShopName", currentShop != null ? currentShop.getShopName() : "N/A");
+		model.addAttribute("currentShopName", currentShop != null ? currentShop.getName() : "N/A");
 
 		model.addAttribute("selectedProductCode", productCodeParam);
 		model.addAttribute("selectedStatusValue", status);

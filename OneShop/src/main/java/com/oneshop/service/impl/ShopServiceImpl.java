@@ -3,7 +3,7 @@ package com.oneshop.service.impl;
 
 import com.oneshop.dto.ShopDto;
 import com.oneshop.entity.Shop;
-import com.oneshop.entity.Shop.ShopStatus;
+import com.oneshop.enums.ShopStatus;
 import com.oneshop.entity.User;
 import com.oneshop.repository.ShopRepository;
 import com.oneshop.repository.UserRepository;
@@ -19,7 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List; // <<< THÊM IMPORT
+import java.util.Optional;
 import java.util.stream.Collectors; // <<< THÊM IMPORT
 
 @Service
@@ -136,5 +139,56 @@ public class ShopServiceImpl implements ShopService {
         // Hoặc giữ nguyên nếu trang liên hệ muốn hiển thị cả shop chờ duyệt
         return shopRepository.findAll(Sort.by("name"));
     }
+ // ===>>> THÊM TRIỂN KHAI CÁC PHƯƠNG THỨC MỚI TỪ INTERFACE HOP NHẤT <<<===
+
+    @Override
+    @Transactional
+    public List<Shop> findAll() {
+        logger.debug("Fetching all shops with vendor info.");
+		// Giả định shopRepository.findAllWithVendor() tồn tại
+		// Vì không có ShopRepository để kiểm tra, giữ nguyên như code cũ
+		// Nếu không có, phải dùng shopRepository.findAll()
+		return shopRepository.findAllWithVendor(); 
+    }
+    
+    @Override
+    @Transactional
+    public Shop findById(Long shopId) {
+        logger.debug("Fetching shop by ID: {}", shopId);
+        // Thay đổi cách xử lý: dùng orElse(null) như code cũ
+        return shopRepository.findById(shopId).orElse(null); 
+    }
+
+    @Override
+    @Transactional
+    public List<Shop> getApprovedShops() {
+        logger.debug("Fetching all APPROVED shops.");
+        return shopRepository.findByStatus(ShopStatus.APPROVED);
+    }
+    
+    @Override
+    @Transactional
+    public Shop updateShopCommissionRate(Long shopId, BigDecimal newRate) {
+        logger.info("Updating commission rate for shop ID: {} to {}", shopId, newRate);
+        Optional<Shop> shopOpt = shopRepository.findById(shopId);
+
+        if (shopOpt.isPresent()) {
+            Shop shop = shopOpt.get();
+            
+            // 1. Cập nhật tỉ lệ chiết khấu
+            shop.setCommissionRate(newRate);
+            
+            // 2. Cập nhật cột lưu thời gian là thời điểm hiện tại
+            shop.setCommissionUpdatedAt(LocalDateTime.now());
+            
+            Shop updatedShop = shopRepository.save(shop);
+            logger.info("Commission rate updated successfully for shop ID: {}", shopId);
+            return updatedShop;
+        }
+        logger.warn("Shop with ID: {} not found for commission update.", shopId);
+        return null;
+    }
+    
+    // ===>>> KẾT THÚC THÊM TRIỂN KHAI <<<===
     
 }

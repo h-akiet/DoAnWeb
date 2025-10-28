@@ -19,7 +19,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     @Query("SELECT u FROM User u WHERE LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<User> findByUsernameOrEmailContaining(@Param("keyword") String keyword);
-}
 
     // ✅ Thêm dòng này
     List<User> findByRole(Role role);

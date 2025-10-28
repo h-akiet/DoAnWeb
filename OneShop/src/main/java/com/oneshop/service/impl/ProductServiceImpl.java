@@ -4,8 +4,10 @@ package com.oneshop.service.impl;
 import com.oneshop.dto.ProductDto;
 import com.oneshop.dto.VariantDto;
 import com.oneshop.entity.*;
+import com.oneshop.enums.ProductStatus;
 import com.oneshop.repository.*;
 import com.oneshop.service.BrandService;
+import com.oneshop.service.CategoryService;
 import com.oneshop.service.FileStorageService;
 import com.oneshop.service.ProductService;
 import com.oneshop.specification.ProductSpecification;
@@ -46,6 +48,7 @@ public class ProductServiceImpl implements ProductService {
     @Autowired private FileStorageService fileStorageService;
     @Autowired private BrandService brandService;
     @Autowired private ProductVariantRepository variantRepository;
+    @Autowired private CategoryService categoryService;
 
     // --- Vendor Methods ---
 
@@ -638,4 +641,60 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(managedProduct);
         logger.debug("Updated aggregate stock/price for product ID: {}", managedProduct.getProductId());
     }
+    @Override
+	@Transactional(readOnly = true)
+	public List<Product> findFilteredProducts(Long shopId, String productCode, ProductStatus status, Long categoryId,
+			String brand) {
+        logger.debug("Fetching filtered products for Admin/Vendor. ShopId: {}, Code: {}, Status: {}, CategoryId: {}, Brand: {}", shopId, productCode, status, categoryId, brand);
+		String codeParam = (productCode != null && !productCode.isEmpty()) ? productCode : null;
+		String brandParam = (brand != null && !brand.isEmpty()) ? brand : null;
+		return productRepository.findFilteredProducts(shopId, codeParam, status, categoryId, brandParam);
+	}
+
+    @Override
+	@Transactional(readOnly = true)
+	public Set<String> findAllUniqueBrands() {
+        logger.debug("Fetching all unique brands.");
+		return productRepository.findAllUniqueBrands();
+	}
+
+    @Override
+	@Transactional
+	public void updateStatus(Long productId, ProductStatus newStatus) {
+        logger.info("Updating status for product ID: {} to {}", productId, newStatus);
+		productRepository.findById(productId).ifPresent(product -> {
+			product.setStatus(newStatus);
+            logger.debug("Successfully set status for product ID: {}", productId);
+		});
+	}
+
+    @Override
+	@Transactional
+	public void updateAdminFields(Product productDetails) {
+        logger.info("Updating Admin fields for product ID: {}", productDetails.getProductId());
+		productRepository.findById(productDetails.getProductId()).ifPresent(product -> {
+			product.setName(productDetails.getName());
+			product.setDescription(productDetails.getDescription());
+			if (productDetails.getCategory() != null && productDetails.getCategory().getId() != null) {
+				Long newCategoryId = productDetails.getCategory().getId();
+                // Sử dụng categoryService đã được inject ở trên
+				categoryService.findById(newCategoryId).ifPresent(product::setCategory);
+                logger.debug("Successfully updated name, description, and category for product ID: {}", product.getProductId());
+			}
+		});
+	}
+
+    @Override
+	@Transactional
+	public void deleteById(Long id) {
+        logger.warn("Admin deleting product by ID: {}", id);
+		productRepository.deleteById(id);
+	}
+
+    @Override
+	@Transactional
+	public int updateCategoryForProducts(Long oldCategoryId, Long newCategoryId) {
+        logger.info("Updating category from {} to {} for products.", oldCategoryId, newCategoryId);
+		return productRepository.updateCategoryByCategoryId(oldCategoryId, newCategoryId);
+	}
 }
