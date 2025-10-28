@@ -1,97 +1,77 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/app}">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quản lý Chiết khấu App - Admin</title>
-<link rel="preconnect" href="https://fonts.gstatic.com">
-<link
-	href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap"
-	rel="stylesheet">
-<link rel="stylesheet"
-	href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
-	integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
-	crossorigin="anonymous" />
-<link rel="stylesheet"
-	th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
-<link rel="stylesheet" th:href="@{/assets/css/library.css}">
-<link rel="stylesheet" th:href="@{/assets/css/common.css}">
-<link rel="stylesheet" th:href="@{/assets/css/admin/user.css}">
+<title>Quản lý Chiết khấu App</title>
+<th:block layout:fragment="css">
+    <style>
+        .table th, .table td { vertical-align: middle; }
+        .action-btns a, .action-btns button { margin: 0 3px; }
+        .modal-title { font-weight: 600; }
+    </style>
+</th:block>
 </head>
 
 <body>
-
-	<div th:replace="~{admin/fragments/header :: header}"></div>
-
-	<div class="main admin-container">
-		<div class="grid wide">
-			<div class="breadcrumb-admin-static" style="padding: 20px 0;">
-				<span class="breadcrumb-item-admin"
-					style="font-weight: 500; text-transform: uppercase;">ADMIN</span> <span
-					style="font-weight: 500; margin: 0 5px;">/</span> <span
-					class="breadcrumb-item-admin"
-					style="font-weight: 500; text-transform: uppercase;">QUẢN LÝ
-					CHIẾT KHẤU APP </span>
-			</div>
-			<div th:if="${message}"
-				th:classappend="${'alert-' + (#strings.toLowerCase(status))}"
-				class="alert alert-dismissible fade show" role="alert">
-				<span th:text="${message}" class="fs-3"></span>
-				<button type="button" class="btn-close" data-bs-dismiss="alert"
-					aria-label="Close"></button>
-			</div>
-
-			<table class="table table-bordered table-striped">
-				<thead>
-					<tr>
-						<th scope="col" style="width: 50px;">STT</th>
-						<th scope="col">Mã cửa hàng</th>
-						<th scope="col">Tên cửa hàng</th>
-						<th scope="col">Tỉ lệ chiết khấu App</th>
-						<th scope="col">Thời gian cập nhật</th>
-						<th scope="col" class="text-center" style="width: 120px;">Thao
-							tác</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr th:each="shop, shopStat : ${shops}">
-						<td th:text="${shopStat.index + 1}"></td>
-						<td th:text="${shop.shopId}" class="shop-id-col"></td>
-						<td th:text="${shop.shopName}" class="shop-name-col"></td>
-						<td th:data-commission-rate="${shop.commissionRate}"
-							th:text="${#numbers.formatDecimal(shop.commissionRate * 100, 1, 2) + '%'}"
-							class="shop-commission-col"></td>
-						<td
-							th:text="${#temporals.format(shop.commissionUpdatedAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
-
-						<td class="text-center">
-							<!-- Thay đổi: Thêm data-bs-toggle và data-bs-target để mở modal -->
-							<a href="#" class="btn btn-sm btn-warning btn-edit"
-							title="Chỉnh sửa chiết khấu" data-bs-toggle="modal"
-							data-bs-target="#editCommissionModal"
-							th:data-shop-id="${shop.shopId}"
-							th:data-shop-name="${shop.shopName}"
-							th:data-commission-rate="${shop.commissionRate * 100}"> <i
-								class="fas fa-pencil-alt fa-lg" style="color: black !important;"></i>
-						</a>
-						</td>
-					</tr>
-
-				</tbody>
-			</table>
+	<div layout:fragment="content">
+		<div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
+			 <h1 class="h3 mb-0">Quản lý Chiết khấu App</h1>
 		</div>
+        <p class="lead mb-4">Thiết lập tỉ lệ chiết khấu hoa hồng cho từng gian hàng.</p>
 
+        <div th:if="${message}"
+             th:classappend="${'alert-' + (#strings.toLowerCase(status ?: 'info'))}"
+             class="alert alert-dismissible fade show" role="alert">
+            <span th:text="${message}" class="fs-5"></span> <button type="button" class="btn-close" data-bs-dismiss="alert"
+                aria-label="Close"></button>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                 <h6 class="m-0 font-weight-bold">Danh sách Shop đã duyệt</h6>
+            </div>
+             <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th scope="col" style="width: 50px;">STT</th>
+                                <th scope="col" class="text-start">Tên cửa hàng</th> <th scope="col">Tỉ lệ chiết khấu</th>
+                                <th scope="col">Cập nhật lần cuối</th>
+                                <th scope="col" class="text-center" style="width: 120px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="shop, shopStat : ${shops}">
+                                <td th:text="${shopStat.index + 1}" class="text-center"></td>
+                                <td th:text="${shop.name}" class="shop-name-col text-start"></td> <td th:data-commission-rate="${shop.commissionRate}"
+                                    th:text="${#numbers.formatDecimal(shop.commissionRate * 100, 1, 1)} + '%'" class="shop-commission-col text-center"></td>
+                                <td th:text="${shop.commissionUpdatedAt != null ? #temporals.format(shop.commissionUpdatedAt, 'dd/MM/yyyy HH:mm') : 'N/A'}" class="text-center"></td> <td class="text-center action-btns">
+                                    <button type="button" class="btn btn-sm btn-info text-white btn-edit" title="Chỉnh sửa chiết khấu" data-bs-toggle="modal"
+                                        data-bs-target="#editCommissionModal"
+                                        th:data-shop-id="${shop.id}" th:data-shop-name="${shop.name}"
+                                        th:data-commission-rate="${shop.commissionRate * 100}">
+                                        <i class="fas fa-pencil-alt"></i> </button>
+                                </td>
+                            </tr>
+                             <tr th:if="${#lists.isEmpty(shops)}">
+                                <td colspan="5" class="text-center text-muted py-4">Không có Shop nào đã được duyệt.</td>
+                             </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 	</div>
 
-	<!-- MODAL CHỈNH SỬA CHIẾT KHẤU APP -->
 	<div class="modal fade" id="editCommissionModal" tabindex="-1"
 		aria-labelledby="editCommissionModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="editCommissionModalLabel">Chỉnh
-						sửa Chiết khấu App</h5>
+					<h5 class="modal-title" id="editCommissionModalLabel">Chỉnh sửa Chiết khấu App</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"
 						aria-label="Close"></button>
 				</div>
@@ -100,62 +80,49 @@
 					<div class="modal-body">
 						<input type="hidden" name="shopId" id="modalShopId">
 						<div class="mb-3">
-							<label for="modalShopName" class="form-label">Tên cửa
-								hàng:</label> <input type="text" class="form-control" id="modalShopName"
-								readonly>
+							<label for="modalShopName" class="form-label">Tên cửa hàng</label>
+                            <input type="text" class="form-control" id="modalShopName" readonly>
 						</div>
 						<div class="mb-3">
-							<label for="newCommissionRate" class="form-label">Chiết
-								khấu App mới (%)</label> <input type="number" class="form-control"
-								id="newCommissionRate" name="newCommissionRatePercent" required
-								min="0" max="100" step="0.01">
-							<div class="form-text fs-5 ">Nhập giá trị chiết khấu từ 0
-								đến 100 (Ví dụ: 5.5 cho 5.5%)</div>
+							<label for="newCommissionRate" class="form-label">Chiết khấu App mới (%) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="newCommissionRate" name="newCommissionRatePercent" required min="0" max="100" step="0.1"> <div class="form-text">Nhập giá trị chiết khấu từ 0 đến 100 (Ví dụ: 5.5 cho 5.5%)</div>
 						</div>
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary"
-							data-bs-dismiss="modal">Đóng</button>
-						<button type="submit" class="btn btn-primary">Lưu thay
-							đổi</button>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+						<button type="submit" class="btn btn-primary">Lưu thay đổi</button>
 					</div>
 				</form>
 			</div>
 		</div>
 	</div>
 
+	<th:block layout:fragment="js">
+        <script>
+            $(document).ready(function() {
+                // Script cho modal (không đổi)
+                $('#editCommissionModal').on('show.bs.modal', function(event) {
+                    var button = $(event.relatedTarget);
+                    var shopId = button.data('shop-id');
+                    var shopName = button.data('shop-name');
+                    // Lấy commission rate và làm tròn nếu cần (ví dụ: 2 chữ số thập phân)
+                    var commissionRate = parseFloat(button.data('commission-rate')).toFixed(1);
+                    var modal = $(this);
+                    modal.find('#modalShopId').val(shopId);
+                    modal.find('#modalShopName').val(shopName);
+                    modal.find('#newCommissionRate').val(commissionRate);
+                });
 
-	<div th:replace="~{admin/fragments/footer :: footer}"></div>
-
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
-	<script th:src="@{/assets/js/commonscript.js}"></script>
-
-	<script>
-		$(document).ready(function() {
-			$('#editCommissionModal').on('show.bs.modal', function(event) {
-				var button = $(event.relatedTarget);
-				var shopId = button.data('shop-id');
-				var shopName = button.data('shop-name');
-				var commissionRate = button.data('commission-rate');
-				var modal = $(this);
-				modal.find('#modalShopId').val(shopId);
-				modal.find('#modalShopName').val(shopName);
-				modal.find('#newCommissionRate').val(commissionRate);
-			});
-		});
-	</script>
-	<script>
-		$(document).ready(function() {
-			var alert = $('.alert');
-			if (alert.length) {
-				setTimeout(function() {
-					alert.alert('close');
-				}, 5000);
-			}
-		});
-	</script>
+                 // Tự đóng alert sau 5 giây
+                var alert = $('.alert');
+                if (alert.length) {
+                    setTimeout(function() {
+                        alert.alert('close');
+                    }, 5000);
+                }
+            });
+        </script>
+	</th:block>
 
 </body>
-
 </html>

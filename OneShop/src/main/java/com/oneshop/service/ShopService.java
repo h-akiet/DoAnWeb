@@ -2,6 +2,7 @@ package com.oneshop.service;
 
 import com.oneshop.dto.ShopDto;
 import com.oneshop.entity.Shop;
+import com.oneshop.enums.ShopStatus;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -61,4 +62,5 @@ public interface ShopService {
     Shop updateShopCommissionRate(Long shopId, BigDecimal newRate);
 
     // ===>>> KẾT THÚC THÊM PHƯƠNG THỨC <<<===
+    Shop updateShopStatus(Long shopId, ShopStatus newStatus);
 }

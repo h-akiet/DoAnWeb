@@ -25,6 +25,10 @@ import java.util.List; // <<< THÊM IMPORT
 import java.util.Optional;
 import java.util.stream.Collectors; // <<< THÊM IMPORT
 
+import com.oneshop.enums.ShopStatus;
+import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class ShopServiceImpl implements ShopService {
 
@@ -189,6 +193,23 @@ public class ShopServiceImpl implements ShopService {
         return null;
     }
     
-    // ===>>> KẾT THÚC THÊM TRIỂN KHAI <<<===
+    @Override
+    @Transactional // <-- Thêm Transactional
+    public Shop updateShopStatus(Long shopId, ShopStatus newStatus) {
+        logger.info("Updating status for shop ID: {} to {}", shopId, newStatus);
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> {
+                    logger.error("Shop not found with ID: {} for status update.", shopId);
+                    return new EntityNotFoundException("Không tìm thấy Shop với ID: " + shopId);
+                });
+
+        // Có thể thêm logic kiểm tra chuyển đổi trạng thái hợp lệ ở đây nếu cần
+        // Ví dụ: không cho chuyển từ REJECTED sang APPROVED trực tiếp
+
+        shop.setStatus(newStatus);
+        Shop updatedShop = shopRepository.save(shop);
+        logger.info("Shop ID: {} status updated successfully to {}", shopId, newStatus);
+        return updatedShop;
+    }
     
 }

@@ -35,7 +35,7 @@
 
             .store-locator-grid {
                 display: grid;
-                grid-template-columns: 400px 1fr;
+                grid-template-columns: 400px 1fr; /* Cột trái 400px, cột phải chiếm phần còn lại */
                 gap: 20px;
             }
 
@@ -90,12 +90,13 @@
                 border: 1px solid var(--border-color);
                 border-top: none;
                 border-radius: 0 0 8px 8px;
-                max-height: 500px;
-                overflow-y: auto;
+                max-height: 500px; /* Giới hạn chiều cao cho cột trái */
+                overflow-y: auto; /* Thêm thanh cuộn dọc */
                 padding: 10px;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             }
 
+            /* CSS cho thanh cuộn */
             .store-scroll-list::-webkit-scrollbar { width: 6px; }
             .store-scroll-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
             .store-scroll-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
@@ -138,7 +139,7 @@
                 padding: 15px;
                 font-size: 14px;
                 color: var(--text-color-light);
-                display: none;
+                display: none; /* Ẩn mặc định */
                 border-top: 1px solid var(--border-color);
             }
 
@@ -154,14 +155,16 @@
                 margin-right: 8px;
                 color: var(--primary-color);
                 flex-shrink: 0;
+                padding-top: 2px; /* Căn chỉnh icon với dòng chữ */
             }
 
+            /* CSS khi item được chọn (active) */
             .store-item.active .store-item-header i {
-                transform: rotate(180deg);
+                transform: rotate(180deg); /* Xoay icon chevron */
             }
 
             .store-item.active .store-item-body {
-                display: block;
+                display: block; /* Hiện nội dung */
             }
 
             /* Nút trò chuyện */
@@ -190,14 +193,15 @@
                 font-size: 14px;
             }
 
+            /* Bản đồ bên phải */
             .map-area {
                 background-color: var(--background-white);
                 border-radius: 8px;
                 overflow: hidden;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                height: 600px;
-                position: sticky;
-                top: 20px;
+                height: 600px; /* Chiều cao cố định cho bản đồ */
+                position: sticky; /* Giữ bản đồ đứng yên khi cuộn cột trái */
+                top: 20px; /* Khoảng cách từ top */
             }
 
             .map-area iframe {
@@ -206,25 +210,33 @@
                 border: none;
             }
 
+            /* Responsive cho màn hình nhỏ hơn 992px */
             @media (max-width: 992px) {
                 .store-locator-grid {
-                    grid-template-columns: 1fr;
+                    grid-template-columns: 1fr; /* Chỉ còn 1 cột */
                 }
                 .map-area {
-                    grid-row: 1;
-                    height: 400px;
-                    position: static;
-                    margin-bottom: 20px;
+                    grid-row: 1; /* Đẩy bản đồ lên hàng đầu */
+                    height: 400px; /* Giảm chiều cao */
+                    position: static; /* Bỏ sticky */
+                    margin-bottom: 20px; /* Thêm khoảng cách dưới map */
                 }
                 .store-scroll-list {
-                    max-height: none;
-                    overflow-y: visible;
+                    max-height: none; /* Bỏ giới hạn chiều cao */
+                    overflow-y: visible; /* Bỏ thanh cuộn */
                 }
             }
 
+            /* Responsive cho màn hình nhỏ hơn 576px */
             @media (max-width: 576px) {
                 .filter-area {
-                    grid-template-columns: 1fr;
+                    grid-template-columns: 1fr; /* Filter thành 1 cột */
+                }
+                .store-item-header strong {
+                    font-size: 14px; /* Giảm cỡ chữ tên shop */
+                }
+                .store-item-body {
+                    font-size: 13px; /* Giảm cỡ chữ thông tin chi tiết */
                 }
             }
         </style>
@@ -239,22 +251,15 @@
             <div class="breadcrumb__item"><a th:href="@{/contact}" class="breadcrumb__link">Hệ thống cửa hàng</a></div>
         </div>
 
-<div class="main" layout:fragment="content">
-    <div class="store-locator-container">
-        <div class="main__breadcrumb" style="margin-bottom: 20px;">
-            <div class="breadcrumb__item"><a th:href="@{/}" class="breadcrumb__link">Trang chủ</a></div>
-            <div class="breadcrumb__item"><a th:href="@{/contact}" class="breadcrumb__link">Hệ thống cửa hàng</a></div>
-        </div>
-
         <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
 
         <div class="filter-area">
             <select id="provinceSelect">
                 <option value="0">Chọn tỉnh/thành phố</option>
-            </select>
+                </select>
             <select id="districtSelect" disabled>
                 <option value="0">Chọn quận/huyện</option>
-            </select>
+                 </select>
         </div>
 
         <div class="store-locator-grid">
@@ -268,17 +273,13 @@
                         <p>Hiện chưa có cửa hàng nào.</p>
                     </div>
 
-                    <!-- Mỗi cửa hàng -->
                     <div class="store-item" th:each="shop, iterStat : ${shops}" th:unless="${#lists.isEmpty(shops)}">
-                        <!-- Header: Click để mở/đóng -->
                         <div class="store-item-header" th:attr="onclick='toggleStoreItem(this)'">
                             <strong th:text="'CN ' + ${iterStat.count} + ': ' + ${shop.name}">Store Name</strong>
                             <i class="fas fa-chevron-down"></i>
                         </div>
 
-                        <!-- Body: Thông tin chi tiết -->
                         <div class="store-item-body">
-                            <!-- Địa chỉ -->
                             <p th:if="${shop.user?.address != null and !#strings.isEmpty(shop.user.address)}">
                                 <i class="fas fa-map-marker-alt"></i>
                                 <span th:text="${shop.user.address}">Store Address</span>
@@ -288,7 +289,6 @@
                                 <span>(Chưa cập nhật địa chỉ)</span>
                             </p>
 
-                            <!-- SĐT -->
                             <p th:if="${shop.contactPhone != null and !#strings.isEmpty(shop.contactPhone)}">
                                 <i class="fas fa-phone-alt"></i>
                                 <span th:text="${shop.contactPhone}">Store Phone</span>
@@ -298,17 +298,14 @@
                                 <span>(Chưa cập nhật SĐT)</span>
                             </p>
 
-                            <!-- NÚT TRÒ CHUYỆN – CHỈ HIỆN KHI CÓ VENDOR -->
-                            <div th:if="${shop.user?.id != null}" sec:authorize="isAuthenticated()">
-							    <a th:href="@{/chat/{id}(id=${shop.user.id})}"
-							       class="chat-btn"
-							       onclick="event.stopPropagation();">
-							        <i class="fas fa-comment-dots"></i>
-							        Trò chuyện ngay
-							    </a>
-							</div>
-
-                                <!-- CHƯA ĐĂNG NHẬP -->
+                            <div th:if="${shop.user?.id != null}">
+                                <div sec:authorize="isAuthenticated()">
+                                    <a th:href="@{/chat/{id}(id=${shop.user.id})}"
+                                       class="chat-btn"
+                                       onclick="event.stopPropagation();"> <i class="fas fa-comment-dots"></i>
+                                        Trò chuyện ngay
+                                    </a>
+                                </div>
                                 <div sec:authorize="!isAuthenticated()">
                                     <a href="#" class="chat-btn"
                                        onclick="event.stopPropagation(); alert('Vui lòng đăng nhập để trò chuyện!'); return false;">
@@ -318,33 +315,25 @@
                                 </div>
                             </div>
 
-                            <!-- Không có vendor -->
-                            <div th:unless="${shop.user?.id != null}" class="text-muted small">
+                            <div th:unless="${shop.user?.id != null}" class="text-muted small mt-2">
                                 <em>(Chưa liên kết chủ shop)</em>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="map-area">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.4843336040823!2d106.76933067469711!3d10.850720457814913!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752763f23816ab%3A0x282f711441b6916f!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBTxrAgcGjhuqFtIEvhu7kgdGh14bqtdCBUcC4gSOG7kyBDaMOtIE1pbmg!5e0!3m2!1svi!2s!4v1715077051991!5m2!1svi!2s"
-                        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                </div>
-        </div>
-    </div>
-</div>
+                        </div> </div> </div> </div> <div class="map-area">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.447077670698!2d106.69797081471714!3d10.777006792320748!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f4d6d6e7a6f%3A0x24a4f8fd93b7f2f!2zQ2jhu6MgQuG6v24gVGjDoG5o!5e0!3m2!1svi!2s!4v1678886743123!5m2!1svi!2s"
+                        width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div> </div> </div> </div>
 
 <th:block layout:fragment="js">
     <script>
+        // Hàm bật/tắt hiển thị chi tiết cửa hàng
         function toggleStoreItem(headerElement) {
             const storeItem = headerElement.closest('.store-item');
             if (storeItem) {
+                // Đóng tất cả các item khác đang mở
                 document.querySelectorAll('.store-item.active').forEach(item => {
-                    if (item !== storeItem) {
-                        item.classList.remove('active');
-                    }
+                    if (item !== storeItem) item.classList.remove('active');
                 });
+                // Bật/tắt item hiện tại
                 storeItem.classList.toggle('active');
             }
         }
@@ -353,7 +342,9 @@
             const provinceSelect = document.getElementById('provinceSelect');
             const districtSelect = document.getElementById('districtSelect');
 
-            const locationData = { /* Dữ liệu tỉnh/huyện đã thêm ở bước trước */
+            // --- Dữ liệu Tỉnh/Thành và Quận/Huyện (Ví dụ) ---
+            // Bạn nên lấy dữ liệu này từ API hoặc backend để dễ quản lý
+            const locationData = {
                 "Hồ Chí Minh": ["Quận 1", "Quận 3", "Quận 4", "Quận 5", "Quận 6", "Quận 7", "Quận 8", "Quận 10", "Quận 11", "Quận 12", "Bình Tân", "Bình Thạnh", "Gò Vấp", "Phú Nhuận", "Tân Bình", "Tân Phú", "Thủ Đức", "Bình Chánh", "Cần Giờ", "Củ Chi", "Hóc Môn", "Nhà Bè"],
                 "Hà Nội": ["Ba Đình", "Hoàn Kiếm", "Tây Hồ", "Long Biên", "Cầu Giấy", "Đống Đa", "Hai Bà Trưng", "Hoàng Mai", "Thanh Xuân", "Hà Đông", "Bắc Từ Liêm", "Nam Từ Liêm", "Sơn Tây", "Ba Vì", "Chương Mỹ", "Đan Phượng", "Đông Anh", "Gia Lâm", "Hoài Đức", "Mê Linh", "Mỹ Đức", "Phú Xuyên", "Phúc Thọ", "Quốc Oai", "Sóc Sơn", "Thạch Thất", "Thanh Oai", "Thanh Trì", "Thường Tín", "Ứng Hòa"],
                 "Đà Nẵng": ["Hải Châu", "Thanh Khê", "Sơn Trà", "Ngũ Hành Sơn", "Liên Chiểu", "Cẩm Lệ", "Hòa Vang"],
@@ -361,75 +352,80 @@
                 "Cần Thơ": ["Ninh Kiều", "Bình Thủy", "Cái Răng", "Ô Môn", "Thốt Nốt", "Cờ Đỏ", "Phong Điền", "Thới Lai", "Vĩnh Thạnh"],
                 "An Giang": ["Long Xuyên", "Châu Đốc", "Tân Châu", "An Phú", "Châu Phú", "Châu Thành", "Chợ Mới", "Phú Tân", "Thoại Sơn", "Tịnh Biên", "Tri Tôn"],
                 "Bà Rịa - Vũng Tàu": ["Vũng Tàu", "Bà Rịa", "Phú Mỹ", "Châu Đức", "Côn Đảo", "Đất Đỏ", "Long Điền", "Xuyên Mộc"]
-                // ... (Thêm đầy đủ 63 tỉnh thành)
+                // Thêm các tỉnh thành khác nếu cần
             };
 
+            // Load danh sách tỉnh/thành vào dropdown
             for (const province in locationData) {
-                if (locationData.hasOwnProperty(province)) {
-                    const option = document.createElement('option');
-                    option.value = province;
-                    option.textContent = province;
-                    provinceSelect.appendChild(option);
-                }
+                const option = document.createElement('option');
+                option.value = province;
+                option.textContent = province;
+                provinceSelect.appendChild(option);
             }
-            provinceSelect.disabled = false;
+            provinceSelect.disabled = false; // Kích hoạt dropdown tỉnh/thành
 
+            // Sự kiện khi chọn Tỉnh/Thành
             provinceSelect.addEventListener('change', function() {
                 const selectedProvince = this.value;
+                // Xóa các option quận/huyện cũ
                 districtSelect.innerHTML = '<option value="0">Chọn quận/huyện</option>';
+                // Nếu chọn tỉnh/thành hợp lệ
                 if (selectedProvince !== "0" && locationData[selectedProvince]) {
-                    const districts = locationData[selectedProvince];
-                    districts.forEach(district => {
+                    // Thêm các quận/huyện tương ứng
+                    locationData[selectedProvince].forEach(district => {
                         const option = document.createElement('option');
                         option.value = district;
                         option.textContent = district;
                         districtSelect.appendChild(option);
                     });
-                    districtSelect.disabled = false;
+                    districtSelect.disabled = false; // Kích hoạt dropdown quận/huyện
                 } else {
-                    districtSelect.disabled = true;
+                    districtSelect.disabled = true; // Vô hiệu hóa nếu chọn "Chọn tỉnh/thành phố"
                 }
-                filterStores(selectedProvince, districtSelect.value); // Gọi filter khi tỉnh thay đổi
+                // Gọi hàm lọc cửa hàng
+                filterStores(provinceSelect.value, districtSelect.value);
             });
 
+            // Sự kiện khi chọn Quận/Huyện
             districtSelect.addEventListener('change', function() {
-                 const selectedProvince = provinceSelect.value;
-                 const selectedDistrict = this.value;
-                 filterStores(selectedProvince, selectedDistrict); // Gọi filter khi quận thay đổi
+                filterStores(provinceSelect.value, this.value);
             });
 
-            function filterStores(province, district) {
-                console.log("Filtering stores for:", province, district);
+            // Hàm lọc danh sách cửa hàng dựa trên Tỉnh và Quận đã chọn
+            function filterStores(selectedProvince, selectedDistrict) {
                 const storeItems = document.querySelectorAll('.store-item');
                 let visibleCount = 0;
-                let noResultMessage = document.querySelector('#no-result-message'); // Tìm phần tử thông báo
-                 // Nếu chưa có, tạo mới và thêm vào list
-                 if (!noResultMessage) {
-                     noResultMessage = document.createElement('div');
-                     noResultMessage.id = 'no-result-message';
-                     noResultMessage.className = 'text-center text-muted p-5';
-                     noResultMessage.style.display = 'none'; // Ẩn ban đầu
-                     document.querySelector('.store-scroll-list').appendChild(noResultMessage);
-                 }
+                let noResultMessage = document.getElementById('no-result-message'); // Tìm phần tử thông báo
 
+                // Tạo phần tử thông báo nếu chưa có
+                if (!noResultMessage) {
+                    noResultMessage = document.createElement('div');
+                    noResultMessage.id = 'no-result-message';
+                    noResultMessage.className = 'text-center text-muted p-5';
+                    noResultMessage.style.display = 'none'; // Ẩn ban đầu
+                    document.querySelector('.store-scroll-list').appendChild(noResultMessage);
+                }
 
                 storeItems.forEach(item => {
-                    const addressElement = item.querySelector('.store-item-body span');
-                    const addressText = addressElement ? addressElement.textContent.toLowerCase() : '';
-                    const shopName = item.querySelector('.store-item-header strong').textContent.toLowerCase();
+                    const addressSpan = item.querySelector('.store-item-body span'); // Lấy span chứa địa chỉ
+                    const addressText = addressSpan ? addressSpan.textContent.toLowerCase() : ''; // Lấy text và chuyển sang chữ thường
+                    const storeName = item.querySelector('.store-item-header strong').textContent.toLowerCase(); // Lấy tên cửa hàng
 
-                    let provinceMatch = (province === "0");
-                    let districtMatch = (district === "0");
+                    // Kiểm tra khớp Tỉnh/Thành
+                    let provinceMatch = selectedProvince === "0" // Luôn khớp nếu không chọn tỉnh
+                                        || addressText.includes(selectedProvince.toLowerCase())
+                                        || storeName.includes(selectedProvince.toLowerCase()); // Tìm trong tên shop nữa
 
-                    if (province !== "0") {
-                        provinceMatch = addressText.includes(province.toLowerCase()) || shopName.includes(province.toLowerCase());
+                    // Kiểm tra khớp Quận/Huyện (chỉ khi đã chọn tỉnh và quận)
+                    let districtMatch = selectedDistrict === "0"; // Luôn khớp nếu không chọn quận
+                    if (provinceMatch && selectedDistrict !== "0") {
+                        const districtLower = selectedDistrict.toLowerCase();
+                        // Thử tìm quận/huyện hoặc các biến thể viết tắt
+                        const districtVariations = [districtLower, districtLower.replace("quận ", "q."), districtLower.replace("huyện ", "h.")];
+                        districtMatch = districtVariations.some(variation => addressText.includes(variation) || storeName.includes(variation));
                     }
-                    if (provinceMatch && district !== "0") {
-                         const districtLower = district.toLowerCase();
-                         const districtAlts = [districtLower, districtLower.replace("quận ", "q."), districtLower.replace("huyện ", "h.")];
-                         districtMatch = districtAlts.some(alt => addressText.includes(alt) || shopName.includes(alt));
-                    }
 
+                    // Hiển thị hoặc ẩn item dựa trên kết quả lọc
                     if (provinceMatch && districtMatch) {
                         item.style.display = 'block';
                         visibleCount++;
@@ -438,28 +434,16 @@
                     }
                 });
 
-                const countElement = document.querySelector('.store-list-area span');
-                if (countElement) {
-                    countElement.textContent = `${visibleCount} cửa hàng phù hợp`; // Cập nhật số lượng
+                // Cập nhật số lượng cửa hàng hiển thị
+                const countSpan = document.querySelector('.store-list-area span');
+                if (countSpan) {
+                    countSpan.textContent = visibleCount + ' cửa hàng phù hợp';
                 }
 
-                // Hiển thị/ẩn thông báo "Không tìm thấy"
-                if(noResultMessage) {
-                     noResultMessage.style.display = (visibleCount === 0) ? 'block' : 'none';
-                     if(visibleCount === 0) {
-                        noResultMessage.textContent = 'Không tìm thấy cửa hàng nào phù hợp với bộ lọc.';
-                     }
-                 }
-            }
-             // Gọi filter lần đầu để xử lý (nếu có tham số trên URL chẳng hạn)
-             // filterStores(provinceSelect.value, districtSelect.value);
-        });
-    </script>
-</th:block>
-
-                noResult.style.display = visible === 0 ? 'block' : 'none';
-                if (visible === 0) {
-                    noResult.textContent = 'Không tìm thấy cửa hàng nào phù hợp với bộ lọc.';
+                // Hiển thị hoặc ẩn thông báo "Không tìm thấy"
+                noResultMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+                if (visibleCount === 0) {
+                    noResultMessage.textContent = 'Không tìm thấy cửa hàng nào phù hợp với bộ lọc.';
                 }
             }
         });

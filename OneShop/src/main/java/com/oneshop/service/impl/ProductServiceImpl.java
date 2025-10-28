@@ -702,4 +702,14 @@ public class ProductServiceImpl implements ProductService {
         logger.info("Updating category from {} to {} for products.", oldCategoryId, newCategoryId);
 		return productRepository.updateCategoryByCategoryId(oldCategoryId, newCategoryId);
 	}
+    @Override
+    @Transactional(readOnly = true) // Thêm readOnly vì chỉ đếm
+    public long countProductsByCategory(Long categoryId) {
+        logger.debug("Counting products for category ID: {}", categoryId);
+        if (categoryId == null) {
+            return 0; // Hoặc ném lỗi nếu categoryId không bao giờ được null
+        }
+        // Gọi phương thức countByCategoryId từ ProductRepository
+        return productRepository.countByCategoryId(categoryId); // <-- THÊM TRIỂN KHAI NÀY
+    }
 }

@@ -1,148 +1,152 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/app}">
 <head>
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quản lý Người dùng - Admin</title>
-<link rel="preconnect" href="https://fonts.gstatic.com">
-<link
-	href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap"
-	rel="stylesheet">
-<link rel="stylesheet"
-	href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
-	integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
-	crossorigin="anonymous" />
-<link rel="stylesheet"
-	th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
-<link rel="stylesheet" th:href="@{/assets/css/library.css}">
-<link rel="stylesheet" th:href="@{/assets/css/common.css}">
-<link rel="stylesheet" th:href="@{/assets/css/admin/user.css}">
+    <title>Quản lý Người dùng</title>
+    <th:block layout:fragment="css">
+        <style>
+            .table th, .table td { vertical-align: middle; }
+            .action-btns a, .action-btns button { margin: 0 3px; }
+            .status-active { color: #1cc88a; font-weight: bold; }
+            .status-inactive { color: #858796; font-style: italic; }
+            .form-select-sm { padding: .25rem .5rem; font-size: .875rem; border-radius: .2rem; } /* Style cho select nhỏ hơn */
+        </style>
+     </th:block>
 </head>
 
 <body>
+    <div layout:fragment="content">
+        <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
+             <h1 class="h3 mb-0">Quản lý Người dùng</h1>
+        </div>
+        <p class="lead mb-4">Xem, tìm kiếm và quản lý tài khoản người dùng trong hệ thống.</p>
 
-	<div th:replace="~{admin/fragments/header :: header}"></div>
+        <div class="row mb-4">
+            <div class="col-12">
+                 <form th:action="@{/admin/users}" method="get" class="d-flex justify-content-end">
+                    <input type="text" name="keyword" class="form-control me-2" th:value="${keyword}"
+                        placeholder="Tìm kiếm theo tên hoặc email..." style="max-width: 350px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i> Tìm kiếm
+                    </button>
+                    <a th:href="@{/admin/users}" class="btn btn-outline-secondary ms-2" title="Đặt lại">
+                         <i class="fas fa-undo"></i>
+                    </a>
+                </form>
+            </div>
+        </div>
 
-	<div class="main admin-container">
-		<div class="grid wide">
-			<div class="breadcrumb-admin-static" style="padding: 20px 0;">
-				<span class="breadcrumb-item-admin"
-					style="font-weight: 500; text-transform: uppercase;">ADMIN</span> <span
-					style="font-weight: 500; margin: 0 5px;">/</span> <span
-					class="breadcrumb-item-admin"
-					style="font-weight: 500; text-transform: uppercase;">QUẢN LÝ
-					NGƯỜI DÙNG</span>
-			</div>
-			<div class="row mb-4">
-				<div class="col-12">
-					<form th:action="@{/admin/users}" method="get" class="d-flex">
-						<input type="text" name="keyword" class="form-control me-2"
-							th:value="${keyword}"
-							placeholder="Tìm kiếm theo tên hoặc email..."
-							style="max-width: 400px;">
-						<button type="submit" class="btn btn--default">
-							<i class="fas fa-search"></i> Tìm kiếm
-						</button>
-					</form>
-				</div>
-			</div>
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+         <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
 
-			<div class="table-responsive">
-				<table class="table table-hover table-bordered">
-					<thead class="table-light">
-						<tr>
-							<th>ID</th>
-							<th>Tên người dùng</th>
-							<th>Email</th>
-							<th>Quyền</th>
-							<th>Trạng thái</th>
-							<th>Khóa/Mở khóa</th>
-							<th>Cấp/Đổi quyền</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="user : ${users}">
-							<td th:text="${user.id}">1</td>
-							<td th:text="${user.username}">Nguyễn Văn A</td>
-							<td th:text="${user.email}">user.a@example.com</td>
-							<td><span th:each="role : ${user.roles}"
-								th:text="${role.name}">USER</span></td>
-							<td><span
-								th:classappend="${user.activated ? 'status-active' : 'status-inactive'}"
-								th:text="${user.activated ? 'ACTIVE' : 'INACTIVE'}">ACTIVE</span>
-							</td>
-							<td><a
-								th:href="@{'/admin/users/toggle-status/' + ${user.id}}"
-								class="btn btn-sm"
-								th:classappend="${user.activated ? 'btn-danger' : 'btn-success'}"
-								th:text="${user.activated ? 'Khóa' : 'Mở Khóa'}"
-								onclick="return confirm('Bạn có chắc chắn muốn thực hiện thao tác này?');">
-									Khóa/Mở Khóa </a></td>
-							<td>
-								<button type="button" class="btn btn-sm btn-info text-white"
-									data-bs-toggle="modal"
-									th:data-bs-target="'#changeRoleModal-' + ${user.id}">
-									<i class="fas fa-user-tag"></i> Đổi Quyền
-								</button>
-							</td>
-						</tr>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                 <h6 class="m-0 font-weight-bold">Danh sách người dùng</h6>
+            </div>
+             <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th>ID</th>
+                                <th class="text-start">Tên đăng nhập</th> <th class="text-start">Email</th>
+                                <th>Quyền</th>
+                                <th>Trạng thái</th>
+                                <th style="width: 120px;">Khóa/Mở khóa</th>
+                                <th style="width: 120px;">Cấp/Đổi quyền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}">
+                                <td th:text="${user.id}" class="text-center">1</td>
+                                <td th:text="${user.username}">Nguyễn Văn A</td>
+                                <td th:text="${user.email}">user.a@example.com</td>
+                                <td class="text-center">
+                                     <span th:if="${user.role != null}" class="badge bg-info text-dark" th:text="${user.role.name.name()}">ROLE</span>
+                                     <span th:unless="${user.role != null}" class="badge bg-secondary">N/A</span>
+                                </td>
+                                <td class="text-center">
+                                    <span th:classappend="${user.activated ? 'status-active' : 'status-inactive'}"
+                                          th:text="${user.activated ? 'Hoạt động' : 'Bị khóa'}"></span>
+                                </td>
+                                <td class="text-center action-btns"> <a th:href="@{'/admin/users/toggle-status/' + ${user.id}}"
+                                        class="btn btn-sm"
+                                        th:classappend="${user.activated ? 'btn-outline-danger' : 'btn-outline-success'}"
+                                        th:title="${user.activated ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}"
+                                        onclick="return confirm('Bạn có chắc chắn muốn thực hiện thao tác này?');">
+                                        <i th:classappend="${user.activated ? 'fas fa-lock' : 'fas fa-lock-open'}"></i>
+                                    </a>
+                                </td>
+                                <td class="text-center action-btns"> <button type="button" class="btn btn-sm btn-info text-white"
+                                        data-bs-toggle="modal"
+                                        th:data-bs-target="'#changeRoleModal-' + ${user.id}"
+                                        title="Đổi quyền">
+                                        <i class="fas fa-user-tag"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                 <td colspan="7" class="text-center text-muted py-4">Không tìm thấy người dùng nào.</td>
+                             </tr>
+                        </tbody>
+                    </table>
+                </div>
+             </div>
+        </div>
 
+        <div th:each="user : ${users}" class="modal fade"
+            th:id="'changeRoleModal-' + ${user.id}" tabindex="-1"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form th:action="@{'/admin/users/change-role/' + ${user.id}}" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                Cấp/Đổi quyền cho <strong th:text="${user.username}"></strong> </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>
+                                Quyền hiện tại:
+                                <strong th:if="${user.role != null}" class="badge bg-info text-dark" th:text="${user.role.name.name()}">ROLE</strong> <strong th:unless="${user.role != null}" class="badge bg-secondary">N/A</strong>
+                            </p>
+                            <div class="form-group">
+                                <label th:for="'newRole-' + ${user.id}">Chọn quyền mới:</label>
+                                <select class="form-select form-select-sm" name="newRoleName" th:id="'newRole-' + ${user.id}" required>
+                                    <option th:each="roleName : ${T(com.oneshop.entity.Role.RoleName).values()}"
+                                            th:value="${roleName.name()}"
+                                            th:text="${roleName.name()}"
+                                            th:selected="${user.role != null and user.role.name == roleName}"></option> </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button> <button type="submit" class="btn btn-primary btn-sm">Lưu Thay Đổi</button> </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-					</tbody>
-				</table>
-			</div>
-
-		</div>
-	</div>
-
-	<div th:each="user : ${users}" class="modal fade"
-		th:id="'changeRoleModal-' + ${user.id}" tabindex="-1"
-		aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<form th:action="@{'/admin/users/change-role/' + ${user.id}}"
-					method="post">
-					<div class="modal-header">
-						<h5 class="modal-title">
-							Cấp/Đổi quyền cho <span th:text="${user.username}"></span>
-						</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal"
-							aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<p>
-							Quyền hiện tại: <strong
-								th:text="${user.roles.stream().map(r -> r.name).findFirst().orElse('N/A')}"></strong>
-						</p>
-						<div class="form-group">
-							<label th:for="'newRole-' + ${user.id}">Chọn quyền mới:</label> <select
-								class="form-select" name="newRoleName"
-								th:id="'newRole-' + ${user.id}" required>
-								<option value="ADMIN">ADMIN</option>
-								<option value="USER">USER</option>
-								<option value="VENDOR">VENDOR</option>
-								<option value="SHIPPER">SHIPPER</option>
-							</select>
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary"
-							data-bs-dismiss="modal">Đóng</button>
-						<button type="submit" class="btn btn-primary">Lưu Thay
-							Đổi</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
-
-	<div th:replace="~{admin/fragments/footer :: footer}"></div>
-
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
-	<script th:src="@{/assets/js/commonscript.js}"></script>
+    <th:block layout:fragment="js">
+        <script>
+             $(document).ready(function() {
+                 // Tự đóng alert sau 5 giây
+                var alert = $('.alert');
+                if (alert.length) {
+                    setTimeout(function() {
+                        alert.alert('close');
+                    }, 5000);
+                }
+             });
+         </script>
+    </th:block>
 
 </body>
-
 </html>

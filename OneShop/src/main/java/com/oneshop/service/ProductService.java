@@ -232,6 +232,7 @@ public interface ProductService {
      * Cập nhật lại Category cho các sản phẩm khi Category cũ bị xóa/hợp nhất (ADMIN)
      */
     int updateCategoryForProducts(Long oldCategoryId, Long newCategoryId);
+    long countProductsByCategory(Long categoryId);
 
     // ===>>> KẾT THÚC HỢP NHẤT <<<===
 }

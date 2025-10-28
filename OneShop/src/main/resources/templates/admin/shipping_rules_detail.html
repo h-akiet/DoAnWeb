@@ -1,93 +1,65 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/app}">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title th:text="'Quy tắc vận chuyển - ' + ${company.name}"></title>
-<link rel="preconnect" href="https://fonts.gstatic.com">
-<link
-	href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap"
-	rel="stylesheet">
-<link rel="stylesheet"
-	href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
-	integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
-	crossorigin="anonymous" />
-<link rel="stylesheet"
-	th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" />
-<link rel="stylesheet" th:href="@{/assets/css/library.css}">
-<link rel="stylesheet" th:href="@{/assets/css/common.css}">
-<link rel="stylesheet" th:href="@{/assets/css/admin/user.css}">
+<title th:text="'Quy tắc vận chuyển - ' + ${company.name}">Chi tiết Quy tắc</title>
+<th:block layout:fragment="css">
+    <style>
+        .table th, .table td { vertical-align: middle; }
+    </style>
+</th:block>
 </head>
 
 <body>
-
-	<div th:replace="~{admin/fragments/header :: header}"></div>
-
-	<div class="main admin-container">
-		<div class="grid wide">
-			<div class="breadcrumb-admin-static" style="padding: 20px 0;">
-				<span class="breadcrumb-item-admin"
-					style="font-weight: 500; text-transform: uppercase;">ADMIN</span> <span
-					style="font-weight: 500; margin: 0 5px;">/</span> <a
-					th:href="@{/admin/shipping_company}" class="breadcrumb-item-admin"
-					style="font-weight: 500; text-transform: uppercase;">QUẢN LÝ
-					NHÀ VẬN CHUYỂN</a> <span style="font-weight: 500; margin: 0 5px;">/</span>
-				<span class="breadcrumb-item-admin"
-					style="font-weight: 500; text-transform: uppercase;"
-					th:text="'CHI TIẾT NHÀ VẬN CHUYỂN: ' + ${company.name}">CHI
-					TIẾT QUY TẮC</span>
-			</div>
-
-			<a th:href="@{/admin/shipping_company}"
-				class="btn btn-secondary mb-3"> <i class="fas fa-arrow-left"></i>
-				Quay lại
-			</a>
-
-			<table class="table table-bordered table-striped">
-				<thead>
-					<tr>
-						<th scope="col" style="width: 50px;">STT</th>
-						<th scope="col" style="width: 150px;">Mã Quy tắc</th>
-						<th scope="col">Tên Quy tắc</th>
-						<th scope="col" style="width: 120px;">Phí vận chuyển</th>
-						<th scope="col" style="width: 120px;">Vùng Gửi</th>
-						<th scope="col" style="width: 120px;">Vùng Nhận</th>
-						<th scope="col" class="text-center" style="width: 100px;">Giao
-							Hỏa tốc</th>
-						<th scope="col" style="width: 150px;">TG Giao hàng dự kiến</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr th:each="rule, iStat : ${shippingRules}">
-						<td th:text="${iStat.index + 1}"></td>
-						<td th:text="${rule.ruleId}"></td>
-						<td th:text="${rule.ruleName}"></td>
-						<td
-							th:text="${#numbers.formatDecimal(rule.baseFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></td>
-						<td th:text="${rule.fromRegion}"></td>
-						<td th:text="${rule.toRegion}"></td>
-						<td class="text-center"><i th:if="${rule.isExpress}"
-							class="fas fa-check-circle text-success"></i> <i
-							th:unless="${rule.isExpress}"
-							class="fas fa-times-circle text-danger"></i></td>
-						<td th:text="${rule.estimatedDeliveryTime}"></td>
-					</tr>
-					<tr th:if="${#lists.isEmpty(shippingRules)}">
-						<td colspan="8" class="text-center">Không có quy tắc vận
-							chuyển nào được thiết lập.</td>
-					</tr>
-				</tbody>
-			</table>
+	<div layout:fragment="content">
+		<div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
+			 <h1 class="h3 mb-0" th:text="'Quy tắc Vận chuyển: ' + ${company.name}">Chi tiết Quy tắc</h1>
+             <a th:href="@{/admin/shipping_company}" class="btn btn-secondary shadow-sm">
+                 <i class="fas fa-arrow-left me-2"></i> Quay lại Danh sách NVC
+             </a>
 		</div>
+        <p class="lead mb-4" th:text="'Xem chi tiết các quy tắc tính phí vận chuyển của ' + ${company.name} + '.'"></p>
 
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                 <h6 class="m-0 font-weight-bold" th:text="'Danh sách Quy tắc cho ' + ${company.name}">Danh sách Quy tắc</h6>
+            </div>
+             <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th scope="col" style="width: 50px;">STT</th>
+                                <th scope="col" class="text-start">Tên Quy tắc</th> <th scope="col">Vùng Gửi</th>
+                                <th scope="col">Vùng Nhận</th>
+                                <th scope="col" style="width: 120px;">Phí (VNĐ)</th>
+                                <th scope="col" style="width: 150px;">TG Giao dự kiến</th>
+                                <th scope="col" class="text-center" style="width: 100px;">Hỏa tốc</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="rule, iStat : ${shippingRules}">
+                                <td th:text="${iStat.index + 1}" class="text-center"></td>
+                                <td th:text="${rule.ruleName}" class="text-start"></td> <td th:text="${rule.fromRegion}" class="text-center"></td>
+                                <td th:text="${rule.toRegion}" class="text-center"></td>
+                                <td th:text="${#numbers.formatDecimal(rule.baseFee, 0, 'COMMA', 0, 'POINT')}" class="text-end"></td> <td th:text="${rule.estimatedDeliveryTime}" class="text-center"></td>
+                                <td class="text-center">
+                                    <i th:if="${rule.isExpress}" class="fas fa-check-circle text-success"></i>
+                                    <i th:unless="${rule.isExpress}" class="fas fa-times-circle text-muted"></i> </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(shippingRules)}">
+                                <td colspan="7" class="text-center text-muted py-4">Nhà vận chuyển này chưa có quy tắc nào.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 	</div>
 
-	<div th:replace="~{admin/fragments/footer :: footer}"></div>
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script th:src="@{/webjars/bootstrap/5.3.2/js/bootstrap.bundle.min.js}"></script>
-	<script th:src="@{/assets/js/commonscript.js}"></script>
+	<th:block layout:fragment="js"></th:block>
 
 </body>
-
 </html>
