@@ -19,6 +19,12 @@ public class Category {
 
     @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String name;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Category parentCategory;
+    
+
     
     // Một Danh mục có nhiều Sản phẩm
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)

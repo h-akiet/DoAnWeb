@@ -9,6 +9,7 @@ import java.text.NumberFormat;
 import java.util.HashSet; // Import HashSet
 import java.util.Locale;
 import java.util.Set;
+import com.oneshop.enums.ProductStatus;
 
 @Entity // Chỉ một @Entity
 @Table(name = "PRODUCTS") // Đổi tên bảng thành PRODUCTS cho nhất quán

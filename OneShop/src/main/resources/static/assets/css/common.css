@@ -330,7 +330,7 @@ textarea.form-control {
     background-color: rgba(0, 0, 0, 0.4);
 }
 
-.authen-modal {
+/* .authen-modal {
     position: absolute;
     top: 50%;
     right: 50%;
@@ -341,7 +341,7 @@ textarea.form-control {
     padding: 30px 20px 50px 20px;
     will-change: opacity;
     animation: fadeInTop ease 0.4s;
-}
+} */
 
 .overlay-close {
     position: absolute;

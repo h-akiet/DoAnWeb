@@ -1,0 +1,45 @@
+<div th:fragment="header" class="header scrolling" id="myHeader">
+	<div class="grid wide">
+		<div class="header__top">
+		<a th:href="@{#}" class="header__logo"> <img
+				th:src="@{/assets/logo.png}" alt="" class="logo-img">
+			</a>
+			<div class="navbar-icon">
+				<span></span> <span></span> <span></span>
+			</div>
+			
+			<div class="header__account" style="margin-right: 0;">
+
+				<a th:href="@{#}" class="header__admin-info"
+					style="text-decoration: none;"> <i class="fas fa-user-circle"></i>
+					<span>Admin</span>
+				</a>
+
+				<form th:action="@{/logout}" method="post">
+					<button type="submit" class="header__account-logout"
+						style="background: none; border: none; padding: 0; cursor: pointer;">
+						Đăng Xuất</button>
+				</form>
+			</div>
+
+		</div>
+	</div>
+	<div class="header__nav">
+		<ul class="header__nav-list">
+			<li class="header__nav-item index"><a th:href="@{/admin/users}"
+				class="header__nav-link">Quản lý người dùng</a></li>
+			<li class="header__nav-item has-dropdown-menu"><a
+				th:href="@{/admin/shops}" class="header__nav-link">Quản lý
+					sản phẩm</a></li>
+			<li class="header__nav-item"><a th:href="@{/admin/categories}"
+				class="header__nav-link">Quản lý danh mục</a></li>
+			<li class="header__nav-item"><a
+				th:href="@{/admin/app-discounts}" class="header__nav-link">Quản
+					lý chiết khấu app</a></li>
+			<li class="header__nav-item"><a th:href="@{/admin/promotions}"
+				class="header__nav-link">Quản lý khuyến mãi</a></li>
+			<li class="header__nav-item"><a th:href="@{/admin/shipping_company}"
+				class="header__nav-link">Quản lý nhà vận chuyển</a></li>
+		</ul>
+	</div>
+</div>
