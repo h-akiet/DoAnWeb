@@ -2,7 +2,6 @@ package com.oneshop.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,9 +41,5 @@ public class ProductReview {
 
     // Mối quan hệ: Một đánh giá có thể có nhiều media (ảnh/video)
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<ReviewMedia> media = new HashSet<>();;
-    
-    public Set<ReviewMedia> getMedia() {
-        return media;
-    }
+    private Set<ReviewMedia> media;
 }

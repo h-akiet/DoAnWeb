@@ -199,18 +199,6 @@ public class UserServiceImpl implements UserService { // <<< IMPLEMENTS INTERFAC
 
         return userRepository.save(user);
     }
-    
-    
-    
-    @Override
-    @Transactional(readOnly = true)
-    public User findById(Long id) {
-        logger.debug("Đang tìm người dùng theo ID: {}", id);
-        return userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng với ID: " + id));
-    }
-    
-    
 
     @Scheduled(fixedRate = 600000)
     @Transactional

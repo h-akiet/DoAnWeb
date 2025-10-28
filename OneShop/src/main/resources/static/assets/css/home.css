@@ -101,7 +101,10 @@
     line-height: 4rem;
     font-size: 3.2rem;
     cursor: pointer;
-    transition: all .5s ease;
+    /* --- Điều chỉnh hiệu ứng --- */
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    transition: all 0.3s ease;
 }
 
 .main__slice .controls .prev i,
@@ -112,6 +115,8 @@
 .main__slice .controls .prev:hover,
 .main__slice .controls .next:hover {
     color: var(--default-cl);
+    background-color: rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
 }
 
 .main__slice .controls .prev {
@@ -141,12 +146,22 @@
     font-size: 1.6rem;
     line-height: 3.5rem;
     margin: 0 6px;
+    /* --- Thêm hiệu ứng --- */
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* --- Thêm hiệu ứng hover cho indicator --- */
+.main__slice .indicator div:not(.active):hover {
+    background-color: #eee;
 }
 
 .main__slice .indicator div.active {
     background-color: var(--default-cl);
     color: var(--white-cl-1);
-    transition: all 0.3s;
+    /* --- Thêm hiệu ứng --- */
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 
@@ -173,6 +188,7 @@
 .main__sale {
     background: var(--white-cl-3);
     padding: 50px 0;
+    overflow: hidden; /* Chứa animation */
 }
 
 .main__sale-info {
@@ -195,6 +211,10 @@
     height: 1px;
     width: 130px;
     background-color: var(--default-cl);
+    /* --- Thêm hiệu ứng vẽ đường --- */
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: draw-line 1s ease-out 0.5s forwards;
 }
 
 .sale-heading::before {
@@ -205,6 +225,10 @@
     height: 1px;
     width: 60px;
     background-color: var(--default-cl);
+    /* --- Thêm hiệu ứng vẽ đường --- */
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: draw-line 1s ease-out 0.7s forwards;
 }
 
 .sale-description {
@@ -223,8 +247,17 @@
     width: 160px;
     height: 100px;
     background-color: var(--white-cl-1);
-    border-radius: 4px;
+    border-radius: 6px; /* Dùng base-radius */
     margin-right: 6px;
+    /* --- Thêm hiệu ứng thẻ --- */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+/* --- Thêm hiệu ứng hover --- */
+.sale-time__item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .sale-time__number {
@@ -244,20 +277,40 @@
 .main__sale-img {
     display: flex;
     justify-content: center;
+    /* --- Thêm hiệu ứng float --- */
+    animation: float-animation 4s ease-in-out infinite;
 }
 
 
 /* ---News---- */
 .news {
     display: flex;
+    text-decoration: none; /* Bỏ gạch chân nếu đây là thẻ <a> */
+    border-radius: 6px; /* Bo góc */
+    transition: all 0.3s ease; /* Thêm transition chung */
+}
+
+/* --- Thêm hiệu ứng hover --- */
+.news:hover {
+    background-color: var(--white-cl-3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .news__img {
     flex: 2;
+    /* --- Thêm để chứa ảnh zoom --- */
+    overflow: hidden;
+    border-radius: 6px 0 0 6px;
 }
 
 .news__img img {
     width: 100%;
+    transition: transform 0.4s ease; /* Thêm transition cho ảnh */
+}
+
+/* --- Thêm hiệu ứng zoom ảnh --- */
+.news:hover .news__img img {
+    transform: scale(1.05);
 }
 
 .news__body {
@@ -277,6 +330,12 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    transition: color 0.3s; /* Thêm transition cho chữ */
+}
+
+/* --- Thêm hiệu ứng đổi màu chữ --- */
+.news:hover .news__body-title {
+    color: var(--default-cl);
 }
 
 .new__body-date {
@@ -305,6 +364,12 @@
     align-items: center;
     justify-content: center;
     height: 120px;
+    /* --- Thêm hiệu ứng --- */
+    transition: all 0.3s ease;
+}
+
+.policy:hover {
+    transform: scale(1.05); /* Phóng to nhẹ khi hover */
 }
 
 .policy__img {
@@ -335,6 +400,14 @@
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
+    /* --- Thêm hiệu ứng Grayscale --- */
+    filter: grayscale(100%);
+    transition: all 0.3s ease;
+}
+
+.band__item:hover {
+    filter: grayscale(0%);
+    transform: scale(1.1);
 }
 
 /* =================================================================== */
@@ -349,6 +422,22 @@
 @keyframes textTranform {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Thêm Keyframe vẽ đường --- */
+@keyframes draw-line {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+
+/* --- Thêm Keyframe float --- */
+@keyframes float-animation {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
 }
 
 
@@ -398,6 +487,9 @@
     .sale-heading::before {
         left: 50%;
         transform: translate(-50%);
+        /* --- Tắt animation vẽ đường trên mobile --- */
+        animation: none;
+        transform: translate(-50%) scaleX(1);
     }
     .main__policy {
         display: none;
@@ -420,6 +512,10 @@
     .news {
         flex-direction: column;
     }
+    /* --- Điều chỉnh bo góc cho news trên mobile --- */
+    .news__img {
+        border-radius: 6px 6px 0 0;
+    }
     .news__body {
         margin-top: 16px;
         margin-bottom: 24px;
@@ -427,5 +523,19 @@
     .move__left,
     .move__right {
         display: none;
+    }
+
+    /* --- Tắt bớt animation trên mobile cho nhẹ --- */
+    .main__sale-img {
+        animation: none;
+    }
+    .band__item {
+        filter: grayscale(0%); /* Hiển thị màu luôn */
+    }
+    .policy:hover {
+        transform: none;
+    }
+    .sale-time__item:hover {
+        transform: none;
     }
 }

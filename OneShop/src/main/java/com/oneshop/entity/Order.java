@@ -11,12 +11,12 @@ import java.util.List;
 
 @Entity
 @Table(name = "ORDERS")
-@Getter 
+@Getter // Dùng @Getter @Setter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"orderDetails", "user", "shop", "shipper", "promotion"}) // Thêm promotion
-@ToString(exclude = {"orderDetails", "user", "shop", "shipper", "promotion"})      // Thêm promotion
+@EqualsAndHashCode(exclude = {"orderDetails", "user", "shop", "shipper"}) // Thêm shop, shipper
+@ToString(exclude = {"orderDetails", "user", "shop", "shipper"})      // Thêm shop, shipper
 public class Order {
 
     @Id
@@ -36,7 +36,7 @@ public class Order {
     private String shippingPhone;
 
     @Column(name = "shipping_address", nullable = false, columnDefinition = "nvarchar(500)")
-    private String shippingAddress; 
+    private String shippingAddress; // Giữ lại MỘT trường này
 
     // --- Thông tin Đơn hàng ---
     @Column(name = "created_at", nullable = false)
@@ -54,27 +54,9 @@ public class Order {
 
     @Column(name = "shipping_cost", precision = 19, scale = 2)
     private BigDecimal shippingCost;
-    
-    // === BẮT ĐẦU THAY ĐỔI: Thêm thông tin Voucher/Promotion ===
-
-    /**
-     * Số tiền thực tế đã được giảm giá (lưu lại để đảm bảo lịch sử).
-     */
-    @Column(name = "discount_amount", precision = 19, scale = 2)
-    private BigDecimal discountAmount;
-
-    /**
-     * Liên kết đến chương trình khuyến mãi đã áp dụng (nếu có).
-     * Giả sử bạn có entity tên là Promotion.
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "promotion_id") // Đây sẽ là cột promotion_id trong DB
-    private Promotion promotion; // Import com.oneshop.entity.Promotion (Hoặc tên entity tương ứng của bạn)
-
-    // === KẾT THÚC THAY ĐỔI ===
 
     @Column(name = "total_amount", nullable = false, precision = 19, scale = 2)
-    private BigDecimal total; // Đây là tổng cuối cùng (subtotal + shipping - discount)
+    private BigDecimal total;
 
     // --- Liên kết ---
     @ManyToOne(fetch = FetchType.LAZY)
@@ -88,5 +70,20 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails = new ArrayList<>(); // Import com.oneshop.entity.OrderDetail
 
-    // Lombok sẽ tự động tạo getter/setter, không cần viết tay
+    // Bỏ các trường duplicate và getter/setter thủ công
+    // @Column(...)
+    // private String customerName; // Đã có recipientName
+    // @Column(...)
+    // private String customerEmail; // Lấy từ user.getEmail()
+    // @Column(...)
+    // private String customerPhone; // Đã có shippingPhone
+    // @Column(...)
+    // private String shippingAddress; // duplicate
+
+    // @Column(...)
+    // private OrderStatus status; // duplicate
+
+    // Bỏ các getter/setter thủ công
+    // public Long getOrderId() { return id; }
+    // public void setOrderId(Long orderId) { this.id = orderId; }
 }

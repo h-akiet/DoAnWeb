@@ -2,7 +2,6 @@ package com.oneshop.controller;
 
 import com.oneshop.dto.ShopDto;
 import com.oneshop.entity.User;
-import com.oneshop.enums.ShopStatus;
 import com.oneshop.service.ShopService;
 import com.oneshop.service.UserService;
 
@@ -46,7 +45,7 @@ public class ShopRegistrationController {
         if (currentUser.getShop() != null) {
             logger.warn("User {} already has a shop (status: {}), redirecting from registration form.", username, currentUser.getShop().getStatus());
             // Có thể chuyển hướng đến thông báo hoặc trang quản lý shop (nếu đã duyệt)
-             if (currentUser.getShop().getStatus() == ShopStatus.APPROVED) {
+             if (currentUser.getShop().getStatus() == com.oneshop.entity.Shop.ShopStatus.APPROVED) {
                  return "redirect:/vendor/dashboard"; // Nếu đã duyệt thì về dashboard vendor
              } else {
                  model.addAttribute("infoMessage", "Bạn đã gửi yêu cầu đăng ký shop và đang chờ duyệt.");

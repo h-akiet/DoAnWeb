@@ -21,7 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import java.math.RoundingMode;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.YearMonth;         
@@ -29,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap; 
 import java.util.List;
 import java.util.Map;
@@ -51,13 +52,22 @@ public class OrderServiceImpl implements OrderService {
     @Autowired private OrderDetailRepository orderDetailRepository;
     @Autowired @Lazy private CartService cartService;
     @Autowired private EmailService emailService;
-    @Autowired private PromotionService promotionService;
-   
 
     @Autowired @Lazy 
     private ProductService productService;
 
-   
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Order> getOrdersByShop(Long shopId, Optional<OrderStatus> status, Pageable pageable) {
+        logger.debug("Fetching orders for shopId: {}, status: {}, pageable: {}", shopId, status, pageable);
+        Page<Order> orderPage;
+        if (status.isPresent()) {
+            orderPage = orderRepository.findByShopIdAndOrderStatus(shopId, status.get(), pageable);
+        } else {
+            orderPage = orderRepository.findByShopId(shopId, pageable);
+        }
+        return orderPage;
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -182,143 +192,151 @@ public class OrderServiceImpl implements OrderService {
         }
     }
     
-     @Override
-     @Transactional(readOnly = true)
-     public Page<Order> getOrdersByShop(Long shopId, Optional<OrderStatus> status, Pageable pageable) {
-         logger.debug("Fetching orders for shopId: {}, status: {}, pageable: {}", shopId, status, pageable);
-         Page<Order> orderPage;
-         if (status.isPresent()) {
-             orderPage = orderRepository.findByShopIdAndOrderStatus(shopId, status.get(), pageable);
-         } else {
-             orderPage = orderRepository.findByShopId(shopId, pageable);
-         }
-         return orderPage;
-     }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Order createOrderFromRequest(String username, PlaceOrderRequest orderRequest) {
+        logger.info("Creating order from request for user: {}", username);
+        User user = userService.findByUsername(username);
+        Address address = addressRepository.findById(orderRequest.getSelectedAddressId())
+                .filter(addr -> addr.getUser().getId().equals(user.getId()))
+                .orElseThrow(() -> new EntityNotFoundException("Địa chỉ giao hàng không hợp lệ."));
+        List<Long> variantIds = Arrays.stream(orderRequest.getVariantIds().split(","))
+                                      .map(Long::parseLong).distinct().collect(Collectors.toList());
+        if (variantIds.isEmpty()) { throw new IllegalArgumentException("Không có sản phẩm nào được chọn."); }
 
-     // ... (Các phương thức khác không đổi) ...
-     
-     @Override
-     @Transactional(rollbackFor = Exception.class)
-     public Order createOrderFromRequest(String username, PlaceOrderRequest orderRequest) {
-         logger.info("Creating order from request for user: {}", username);
-         User user = userService.findByUsername(username);
-         Address address = addressRepository.findById(orderRequest.getSelectedAddressId())
-                 .filter(addr -> addr.getUser().getId().equals(user.getId()))
-                 .orElseThrow(() -> new EntityNotFoundException("Địa chỉ giao hàng không hợp lệ."));
-         List<Long> variantIds = Arrays.stream(orderRequest.getVariantIds().split(","))
-                                       .map(Long::parseLong).distinct().collect(Collectors.toList());
-         if (variantIds.isEmpty()) { throw new IllegalArgumentException("Không có sản phẩm nào được chọn."); }
+        CartDto userCart = cartService.getCartForUser(username);
+        Map<Long, CartItemDto> cartItemsMap = userCart.getItems();
+        List<CartItemDto> itemsToOrder = variantIds.stream().map(cartItemsMap::get)
+            .filter(item -> item != null && item.getQuantity() > 0).collect(Collectors.toList());
+        if (itemsToOrder.isEmpty()) { throw new IllegalArgumentException("Sản phẩm không có trong giỏ hoặc số lượng không hợp lệ."); }
 
-         CartDto userCart = cartService.getCartForUser(username);
-         Map<Long, CartItemDto> cartItemsMap = userCart.getItems();
-         List<CartItemDto> itemsToOrder = variantIds.stream().map(cartItemsMap::get)
-             .filter(item -> item != null && item.getQuantity() > 0).collect(Collectors.toList());
-         if (itemsToOrder.isEmpty()) { throw new IllegalArgumentException("Sản phẩm không có trong giỏ hoặc số lượng không hợp lệ."); }
+        Order newOrder = new Order();
+        newOrder.setUser(user); newOrder.setCreatedAt(LocalDateTime.now());
+        newOrder.setRecipientName(address.getFullName()); newOrder.setShippingAddress(address.getAddress()); newOrder.setShippingPhone(address.getPhone());
+        newOrder.setOrderStatus(OrderStatus.PENDING); newOrder.setPaymentMethod(orderRequest.getPaymentMethod());
 
-         Order newOrder = new Order();
-         newOrder.setUser(user); newOrder.setCreatedAt(LocalDateTime.now());
-         newOrder.setRecipientName(address.getFullName()); newOrder.setShippingAddress(address.getAddress()); newOrder.setShippingPhone(address.getPhone());
-         newOrder.setOrderStatus(OrderStatus.PENDING); newOrder.setPaymentMethod(orderRequest.getPaymentMethod());
+        BigDecimal subtotal = BigDecimal.ZERO;
+        List<ProductVariant> variantsToUpdateStock = new ArrayList<>();
+        Shop orderShop = null;
 
-         BigDecimal subtotal = BigDecimal.ZERO;
-         List<ProductVariant> variantsToUpdateStock = new ArrayList<>();
-         Shop orderShop = null;
+        for (CartItemDto cartItem : itemsToOrder) {
+            ProductVariant variant = productVariantService.findOptionalVariantById(cartItem.getProductId())
+                .orElseThrow(() -> new EntityNotFoundException("Sản phẩm ID " + cartItem.getProductId() + " không tồn tại."));
+             Shop currentItemShop = variant.getProduct().getShop();
+             if (currentItemShop == null) { throw new RuntimeException("Lỗi: Sản phẩm '" + variant.getProduct().getName() + "' không thuộc về gian hàng nào."); }
+             if (orderShop == null) { orderShop = currentItemShop; }
+             else if (!orderShop.getId().equals(currentItemShop.getId())) { throw new IllegalArgumentException("Không thể đặt hàng sản phẩm từ nhiều gian hàng khác nhau trong cùng một đơn."); }
 
-         // 1. Lặp và tính subtotal + kiểm tra kho
-         for (CartItemDto cartItem : itemsToOrder) {
-             ProductVariant variant = productVariantService.findOptionalVariantById(cartItem.getProductId())
-                 .orElseThrow(() -> new EntityNotFoundException("Sản phẩm ID " + cartItem.getProductId() + " không tồn tại."));
-              Shop currentItemShop = variant.getProduct().getShop();
-              if (currentItemShop == null) { throw new RuntimeException("Lỗi: Sản phẩm '" + variant.getProduct().getName() + "' không thuộc về gian hàng nào."); }
-              if (orderShop == null) { orderShop = currentItemShop; }
-              else if (!orderShop.getId().equals(currentItemShop.getId())) { throw new IllegalArgumentException("Không thể đặt hàng sản phẩm từ nhiều gian hàng khác nhau trong cùng một đơn."); }
+            int requestedQuantity = cartItem.getQuantity();
+            if (variant.getStock() < requestedQuantity) { throw new RuntimeException("Sản phẩm '" + variant.getProduct().getName() + " - " + variant.getName() + "' không đủ hàng (còn " + variant.getStock() + ")."); }
+            
+            variant.setStock(variant.getStock() - requestedQuantity);
+            variantsToUpdateStock.add(variant);
+            
+            OrderDetail detail = new OrderDetail();
+            detail.setOrder(newOrder); detail.setProductVariant(variant); detail.setQuantity(requestedQuantity); detail.setPrice(variant.getPrice());
+            newOrder.getOrderDetails().add(detail);
+            subtotal = subtotal.add(variant.getPrice().multiply(BigDecimal.valueOf(requestedQuantity)));
+        }
+        if (orderShop == null) { throw new RuntimeException("Lỗi: Không thể xác định gian hàng cho đơn hàng."); }
+        newOrder.setShop(orderShop);
+        BigDecimal shippingCost = calculateShippingCost(subtotal, address);
+        newOrder.setSubtotal(subtotal); newOrder.setShippingCost(shippingCost); newOrder.setTotal(subtotal.add(shippingCost));
+        
+        Order savedOrder = orderRepository.save(newOrder); 
+        
+        // ===>>> LƯU CÁC VARIANT ĐÃ CẬP NHẬT KHO <<<===
+        variantRepository.saveAll(variantsToUpdateStock); 
+        variantRepository.flush(); // Đẩy thay đổi xuống DB ngay lập tức
+        logger.debug("Đã flush thay đổi kho variant xuống database.");
+        
+        // ===>>> CẬP NHẬT KHO TỔNG SẢN PHẨM CHA - QUERY LẠI TỪ DB <<<===
+        Set<Long> productIdsToUpdate = variantsToUpdateStock.stream()
+                                            .map(v -> v.getProduct().getProductId())
+                                            .collect(Collectors.toSet());
+        
+        logger.info("===> BẮT ĐẦU cập nhật kho cho {} sản phẩm ID: {}", productIdsToUpdate.size(), productIdsToUpdate);
+        
+        for (Long productId : productIdsToUpdate) {
+            // Query lại Product từ DB để đảm bảo có managed entity
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new RuntimeException("Product " + productId + " không tồn tại!"));
+            
+            int oldStock = product.getStock();
+            BigDecimal oldPrice = product.getPrice();
+            
+            // Query lại tất cả variants của product này từ DB (đã được update)
+            List<ProductVariant> allVariants = variantRepository.findByProduct_ProductId(productId);
+            
+            if (allVariants == null || allVariants.isEmpty()) {
+                logger.warn("Product {} không có variant trong DB", productId);
+                continue;
+            }
+            
+            // Log chi tiết từng variant
+            logger.info("Product {} có {} variants từ DB:", productId, allVariants.size());
+            for (ProductVariant v : allVariants) {
+                logger.info("  - Variant {}: stock={}, price={}", v.getVariantId(), v.getStock(), v.getPrice());
+            }
+            
+            // Tổng kho = tổng kho của tất cả variant
+            int totalStock = allVariants.stream()
+                    .mapToInt(ProductVariant::getStock)
+                    .sum();
+            
+            // Giá thấp nhất
+            BigDecimal minPrice = allVariants.stream()
+                    .map(ProductVariant::getPrice)
+                    .filter(price -> price != null)
+                    .min(BigDecimal::compareTo)
+                    .orElse(BigDecimal.ZERO);
+            
+            // Cập nhật product
+            product.setStock(totalStock);
+            product.setPrice(minPrice);
+            
+            // LƯU NGAY
+            productRepository.save(product);
+            
+            logger.info("✓✓✓ Product {} ĐÃ CẬP NHẬT: Stock {} -> {}, Price {} -> {}", 
+                productId, oldStock, totalStock, oldPrice, minPrice);
+        }
+        
+        // Flush để đẩy tất cả thay đổi xuống DB
+        productRepository.flush();
+        logger.info("===> ĐÃ FLUSH tất cả products xuống database ✓✓✓");
 
-             int requestedQuantity = cartItem.getQuantity();
-             if (variant.getStock() < requestedQuantity) { throw new RuntimeException("Sản phẩm '" + variant.getProduct().getName() + " - " + variant.getName() + "' không đủ hàng (còn " + variant.getStock() + ")."); }
-             
-             variant.setStock(variant.getStock() - requestedQuantity);
-             variantsToUpdateStock.add(variant);
-             
-             OrderDetail detail = new OrderDetail();
-             detail.setOrder(newOrder); detail.setProductVariant(variant); detail.setQuantity(requestedQuantity); detail.setPrice(variant.getPrice());
-             newOrder.getOrderDetails().add(detail);
-             subtotal = subtotal.add(variant.getPrice().multiply(BigDecimal.valueOf(requestedQuantity)));
-         }
-         if (orderShop == null) { throw new RuntimeException("Lỗi: Không thể xác định gian hàng cho đơn hàng."); }
-         newOrder.setShop(orderShop);
-         
-         // 2. Tính toán Phí Ship
-         BigDecimal shippingCost = calculateShippingCost(subtotal, address);
-         
-         // 3. TÍNH TOÁN VOUCHER (GÁN ENTITY VÀO KHÓA NGOẠI)
-         BigDecimal discountAmount = BigDecimal.ZERO;
-         Promotion appliedPromotion = null; // Biến Entity Promotion
-         
-         if (userCart.getAppliedVoucherCode() != null && subtotal.compareTo(BigDecimal.ZERO) > 0) {
-             
-             // GỌI HÀM TÍNH DISCOUNT
-             discountAmount = promotionService.calculateDiscountForOrder(userCart, subtotal);
-             
-             // TÌM VÀ GÁN PROMOTION ENTITY (KHẮC PHỤC LỖI promotion_id NULL)
-             Optional<Promotion> promoOpt = promotionService.findByDiscountCode(userCart.getAppliedVoucherCode());
-             if (promoOpt.isPresent()) {
-                 appliedPromotion = promoOpt.get();
-             }
-             
-             // Xử lý Freeship nếu cần
-             if (appliedPromotion != null && "FREE_SHIPPING".equalsIgnoreCase(userCart.getAppliedVoucherTypeCode())) {
-                  shippingCost = BigDecimal.ZERO;
-             }
-             
-             // Đảm bảo discountAmount không vượt quá subtotal
-             discountAmount = discountAmount.min(subtotal);
-             
-             // Cần gán lại shippingCost nếu có thay đổi
-             newOrder.setShippingCost(shippingCost);
-             // GÁN PROMOTION ENTITY VÀ DISCOUNT AMOUNT
-             newOrder.setPromotion(appliedPromotion); 
-             newOrder.setDiscountAmount(discountAmount); 
-             
-         } else {
-              // Nếu không có voucher
-              newOrder.setShippingCost(shippingCost);
-              newOrder.setDiscountAmount(BigDecimal.ZERO);
-              newOrder.setPromotion(null); // Đảm bảo gán NULL rõ ràng
-         }
+        List<Long> orderedVariantIds = itemsToOrder.stream().map(CartItemDto::getProductId).collect(Collectors.toList());
+        cartService.clearCartItems(user.getId(), orderedVariantIds);
+        Map<Long, Integer> productQuantities = new HashMap<>();
+        for (OrderDetail detail : savedOrder.getOrderDetails()) {
+            if (detail.getProductVariant() != null && detail.getProductVariant().getProduct() != null) {
+                productQuantities.merge(
+                    detail.getProductVariant().getProduct().getProductId(), // Lấy ID Product cha
+                    detail.getQuantity(), // Lấy số lượng từ OrderDetail
+                    Integer::sum // Cộng dồn số lượng cho cùng Product ID
+                );
+            }
+        }
 
-         // 4. GÁN TỔNG CUỐI CÙNG (GRAND TOTAL)
-         BigDecimal finalGrandTotal = subtotal
-                                      .subtract(discountAmount)
-                                      .add(shippingCost)
-                                      .max(BigDecimal.ZERO)
-                                      .setScale(0, RoundingMode.HALF_UP);
+        if (!productQuantities.isEmpty()) {
+            logger.info("Updating salesCount for {} products in order {}", productQuantities.size(), savedOrder.getId());
+            List<Product> productsToUpdateSales = productRepository.findAllById(productQuantities.keySet()); // Lấy các Product cần cập nhật
 
-         newOrder.setSubtotal(subtotal);
-         newOrder.setTotal(finalGrandTotal);
-         
-         Order savedOrder = orderRepository.save(newOrder); 
-         
-         // 5. XÓA VOUCHER KHỎI SESSION (QUAN TRỌNG)
-         promotionService.removeVoucher(username);
-         logger.info("Voucher cleared from session after order creation.");
-         
-         // ... (Phần lưu kho và cập nhật tổng sản phẩm cha không đổi) ...
-         
-         variantRepository.saveAll(variantsToUpdateStock); 
-         variantRepository.flush(); 
-         logger.debug("Đã flush thay đổi kho variant xuống database.");
-         
-         // ... (Phần cập nhật kho tổng sản phẩm cha không đổi) ...
-         
-         // Flush để đẩy tất cả thay đổi xuống DB
-         productRepository.flush();
-         logger.info("===> ĐÃ FLUSH tất cả products xuống database ✓✓✓");
-
-         List<Long> orderedVariantIds = itemsToOrder.stream().map(CartItemDto::getProductId).collect(Collectors.toList());
-         cartService.clearCartItems(user.getId(), orderedVariantIds);
-         logger.info("Đơn hàng {} đã được tạo thành công.", savedOrder.getId());
-         return savedOrder;
-     }
+            for (Product product : productsToUpdateSales) {
+                int quantityOrdered = productQuantities.getOrDefault(product.getProductId(), 0);
+                if (quantityOrdered > 0) {
+                    product.setSalesCount(product.getSalesCount() + quantityOrdered); // Cộng dồn số lượng bán
+                    logger.debug(" -> Product {}: increasing salesCount by {} to {}", product.getProductId(), quantityOrdered, product.getSalesCount());
+                }
+            }
+            productRepository.saveAll(productsToUpdateSales); // Lưu lại các Product đã cập nhật
+            productRepository.flush(); // Đẩy thay đổi xuống DB
+            logger.info("Successfully updated salesCount for products in order {}", savedOrder.getId());
+        }
+        logger.info("Đơn hàng {} đã được tạo thành công.", savedOrder.getId());
+        return savedOrder;
+    }
     
     @Override
     @Transactional(readOnly = true)
@@ -418,6 +436,35 @@ public class OrderServiceImpl implements OrderService {
         }
 
         orderRepository.save(order);
+        Map<Long, Integer> productQuantitiesToDecrement = new HashMap<>();
+        if (order.getOrderDetails() != null) {
+            for (OrderDetail detail : order.getOrderDetails()) {
+                if (detail.getProductVariant() != null && detail.getProductVariant().getProduct() != null) {
+                    productQuantitiesToDecrement.merge(
+                        detail.getProductVariant().getProduct().getProductId(),
+                        detail.getQuantity(),
+                        Integer::sum
+                    );
+                }
+            }
+        }
+
+        if (!productQuantitiesToDecrement.isEmpty()) {
+            logger.info("Decrementing salesCount for {} products due to cancellation of order {}", productQuantitiesToDecrement.size(), orderId);
+            List<Product> productsToUpdateSales = productRepository.findAllById(productQuantitiesToDecrement.keySet());
+
+            for (Product product : productsToUpdateSales) {
+                int quantityCancelled = productQuantitiesToDecrement.getOrDefault(product.getProductId(), 0);
+                if (quantityCancelled > 0) {
+                    int currentSales = product.getSalesCount();
+                    product.setSalesCount(Math.max(0, currentSales - quantityCancelled)); // Trừ đi, đảm bảo không âm
+                    logger.debug(" -> Product {}: decreasing salesCount by {} to {}", product.getProductId(), quantityCancelled, product.getSalesCount());
+                }
+            }
+            productRepository.saveAll(productsToUpdateSales); // Lưu lại
+            productRepository.flush();
+            logger.info("Successfully updated salesCount for products after cancelling order {}", orderId);
+        }
         logger.info("Order {} cancelled by user {}", orderId, username);
     }
 
@@ -477,5 +524,4 @@ public class OrderServiceImpl implements OrderService {
      private BigDecimal calculateShippingCost(BigDecimal subtotal, Address address) {
         return BigDecimal.valueOf(30000); // Tạm thời phí cố định 30.000đ
      }
-     
 }

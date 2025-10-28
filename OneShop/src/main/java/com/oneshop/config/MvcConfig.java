@@ -16,14 +16,10 @@ public class MvcConfig implements WebMvcConfigurer {
         // Thư mục 'uploads' này nằm ở gốc dự án, ngang hàng với 'src'
         Path imageUploadDir = Paths.get("./uploads/images");
         String imageUploadPath = imageUploadDir.toFile().getAbsolutePath();
-        
-   
 
         // Cấu hình: Khi ai đó truy cập /uploads/images/**
         // Hãy tìm file trong thư mục 'file:/đường/dẫn/tuyệt/đối/uploads/images/'
         registry.addResourceHandler("/uploads/images/**")
                 .addResourceLocations("file:/" + imageUploadPath + "/");
-
-       
     }
 }

@@ -2,7 +2,6 @@ package com.oneshop.controller;
 
 import com.oneshop.dto.*;
 import com.oneshop.entity.*;
-import com.oneshop.enums.ShopStatus;
 import com.oneshop.repository.UserRepository; // Đảm bảo import UserRepository
 import com.oneshop.service.*;
 
@@ -91,7 +90,7 @@ public class VendorController {
 		}
 
 		// Kiểm tra trạng thái shop
-		if (shop.getStatus() != ShopStatus.APPROVED) {
+		if (shop.getStatus() != Shop.ShopStatus.APPROVED) {
 			logger.warn("Vendor {} attempting to access vendor area, but shop status is {}", user.getUsername(), shop.getStatus());
 			throw new ShopNotApprovedException("Shop của bạn chưa được duyệt hoặc đang ở trạng thái không hợp lệ.", shop.getStatus());
 		}
@@ -1199,14 +1198,14 @@ public class VendorController {
 
 	// --- Exception tùy chỉnh cho shop chưa duyệt ---
 	public static class ShopNotApprovedException extends RuntimeException {
-		private final ShopStatus shopStatus;
+		private final Shop.ShopStatus shopStatus;
 
-		public ShopNotApprovedException(String message, ShopStatus status) {
+		public ShopNotApprovedException(String message, Shop.ShopStatus status) {
 			super(message);
 			this.shopStatus = status;
 		}
 
-		public ShopStatus getShopStatus() {
+		public Shop.ShopStatus getShopStatus() {
 			return shopStatus;
 		}
 	}

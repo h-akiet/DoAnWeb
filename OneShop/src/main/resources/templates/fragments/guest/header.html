@@ -46,32 +46,35 @@
 										class="fas fa-box-open"></i> Đơn hàng
 									</a>
 
-									<th:block th:with="currentUserShop=${#authentication.principal.shop}">
+									<th:block th:with="currentUser=${#authentication.principal}">
+										<th:block th:if="${currentUser instanceof T(com.oneshop.entity.User)}">
+											<th:block th:with="userShop=${currentUser.getShop()}">
 
-										<a th:if="${#authorization.expression('hasAuthority(''ROLE_VENDOR'')') and currentUserShop != null and currentUserShop.status.name() == 'APPROVED'}"
-										   th:href="@{/vendor/dashboard}" class="dropdown__item">
-											<i class="fas fa-store"></i> Kênh Người Bán
-										</a>
+												<th:block th:if="${#authorization.expression('hasAuthority(''ROLE_VENDOR'')')}">
+													<a th:if="${userShop != null and userShop.status.name() == 'APPROVED'}"
+													   th:href="@{/vendor/dashboard}" class="dropdown__item">
+														<i class="fas fa-store"></i> Kênh Người Bán
+													</a>
+													<a th:if="${userShop != null and userShop.status.name() != 'APPROVED'}"
+													   href="javascript:void(0);" class="dropdown__item"
+													   th:onclick="'alert(\'Shop của bạn đang ' + (${userShop.status.name() == 'PENDING'} ? 'chờ duyệt' : 'bị từ chối/không hoạt động') + '. Vui lòng liên hệ quản trị viên.\');'">
+														<i class="fas fa-store"></i> Kênh Người Bán (<span th:text="${userShop.status.name() == 'PENDING' ? 'Chờ duyệt' : 'Xem trạng thái'}"></span>)
+													</a>
+													<a th:if="${userShop == null}"
+													   href="javascript:void(0);" class="dropdown__item"
+													   onclick="alert('Lỗi: Tài khoản Vendor chưa được liên kết với Shop nào.');">
+														<i class="fas fa-exclamation-triangle"></i> Lỗi Shop
+													</a>
+												</th:block>
 
-										<a th:if="${#authorization.expression('hasAuthority(''ROLE_VENDOR'')') and currentUserShop != null and currentUserShop.status.name() != 'APPROVED'}"
-										   href="javascript:void(0);" class="dropdown__item"
-										   onclick="alert('Shop của bạn đang chờ duyệt hoặc đã bị từ chối. Vui lòng liên hệ quản trị viên.');">
-											<i class="fas fa-store"></i> Kênh Người Bán (Chờ duyệt)
-										</a>
+												<th:block th:unless="${#authorization.expression('hasAuthority(''ROLE_VENDOR'')')}">
+													<a th:if="${userShop == null}"
+													   th:href="@{/shop/register}" class="dropdown__item">
+														<i class="fas fa-plus-circle"></i> Đăng ký mở Shop
+													</a>
+													</th:block>
 
-										<a th:if="${not #authorization.expression('hasAuthority(''ROLE_VENDOR'')') and currentUserShop == null}"
-										   th:href="@{/shop/register}" class="dropdown__item">
-											<i class="fas fa-plus-circle"></i> Đăng ký mở Shop
-										</a>
-
-										<a th:if="${not #authorization.expression('hasAuthority(''ROLE_VENDOR'')') and currentUserShop != null}"
-                                           href="javascript:void(0);" class="dropdown__item"
-                                           onclick="alert('Yêu cầu đăng ký shop của bạn đang chờ duyệt.');">
-                                             <i class="fas fa-info-circle"></i> Trạng thái đăng ký Shop
-                                        </a>
-
-									</th:block>
-									<a th:href="@{/logout}" class="dropdown__item"
+											</th:block> </th:block> </th:block> <a th:href="@{/logout}" class="dropdown__item"
 										onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
 										<i class="fas fa-sign-out-alt"></i> Đăng xuất
 									</a>
@@ -298,6 +301,33 @@
 				}
 
 			}); // Kết thúc document ready
+			// === CODE MỚI: Xử lý nút THANH TOÁN trong mini-cart ===
+            $('body').on('click', '.header__cart-wrap .btn.orange', function(e) {
+                // Ngăn hành vi mặc định (chuyển hướng tới /pay không có ID)
+                e.preventDefault();
+
+                const allVariantIds = [];
+
+                // Tìm tất cả item trong mini-cart và lấy ID từ data-variant-id
+                $('.header__cart-wrap .item-order').each(function() {
+                    const variantId = $(this).data('variant-id'); // Lấy ID từ data-variant-id
+                    if (variantId) {
+                        allVariantIds.push(variantId);
+                    }
+                });
+
+                // Kiểm tra xem có sản phẩm nào không
+                if (allVariantIds.length === 0) {
+                    // Nếu không có, cứ đi tới trang giỏ hàng (rỗng)
+                    window.location.href = /*[[@{/cart}]]*/ '/cart';
+                    return;
+                }
+
+                // Xây dựng URL thanh toán với tất cả ID và chuyển hướng
+                const baseUrl = /*[[@{/pay}]]*/ '/pay';
+                window.location.href = baseUrl + '?variantIds=' + allVariantIds.join(',');
+            });
+            // === HẾT CODE MỚI ===
 			/*]]>*/
 		</script>
 	</div>

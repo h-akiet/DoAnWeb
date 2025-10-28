@@ -1,7 +1,6 @@
 // src/main/java/com/oneshop/controller/ProductController.java
 package com.oneshop.controller;
 
-import com.oneshop.dto.ReviewDTO;
 // --- THÊM LẠI CÁC IMPORT CẦN THIẾT ---
 import com.oneshop.entity.Brand;
 import com.oneshop.entity.Category;
@@ -9,7 +8,6 @@ import com.oneshop.entity.Product;
 import com.oneshop.entity.ProductImage; // <<< Đã thêm
 import com.oneshop.entity.ProductReview;
 import com.oneshop.entity.ProductVariant; // <<< Đã thêm
-import com.oneshop.entity.ReviewMedia;
 import com.oneshop.service.BrandService;
 import com.oneshop.service.CategoryService;
 import com.oneshop.service.ProductReviewService;
@@ -33,7 +31,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.util.StringUtils; // <<< Đã thêm
-
 
 import java.math.BigDecimal;
 import java.util.ArrayList;   // <<< Đã thêm
@@ -190,20 +187,14 @@ public class ProductController {
             // --- KẾT THÚC TẠO LIST ẢNH ---
 
             // Lấy reviews và related products (không đổi)
-            List<ReviewDTO> reviews = reviewService.getReviewsByProductId(productId);
+            List<ProductReview> reviews = reviewService.getReviewsByProductId(productId);
             List<Product> relatedProducts = productService.findRelatedProducts(product, 6);
-            
-            
+
             // Truyền dữ liệu ra Model
             model.addAttribute("product", product); // Vẫn truyền product gốc
             model.addAttribute("displayImages", displayImageUrls); // <<< TRUYỀN LIST MỚI RA VIEW
             model.addAttribute("relatedProducts", relatedProducts);
             model.addAttribute("reviews", reviews);
-            logger.info("--- Kiểm tra 'reviews' (Ảnh đánh giá) ---");
-            reviews.forEach(r -> {
-                logger.info("  -> Review ID [{}]: {} ảnh", r.getReviewId(), r.getMediaUrls().size());
-                r.getMediaUrls().forEach(url -> logger.info("    -> URL: {}", url));
-            });
 
             return "user/product";
 

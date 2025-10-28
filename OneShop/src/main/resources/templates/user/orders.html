@@ -31,7 +31,7 @@
             visibility: visible !important;
             opacity: 1 !important;
         }
-        /* --- Điều chỉnh kích thước ảnh sản phẩm --- */
+
         .order-product-image {
             width: 50px; /* Giảm kích thước */
             height: 50px; /* Giảm kích thước */
@@ -39,14 +39,150 @@
             border-radius: 4px;
             border: 1px solid #eee;
         }
-        /* ------------------------------------- */
+        
+        /* ================================================= */
+        /* === CSS NÂNG CẤP CHO TRANG ĐƠN HÀNG (orders.html) === */
+        /* ================================================= */
+
+        /* --- 1. Bố cục Card chính --- */
+        .container.my-4 {
+            background-color: var(--white-cl-1, #fff);
+            /* Dùng biến từ common.css */
+            border-radius: var(--base-radius, 6px);
+            box-shadow: var(--shadow-medium, 0 4px 15px rgba(0,0,0,0.15));
+            padding: 30px;
+        }
+
+        h1.mb-4 {
+            color: var(--black-cl-2, #222);
+            font-weight: 600; /* Đậm hơn */
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            font-size: 2.4rem; /* Căn lại size */
+        }
+
+        /* --- 2. Tinh chỉnh Tabs (Đổi màu theme) --- */
+        .tabs {
+            border-bottom: 2px solid #eee; /* Làm mỏng viền dưới */
+            margin-bottom: 30px;
+        }
+        .tab-item {
+            padding: 12px 20px;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--black-cl-1, #444);
+            transition: color 0.3s ease; /* Thêm hiệu ứng */
+        }
+        .tab-item:hover {
+            color: var(--default-cl, #9e5bab); /* Hover màu tím */
+        }
+        .tab-item.active {
+            color: var(--default-cl, #9e5bab) !important; /* Active màu tím */
+        }
+        .line {
+            height: 2px; /* Mỏng 2px */
+            bottom: -2px; /* Nằm đè lên border */
+            background: var(--default-cl, #9e5bab) !important; /* Line màu tím */
+        }
+
+        /* --- 3. Bảng (Table) & Hiệu ứng --- */
+        .tab-pane .table {
+            border: 1px solid #eee;
+            border-radius: var(--base-radius, 6px);
+            overflow: hidden; /* Giữ bo góc cho thead */
+        }
+        /* Tiêu đề bảng */
+        .tab-pane .table thead {
+            background-color: var(--white-cl-3, #f8f7fd);
+            color: var(--black-cl-2, #222);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 1.4rem;
+        }
+        /* Hàng trong bảng */
+        .tab-pane tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        .tab-pane tbody tr:hover {
+            background-color: #fcf8fd; /* Màu tím siêu nhạt khi hover */
+        }
+        /* Ảnh sản phẩm */
+        .order-product-image {
+            transition: transform 0.3s ease;
+        }
+        .order-product-image:hover {
+            transform: scale(1.2); /* Zoom nhẹ khi hover */
+        }
+        /* Thông báo rỗng */
+        .tab-pane tbody tr td[colspan="6"] {
+            padding: 40px 0;
+            font-size: 1.6rem;
+            color: #888;
+        }
+
+        /* --- 4. Nút bấm (Buttons) --- */
+        .action-cell .btn {
+            transition: all 0.2s ease;
+            font-size: 1.4rem;
+            padding: 6px 12px; /* Căn lại padding */
+        }
+        .action-cell .btn:hover {
+            transform: scale(1.05); /* Phóng to nhẹ khi hover */
+        }
+
+        /* Đổi màu nút 'Chi tiết' / 'Theo dõi' (btn-info) */
+        .btn.btn-info {
+            background-color: var(--default-cl, #9e5bab);
+            border-color: var(--default-cl, #9e5bab);
+            color: var(--white-cl-1, #fff);
+        }
+        .btn.btn-info:hover {
+            background-color: var(--default-cl-darker, #8a4e9a);
+            border-color: var(--default-cl-darker, #8a4e9a);
+            color: var(--white-cl-1, #fff);
+        }
+
+        /* Đổi màu nút 'Đánh giá' (btn-primary) */
+        .btn.btn-primary {
+            background-color: var(--default-cl, #9e5bab);
+            border-color: var(--default-cl, #9e5bab);
+        }
+        .btn.btn-primary:hover {
+            background-color: var(--default-cl-darker, #8a4e9a);
+            border-color: var(--default-cl-darker, #8a4e9a);
+        }
+
+        /* Đổi màu nút 'Hủy đơn' (btn-danger) sang màu cam */
+        .btn.btn-danger {
+            background-color: var(--orange-cl, #d26e4b);
+            border-color: var(--orange-cl, #d26e4b);
+        }
+        .btn.btn-danger:hover {
+            background-color: #c15e3a; /* Cam đậm hơn */
+            border-color: #c15e3a;
+        }
+
+        /* --- 5. Modal (Cửa sổ chi tiết) --- */
+        .modal-header {
+            background-color: var(--default-cl, #9e5bab);
+            color: var(--white-cl-1, #fff);
+        }
+        .modal-header .modal-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        /* Đổi màu nút 'x' (close) sang màu trắng */
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
     </style>
 </head>
 
 <body>
 <div layout:fragment="content">
     <div class="container my-4">
-        <h1 class="mb-4" style="font-size: 28px;">Đơn hàng của tôi</h1>
+        <h1 class="mb-4">Đơn hàng của tôi</h1>
 
         <div class="tabs">
             <div class="tab-item active">PENDING</div>
@@ -342,7 +478,8 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script th:src="@{/assets/js/jquery-3.6.0.min.js}"></script> 
+    <script th:src="@{/assets/js/jquery-3.6.0.min.js}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
     <script>
         // Hàm xử lý việc xác nhận và gửi form hủy đơn hàng
         function confirmCancellation(orderId) {
@@ -367,13 +504,13 @@
             };
 
             const activeTab = document.querySelector('.tab-item.active');
-            if(activeTab) { 
+            if(activeTab) {
                 updateLinePosition(activeTab);
             }
 
             tabs.forEach((tab, index) => {
                 const pane = panes[index];
-                if (!pane) return; 
+                if (!pane) return;
                 
                 tab.onclick = function() {
                     const currentActiveTab = document.querySelector('.tab-item.active');
@@ -399,7 +536,7 @@
             // Xử lý Modal Chi tiết Đơn hàng (AJAX Load)
             orderModal.addEventListener('show.bs.modal', function (event) {
                 // Nút đã kích hoạt modal
-                const button = event.relatedTarget; 
+                const button = event.relatedTarget;
                 // Lấy ID đơn hàng từ data attribute
                 const orderId = button.getAttribute('data-order-id');
                 
@@ -414,12 +551,12 @@
                 // GỌI AJAX ĐỂ TẢI NỘI DUNG CHI TIẾT ĐƠN HÀNG
                 // Yêu cầu jQuery đã được load và Controller có endpoint @GetMapping("/{id}/details")
                 $.ajax({
-                    url: '/user/orders/' + orderId + '/details', 
+                    url: '/user/orders/' + orderId + '/details',
                     method: 'GET',
                     // dataType: 'html' (Không cần thiết vì Thymeleaf fragment đã là HTML)
                     success: function(response) {
                         // response là nội dung fragment HTML từ Controller (order-details-fragment.html)
-                        modalBody.innerHTML = response; 
+                        modalBody.innerHTML = response;
                         
                         // Cần gọi lại script để cập nhật ID đơn hàng trên Modal (vì fragment có thể ghi đè)
                         // Nếu bạn đã dùng script trong fragment, bước này sẽ tự động chạy

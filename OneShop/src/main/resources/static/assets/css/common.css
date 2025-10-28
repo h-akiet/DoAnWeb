@@ -5,6 +5,7 @@
 /* === Css base & Variables === */
 :root {
     --default-cl: #9e5bab;
+    --default-cl-darker: #8a4e9a; /* Thêm màu tối hơn khi hover */
     --black-cl-1: #444444;
     --black-cl-2: #222222;
     --white-cl-1: #fff;
@@ -14,15 +15,30 @@
     --hight-header-top: 80px;
     --hight-header-nav: 50px;
     --hight-header: calc(var(--hight-header-nav) + var(--hight-header-top));
+
+    /* --- Biến thêm vào --- */
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 4px 15px rgba(0, 0, 0, 0.15);
+    --base-transition: all 0.3s ease;
+    --base-radius: 6px;
 }
 
 * {
     box-sizing: border-box;
+    padding: 0;
+    margin: 0;
 }
 
 html {
     font-family: 'Roboto Slab', serif;
     font-size: 62.5%;
+    scroll-behavior: smooth; /* Thêm hiệu ứng cuộn mượt */
+}
+
+body {
+    font-size: 1.6rem; /* Đặt font-size cơ bản ở body */
+    line-height: 1.5;
+    color: var(--black-cl-2);
 }
 
 /*input*/
@@ -52,11 +68,18 @@ select:-webkit-autofill:focus {
     border-radius: 2px;
     cursor: pointer;
     text-align: center;
+    transition: var(--base-transition); /* Chuẩn hóa transition */
 }
 
 .btn:hover {
-    opacity: 0.7;
-    transition: all 0.3s;
+    opacity: 1;
+    transform: translateY(-2px); /* Hiệu ứng nhấc lên */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.btn:focus {
+    outline: 2px solid var(--default-cl);
+    outline-offset: 2px;
 }
 
 .btn.btn--default {
@@ -65,6 +88,11 @@ select:-webkit-autofill:focus {
     color: var(--white-cl-1);
     text-transform: uppercase;
     font-size: 1.6rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn.btn--default:hover {
+    background-color: var(--default-cl-darker); /* Dùng màu tối hơn */
 }
 
 .btn.cart-btn {
@@ -120,9 +148,17 @@ input[type=checkbox]:checked:after {
     font-size: 1.4rem;
     width: 100%;
     margin-top: 10px;
-    border: none;
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+    border: 1px solid #ddd; /* Thay shadow bằng border */
+    box-shadow: none;
     padding: 8px 12px;
+    border-radius: 4px; /* Bo góc nhẹ */
+    transition: border-color 0.3s, box-shadow 0.3s; /* Thêm transition */
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--default-cl);
+    box-shadow: 0 0 0 3px rgba(158, 91, 171, 0.2); /* Hiệu ứng focus hiện đại */
 }
 
 textarea.form-control {
@@ -175,6 +211,7 @@ textarea.form-control {
     left: 0;
     z-index: 999; /* Đặt z-index cao để luôn nằm trên cùng */
     background-color: var(--white-cl-1);
+    box-shadow: var(--shadow-light); /* Thêm shadow nhẹ cho header */
 }
 
 .header__top {
@@ -198,12 +235,19 @@ textarea.form-control {
 
 .header__search-wrap {
     border-radius: 18px;
-    border: 1px solid var(--default-cl);
+    border: 1px solid #ccc; /* Làm nhạt border mặc định */
     width: 60%;
     display: flex;
     height: 36px;
     margin: 0 auto;
     align-items: center;
+    transition: border-color 0.3s, box-shadow 0.3s; /* Thêm transition */
+}
+
+/* Hiệu ứng khi focus vào ô tìm kiếm */
+.header__search-wrap:focus-within {
+    border-color: var(--default-cl);
+    box-shadow: 0 0 0 3px rgba(158, 91, 171, 0.2);
 }
 
 .header__search-input {
@@ -220,6 +264,7 @@ textarea.form-control {
     border: none;
     outline: none;
     background: none;
+    transition: color 0.3s; /* Thêm transition */
 }
 
 .header__search-icon i {
@@ -229,9 +274,9 @@ textarea.form-control {
     padding-right: 16px;
 }
 
-.header__search:hover i {
+.header__search:hover i,
+.header__search-wrap:focus-within i { /* Thêm đổi màu icon khi focus */
     color: var(--default-cl);
-    transition: all 0.3s;
 }
 
 /* ------ Account & Modals ------ */
@@ -242,6 +287,10 @@ textarea.form-control {
     align-items: center;
     position: relative;
     text-align: center;
+
+    /* --- THÊM 2 DÒNG NÀY --- */
+    align-self: flex-end; /* Yêu cầu tự căn xuống dưới */
+    padding-bottom: 12px;  /* Thêm một chút đệm dưới cho đẹp */
 }
 
 .header__account:after {
@@ -261,8 +310,10 @@ textarea.form-control {
     background-color: var(--black-cl-1);
     min-width: 130px;
     padding: 8px 0;
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-medium); /* Dùng shadow chuẩn */
     display: none;
+    border-radius: var(--base-radius); /* Thêm bo góc */
+    overflow: hidden; /* Giữ bo góc */
 }
 
 .item-user {
@@ -271,6 +322,7 @@ textarea.form-control {
     color: var(--white-cl-1);
     padding: 6px 8px;
     line-height: 2.2rem;
+    transition: background-color 0.2s, color 0.2s; /* Thêm transition */
 }
 
 .item-user:hover {
@@ -296,6 +348,7 @@ textarea.form-control {
     position: relative;
     font-size: 1.6rem;
     color: var(--black-cl-1);
+    transition: color 0.3s; /* Thêm transition */
 }
 
 .header .name-user {
@@ -316,7 +369,6 @@ textarea.form-control {
 .header__account-login:hover,
 .header__account-register:hover {
     color: var(--default-cl);
-    transition: all 0.3s;
 }
 
 .modal {
@@ -330,18 +382,19 @@ textarea.form-control {
     background-color: rgba(0, 0, 0, 0.4);
 }
 
-/* .authen-modal {
+.authen-modal {
     position: absolute;
     top: 50%;
     right: 50%;
     transform: translate(50%, -50%);
     width: 400px;
     background-color: var(--white-cl-1);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-medium); /* Dùng shadow chuẩn */
     padding: 30px 20px 50px 20px;
     will-change: opacity;
     animation: fadeInTop ease 0.4s;
-} */
+    border-radius: var(--base-radius); /* Thêm bo góc */
+}
 
 .overlay-close {
     position: absolute;
@@ -381,11 +434,11 @@ textarea.form-control {
     margin-top: 16px;
     cursor: pointer;
     text-align: center;
+    transition: color 0.3s; /* Thêm transition */
 }
 
 .authen__link:hover {
     color: var(--default-cl);
-    transition: all 0.3s;
 }
 
 /* ----Cart---- */
@@ -393,6 +446,10 @@ textarea.form-control {
     position: relative;
     cursor: pointer;
     padding: 12px;
+
+    /* --- THÊM 2 DÒNG NÀY --- */
+    align-self: flex-end; /* Yêu cầu tự căn xuống dưới */
+    padding-bottom: 12px;  /* Đệm dưới (phải giống hệt khối avatar) */
 }
 
 .header__cart:after {
@@ -404,14 +461,15 @@ textarea.form-control {
     right: 0;
 }
 
-.header__cart:hover i {
-    color: var(--default-cl);
-    transition: all 0.3s;
-}
-
 .header .header__cart i {
     font-size: 2.6rem;
     color: var(--black-cl-2);
+    transition: color 0.3s, transform 0.3s; /* Thêm transition */
+}
+
+.header__cart:hover i {
+    color: var(--default-cl);
+    transform: scale(1.1); /* Hiệu ứng icon to lên */
 }
 
 .header__cart-amount {
@@ -436,11 +494,12 @@ textarea.form-control {
     background-color: rgb(245, 237, 238);
     padding: 12px;
     z-index: 1001; /* Phải cao hơn header */
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-medium); /* Dùng shadow chuẩn */
     transform-origin: top right;
     will-change: transform, opacity;
     animation: ScaleTopRight ease-in 0.35s;
     display: none;
+    border-radius: var(--base-radius); /* Thêm bo góc */
 }
 
 .header__cart.have:hover .header__cart-wrap {
@@ -508,6 +567,7 @@ textarea.form-control {
     -webkit-line-clamp: 1;
     text-align: left;
     text-decoration: none;
+    transition: color 0.2s; /* Thêm transition */
 }
 .order-main-name:hover {
     color: var(--orange-cl);
@@ -524,8 +584,20 @@ textarea.form-control {
     color: var(--black-cl-1);
     margin-left: 12px;
 }
-.order-close:hover i {
-    color: var(--orange-cl);
+/* Nút xóa trong giỏ hàng mini */
+.header__cart-wrap .order-close {
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #999;
+    margin-left: 5px; /* Khoảng cách với nội dung */
+    line-height: 1; /* Căn giữa icon */
+    transition: color 0.2s; /* Thêm transition */
+}
+.header__cart-wrap .order-close:hover {
+    color: #dc3545; /* Màu đỏ khi hover */
 }
 .total-money {
     font-size: 1.6rem;
@@ -538,7 +610,11 @@ textarea.form-control {
 .header__cart-wrap .btn {
     margin-top: 10px;
 }
-
+.header__cart-wrap .btn.orange:hover {
+    background-color: #c15e3a; /* Đây là màu cam đậm hơn */
+    color: var(--white-cl-1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
 /* ----Menu---- */
 .header__nav {
     height: var(--hight-header-nav);
@@ -570,11 +646,29 @@ textarea.form-control {
     line-height: 1.5;   
     text-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
     text-decoration: none;
+    position: relative; /* Thêm để tạo gạch chân */
+    transition: color 0.3s; /* Chỉ transition màu */
+}
+
+/* Thêm hiệu ứng gạch chân khi hover */
+.header__nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background-color: var(--default-cl);
+    transition: width 0.3s ease;
 }
 
 .header__nav-link:hover {
     color: var(--default-cl);
-    transition: all 0.3s;
+}
+
+.header__nav-link:hover::after {
+    width: calc(100% - 88px); /* 88px = 44px padding mỗi bên */
 }
 
 .header__nav-list .header__nav-item.authen-form {
@@ -593,13 +687,15 @@ textarea.form-control {
     top: 100%;
     right: 50%;
     transform: translate(50%);
-    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-medium); /* Dùng shadow chuẩn */
     transform-origin: top left;
     will-change: opacity, transform;
     animation: fadeInScale linear 0.3s;
     display: none;
     flex-wrap: wrap;
     z-index: 1001; /* Phải cao hơn header */
+    border-radius: 0 0 var(--base-radius) var(--base-radius); /* Bo góc dưới */
+    overflow: hidden;
 }
 
 .sub-nav {
@@ -617,6 +713,7 @@ textarea.form-control {
     padding: 14px 12px;
     color: var(--black-cl-1);
     text-decoration: none;
+    transition: background-color 0.2s; /* Thêm transition */
 }
 .sub-nav__link.heading {
     font-size: 1.7rem;
@@ -624,7 +721,7 @@ textarea.form-control {
     text-transform: uppercase;
 }
 .sub-nav__link:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.05); /* Làm nhạt màu hover */
 }
 
 /* ---Icon bar--- */
@@ -676,12 +773,180 @@ textarea.form-control {
     visibility: hidden;
     transform: translateY(10px);
     transition: all 0.3s ease;
+    background-color: var(--white-cl-1); /* Thêm nền */
+    box-shadow: var(--shadow-medium); /* Thêm bóng */
+    border-radius: 0 0 var(--base-radius) var(--base-radius); /* Thêm bo góc */
+    overflow: hidden;
 }
 
 .header__nav .has-dropdown-menu:hover .category-menu {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+}
+
+/* ============================================================
+   Header User Account Menu
+   (Đã di chuyển từ cuối file lên đây để sửa lỗi CSS)
+============================================================
+*/
+.header__account {
+    position: relative; /* Cho dropdown định vị theo */
+}
+
+#userAccountMenu .account__avatar-btn {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; /* Kích thước nút avatar */
+    height: 36px;
+    border-radius: 50%; /* Bo tròn */
+    background-color: #f0f0f0; /* Màu nền nhẹ */
+    color: #555; /* Màu icon */
+    font-size: 18px; /* Kích thước icon */
+    transition: background-color 0.2s ease;
+    border: 1px solid #ddd;
+}
+
+#userAccountMenu .account__avatar-btn:hover {
+    background-color: #e0e0e0;
+}
+
+#userAccountMenu .account__dropdown {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important; /* <--- ĐÃ SỬA */
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: var(--shadow-medium); /* Dùng shadow chuẩn */
+    min-width: 200px; /* Độ rộng tối thiểu */
+    z-index: 100;
+    display: none; /* Ẩn mặc định */
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    overflow: hidden; /* Để bo góc hoạt động */
+    border: 1px solid #eee;
+}
+
+/* Hiển thị dropdown khi container có class active */
+#userAccountMenu.active .account__dropdown {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.account__dropdown .dropdown__header {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #f9f9f9;
+}
+
+.account__dropdown .dropdown__user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    display: block; /* Để chiếm hết chiều rộng */
+    white-space: nowrap; /* Ngăn xuống dòng */
+    overflow: hidden; /* Ẩn phần thừa */
+    text-overflow: ellipsis; /* Hiển thị dấu ... */
+}
+
+.account__dropdown .dropdown__actions {
+    padding: 8px 0; /* Khoảng cách trên dưới cho nhóm link */
+}
+
+.account__dropdown .dropdown__item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    font-size: 14px;
+    color: #555;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+}
+
+.account__dropdown .dropdown__item i {
+    margin-right: 12px; /* Khoảng cách icon và chữ */
+    width: 18px; /* Đảm bảo icon thẳng hàng */
+    text-align: center;
+    color: #888;
+}
+
+.account__dropdown .dropdown__item:hover {
+    background-color: #f5f5f5;
+    color: var(--default-cl); /* Đổi màu hover */
+}
+
+.account__dropdown .dropdown__item:hover i {
+    color: var(--default-cl); /* Đổi màu hover */
+}
+
+/* Căn text "Xin chào" ở trên avatar */
+#userAccountMenu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+}
+
+#userAccountMenu .user-greeting {
+    font-size: 13px;
+    color: var(--black-cl-1);
+    font-weight: 500;
+    white-space: nowrap;
+    text-align: center;
+}
+
+#userAccountMenu .avatar-dropdown-container {
+    display: flex;
+    align-items: center;
+}
+
+/* Tạo vùng cầu nối giữa avatar và dropdown */
+#userAccountMenu::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 12px; /* Vùng an toàn để di chuột */
+    z-index: 1000;
+}
+
+/* Căn dropdown menu ở giữa dưới toàn bộ */
+#userAccountMenu .account__dropdown {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important; /* <--- ĐÃ SỬA LỖI */
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: var(--shadow-medium); /* Dùng shadow chuẩn */
+    min-width: 200px;
+    z-index: 1001;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    overflow: hidden;
+    border: 1px solid #eee;
+}
+
+#userAccountMenu.active .account__dropdown {
+    display: block;
+    opacity: 1;
+}
+
+/* Giữ dropdown hiển thị khi hover vào nó */
+#userAccountMenu .account__dropdown:hover {
+    display: block;
+    opacity: 1;
 }
 
 
@@ -706,6 +971,11 @@ textarea.form-control {
     text-transform: uppercase;
     margin-right: 12px;
     color: var(--black-cl-1);
+    text-decoration: none; /* Bỏ gạch chân */
+    transition: color 0.2s; /* Thêm transition */
+}
+.breadcrumb__link:hover {
+    color: var(--default-cl); /* Thêm hover */
 }
 
 .breadcrumb__item::after {
@@ -797,7 +1067,8 @@ textarea.form-control {
     border-top-right-radius: 5px;
     border-bottom: 3px solid transparent;
     cursor: pointer;
-    transition: all 0.5s ease;
+    /* Rút ngắn transition */
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
     text-transform: uppercase;
 }
 
@@ -827,15 +1098,19 @@ textarea.form-control {
 .product {
     display: block;
     background-color: var(--white-cl-1);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-light); /* Dùng shadow chuẩn */
     position: relative;
     will-change: transform;
-    transition: all linear 0.3s;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    /* Tinh chỉnh transition */
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    border: 1px solid #eee; /* Làm mềm border */
+    border-radius: var(--base-radius); /* Thêm bo góc */
+    overflow: hidden; /* Cần thiết cho bo góc và .product__avt */
 }
 
 .product:hover {
-    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-medium); /* Dùng shadow chuẩn */
+    transform: translateY(-5px); /* Hiệu ứng nhấc card lên */
 }
 
 .product__avt {
@@ -843,6 +1118,11 @@ textarea.form-control {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
+    transition: transform 0.4s ease; /* Thêm transition cho ảnh */
+}
+
+.product:hover .product__avt {
+    transform: scale(1.05); /* Hiệu ứng zoom ảnh khi hover */
 }
 
 .product__info {
@@ -859,6 +1139,11 @@ textarea.form-control {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    transition: color 0.2s; /* Thêm transition */
+}
+
+.product:hover .product__name {
+    color: var(--default-cl); /* Đổi màu tên SP khi hover */
 }
 
 .product__price {
@@ -927,14 +1212,20 @@ textarea.form-control {
     position: absolute;
     left: 50%;
     display: block;
-    transform: translateX(-50%);
     width: 90%;
     padding: 12px 0;
-    background-color: rgba(0, 0, 0, 0.15);
+    /* Đổi màu nền cho hợp tông */
+    background-color: rgba(158, 91, 171, 0.7);
     font-size: 1.6rem;
     text-align: center;
     color: var(--white-cl-1);
-    display: none;
+    font-weight: 600; /* Tăng font-weight */
+    
+    /* Thay đổi từ display:none sang opacity:0 để tạo animation */
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, 10px); /* Bắt đầu ở dưới 10px */
+    transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
 }
 
 .product .viewDetail {
@@ -947,14 +1238,16 @@ textarea.form-control {
 
 .product .viewDetail:hover,
 .product .addToCart:hover {
-    color: black;
-    background-color: rgba(0, 0, 0, 0.05);
-    font-weight: 600;
+    color: var(--white-cl-1);
+    background-color: rgba(158, 91, 171, 1); /* Đậm hơn khi hover */
 }
 
 .product:hover .viewDetail,
 .product:hover .addToCart {
-    display: block;
+    /* Thay display:block bằng opacity:1 */
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0); /* Di chuyển về vị trí 0 */
 }
 
 /* Rating & Sold Count */
@@ -1005,7 +1298,8 @@ textarea.form-control {
     position: absolute;
     top: 45%;
     font-size: 6rem;
-    transform: translateY(-50%)
+    transform: translateY(-50%);
+    transition: color 0.3s; /* Thêm transition */
 }
 
 .owl-carousel .owl-nav button.owl-prev { left: -20px; }
@@ -1034,6 +1328,15 @@ textarea.form-control {
     padding: 0;
     text-shadow: 1px 1px 1px #fff;
     border: 1px solid #ddd;
+    cursor: pointer; /* Thêm cursor */
+    transition: background-color 0.2s; /* Thêm transition */
+}
+
+.is-form:hover {
+    background-color: #eee;
+}
+.is-form:active {
+    background-color: #ddd;
 }
 
 .is-form:focus,
@@ -1104,6 +1407,8 @@ textarea.form-control {
     padding: 6px 0;
     align-items: center;
     font-weight: 300;
+    text-decoration: none; /* Bỏ gạch chân */
+    transition: color 0.2s; /* Thêm transition */
 }
 
 .footer__link:hover {
@@ -1129,22 +1434,23 @@ textarea.form-control {
     display: flex;
     margin-top: 12px;
     border-radius: 3px;
+    transition: var(--base-transition); /* Chuẩn hóa transition */
 }
 
 .social-item i {
     font-size: 1.8rem;
     color: var(--white-cl-1);
     margin: auto;
+    transition: color 0.3s;
 }
 
 .social-item:hover {
     background-color: var(--white-cl-1);
-    transition: all 0.3s;
+    transform: scale(1.1); /* Hiệu ứng scale */
 }
 
 .social-item:hover i {
     color: var(--black-cl-2);
-    transition: all 0.3s;
 }
 
 .send-email {
@@ -1168,6 +1474,11 @@ textarea.form-control {
     font-size: 1.8rem;
     color: var(--black-cl-1);
     padding-right: 12px;
+    transition: color 0.2s; /* Thêm transition */
+}
+
+.send-email__link:hover {
+    color: var(--default-cl); /* Thêm hover */
 }
 
 .copyright {
@@ -1192,6 +1503,7 @@ textarea.form-control {
     padding: 12px 14px;
     color: var(--orange-cl);
     z-index: 10;
+    transition: var(--base-transition); /* Thêm transition */
 }
 
 .up-top i {
@@ -1201,7 +1513,9 @@ textarea.form-control {
 
 .up-top:hover {
     border-color: var(--default-cl);
-    color: var(--default-cl)
+    color: var(--white-cl-1); /* Đổi màu chữ */
+    background-color: var(--default-cl); /* Thêm màu nền */
+    transform: scale(1.1); /* Hiệu ứng scale */
 }
 
 
@@ -1259,6 +1573,10 @@ textarea.form-control {
     }
     .header__nav-link:hover {
         color: var(--white-cl-1);
+    }
+    /* Tắt hiệu ứng gạch chân trên mobile */
+    .header__nav-link::after {
+        display: none;
     }
     .header__search,
     .header__account-register,
@@ -1322,177 +1640,14 @@ textarea.form-control {
     .product__price {
         font-size: 1.5rem;
     }
-}
-/* ========================
-   Header User Account Menu
-   ======================== */
-.header__account {
-    position: relative; /* Cho dropdown định vị theo */
-}
-
-#userAccountMenu .account__avatar-btn {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px; /* Kích thước nút avatar */
-    height: 36px;
-    border-radius: 50%; /* Bo tròn */
-    background-color: #f0f0f0; /* Màu nền nhẹ */
-    color: #555; /* Màu icon */
-    font-size: 18px; /* Kích thước icon */
-    transition: background-color 0.2s ease;
-    border: 1px solid #ddd;
-}
-
-#userAccountMenu .account__avatar-btn:hover {
-    background-color: #e0e0e0;
-}
-
-#userAccountMenu .account__dropdown {
-    position: absolute;
-    top: 110%; /* Hiển thị ngay dưới nút avatar */
-    right: 0;
-    background-color: #fff;
-    border-radius: 6px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    min-width: 200px; /* Độ rộng tối thiểu */
-    z-index: 100;
-    display: none; /* Ẩn mặc định */
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    overflow: hidden; /* Để bo góc hoạt động */
-    border: 1px solid #eee;
-}
-
-/* Hiển thị dropdown khi container có class active */
-#userAccountMenu.active .account__dropdown {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.account__dropdown .dropdown__header {
-    padding: 12px 15px;
-    border-bottom: 1px solid #f0f0f0;
-    background-color: #f9f9f9;
-}
-
-.account__dropdown .dropdown__user-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
-    display: block; /* Để chiếm hết chiều rộng */
-    white-space: nowrap; /* Ngăn xuống dòng */
-    overflow: hidden; /* Ẩn phần thừa */
-    text-overflow: ellipsis; /* Hiển thị dấu ... */
-}
-
-.account__dropdown .dropdown__actions {
-    padding: 8px 0; /* Khoảng cách trên dưới cho nhóm link */
-}
-
-.account__dropdown .dropdown__item {
-    display: flex;
-    align-items: center;
-    padding: 10px 15px;
-    font-size: 14px;
-    color: #555;
-    text-decoration: none;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    white-space: nowrap;
-}
-
-.account__dropdown .dropdown__item i {
-    margin-right: 12px; /* Khoảng cách icon và chữ */
-    width: 18px; /* Đảm bảo icon thẳng hàng */
-    text-align: center;
-    color: #888;
-}
-
-.account__dropdown .dropdown__item:hover {
-    background-color: #f5f5f5;
-    color: var(--primary-color, #E85A70); /* Dùng màu chính nếu có */
-}
-
-.account__dropdown .dropdown__item:hover i {
-    color: var(--primary-color, #E85A70);
-}
-
-/* Nút xóa trong giỏ hàng mini */
-.header__cart-wrap .order-close {
-    background: none;
-    border: none;
-    padding: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #999;
-    margin-left: 5px; /* Khoảng cách với nội dung */
-    line-height: 1; /* Căn giữa icon */
-}
-.header__cart-wrap .order-close:hover {
-    color: #dc3545; /* Màu đỏ khi hover */
-}
-/* Căn text "Xin chào" ở trên avatar */
-#userAccountMenu {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    position: relative;
-}
-
-#userAccountMenu .user-greeting {
-    font-size: 13px;
-    color: var(--black-cl-1);
-    font-weight: 500;
-    white-space: nowrap;
-    text-align: center;
-}
-
-#userAccountMenu .avatar-dropdown-container {
-    display: flex;
-    align-items: center;
-}
-
-/* Tạo vùng cầu nối giữa avatar và dropdown */
-#userAccountMenu::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    height: 12px; /* Vùng an toàn để di chuột */
-    z-index: 1000;
-}
-
-/* Căn dropdown menu ở giữa dưới toàn bộ */
-#userAccountMenu .account__dropdown {
-    position: absolute !important;
-    top: calc(100% + 8px) !important;
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) !important;
-    background-color: #fff;
-    border-radius: 6px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    min-width: 200px;
-    z-index: 1001;
-    display: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    overflow: hidden;
-    border: 1px solid #eee;
-}
-
-#userAccountMenu.active .account__dropdown {
-    display: block;
-    opacity: 1;
-}
-
-/* Giữ dropdown hiển thị khi hover vào nó */
-#userAccountMenu .account__dropdown:hover {
-    display: block;
-    opacity: 1;
+    /* Ẩn các nút trên mobile, trừ khi hover (khó) */
+    /* Tốt hơn là nên dùng JS để bật/tắt trên mobile */
+    .product .viewDetail,
+    .product .addToCart {
+        display: none; /* Ẩn đi trên mobile */
+    }
+    .product:hover .viewDetail,
+    .product:hover .addToCart {
+        display: none; /* Đảm bảo vẫn ẩn khi hover (vì mobile ko có hover) */
+    }
 }

@@ -5,9 +5,6 @@ import com.oneshop.dto.ProductDto;
 import com.oneshop.entity.Brand;
 import com.oneshop.entity.Category;
 import com.oneshop.entity.Product;
-import com.oneshop.enums.ProductStatus;
-
-import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal; // Import BigDecimal
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 // Đây là Interface, chỉ khai báo phương thức
 public interface ProductService {
@@ -120,61 +116,7 @@ public interface ProductService {
      * @return List<Product>.
      */
     List<Product> findRelatedProducts(Product product, int limit); // Sửa: Thêm limit
-    
-//	// ADMIN
-//	private final CategoryService categoryService;
-//
-//	@Autowired
-//	public ProductService(ProductRepository productRepository, CategoryService categoryService) {
-//		this.productRepository = productRepository;
-//		this.categoryService = categoryService;
-//	}
-//
-//	@Transactional(readOnly = true)
-//	public List<Product> findFilteredProducts(Long shopId, String productCode, ProductStatus status, Long categoryId,
-//			String brand) {
-//		String codeParam = (productCode != null && !productCode.isEmpty()) ? productCode : null;
-//		String brandParam = (brand != null && !brand.isEmpty()) ? brand : null;
-//		return productRepository.findFilteredProducts(shopId, codeParam, status, categoryId, brandParam);
-//	}
-//
-//	@Transactional(readOnly = true)
-//	public Set<String> findAllUniqueBrands() {
-//		return productRepository.findAllUniqueBrands();
-//	}
-//
-////Xử lý việc duyệt/từ chối (cập nhật trạng thái).
-//
-//	@Transactional
-//	public void updateStatus(Long productId, ProductStatus newStatus) {
-//		productRepository.findById(productId).ifPresent(product -> {
-//			product.setStatus(newStatus);
-//		});
-//	}
-//
-////Xử lý chỉnh sửa thông tin Admin được phép thay đổi.
-//	@Transactional
-//	public void updateAdminFields(Product productDetails) {
-//		productRepository.findById(productDetails.getProductId()).ifPresent(product -> {
-//			product.setName(productDetails.getName());
-//			product.setDescription(productDetails.getDescription());
-//			if (productDetails.getCategory() != null && productDetails.getCategory().getCategoryId() != null) {
-//				Long newCategoryId = productDetails.getCategory().getCategoryId();
-//				categoryService.findById(newCategoryId).ifPresent(product::setCategory);
-//			}
-//		});
-//	}
-//
-//	@Transactional
-//	public void deleteById(Long id) {
-//		productRepository.deleteById(id);
-//	}
-//
-//	@Transactional
-//	public int updateCategoryForProducts(Long oldCategoryId, Long newCategoryId) {
-//		return productRepository.updateCategoryByCategoryId(oldCategoryId, newCategoryId);
-//	}
-//  //====================================================================================
+
     /**
      * Tìm kiếm và lọc tất cả sản phẩm đã published, có phân trang.
      * @param spec Specification chứa điều kiện lọc.
@@ -194,45 +136,5 @@ public interface ProductService {
      */
     List<Product> searchAndFilterPublic(String name, Long categoryId, Long brandId, BigDecimal minPrice, BigDecimal maxPrice); 
     
-   
- 
-    
     void updateProductStockAndPriceFromVariants(Product product);
-  //main 
-    
-    
- // ===>>> CÁC PHƯƠNG THỨC MỚI ĐƯỢC HỢP NHẤT TỪ PHẦN CLASS CŨ <<<===
-
-   // List<Product> findFeaturedProducts();
-
-    List<Product> findFilteredProducts(Long shopId, String productCode, ProductStatus status, Long categoryId,
-            String brand);
-
-    /**
-     * Lấy danh sách tất cả các thương hiệu duy nhất
-     */
-    Set<String> findAllUniqueBrands();
-
-    /**
-     * Cập nhật trạng thái duyệt/từ chối cho sản phẩm (ADMIN)
-     */
-    void updateStatus(Long productId, ProductStatus newStatus);
-
-    /**
-     * Cập nhật các trường mà ADMIN được phép thay đổi
-     */
-    void updateAdminFields(Product productDetails);
-
-    /**
-     * Xóa sản phẩm bằng ID (ADMIN)
-     */
-    void deleteById(Long id);
-
-    /**
-     * Cập nhật lại Category cho các sản phẩm khi Category cũ bị xóa/hợp nhất (ADMIN)
-     */
-    int updateCategoryForProducts(Long oldCategoryId, Long newCategoryId);
-    long countProductsByCategory(Long categoryId);
-
-    // ===>>> KẾT THÚC HỢP NHẤT <<<===
 }

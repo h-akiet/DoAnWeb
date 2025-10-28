@@ -2,37 +2,32 @@
 package com.oneshop.service.impl;
 
 import com.oneshop.dto.ShopDto;
+import com.oneshop.entity.Role; // <<< THÊM IMPORT ROLE
 import com.oneshop.entity.Shop;
-import com.oneshop.enums.ShopStatus;
+import com.oneshop.entity.Shop.ShopStatus;
 import com.oneshop.entity.User;
+import com.oneshop.repository.RoleRepository; // <<< THÊM IMPORT ROLE REPOSITORY
 import com.oneshop.repository.ShopRepository;
 import com.oneshop.repository.UserRepository;
 import com.oneshop.service.FileStorageService;
 import com.oneshop.service.ShopService;
 
-import org.slf4j.Logger; // <<< THÊM IMPORT
-import org.slf4j.LoggerFactory; // <<< THÊM IMPORT
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort; // <<< THÊM IMPORT
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List; // <<< THÊM IMPORT
-import java.util.Optional;
-import java.util.stream.Collectors; // <<< THÊM IMPORT
-
-import com.oneshop.enums.ShopStatus;
-import org.springframework.transaction.annotation.Transactional;
-import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ShopServiceImpl implements ShopService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ShopServiceImpl.class); // <<< THÊM LOGGER
+    private static final Logger logger = LoggerFactory.getLogger(ShopServiceImpl.class);
 
     @Autowired
     private ShopRepository shopRepository;
@@ -43,10 +38,13 @@ public class ShopServiceImpl implements ShopService {
     @Autowired
     private FileStorageService fileStorageService;
 
+    @Autowired // <<< INJECT ROLE REPOSITORY
+    private RoleRepository roleRepository;
+
     @Override
-    @Transactional(readOnly = true) // <<< THÊM readOnly
+    @Transactional(readOnly = true)
     public Shop getShopByUserId(Long userId) {
-        logger.debug("Fetching shop by userId: {}", userId); // <<< THÊM LOG
+        logger.debug("Fetching shop by userId: {}", userId);
         // Sau này userId sẽ lấy từ user đang đăng nhập
         return shopRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Người dùng này chưa có shop"));
@@ -55,7 +53,7 @@ public class ShopServiceImpl implements ShopService {
     @Override
     @Transactional
     public Shop updateShop(Long shopId, ShopDto shopDto, MultipartFile logoFile, MultipartFile bannerFile) {
-        logger.info("Updating shop with ID: {}", shopId); // <<< THÊM LOG
+        logger.info("Updating shop with ID: {}", shopId);
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy shop"));
 
@@ -67,10 +65,10 @@ public class ShopServiceImpl implements ShopService {
 
         // Xử lý upload logo mới
         if (logoFile != null && !logoFile.isEmpty()) {
-            logger.debug("Processing new logo file for shop {}", shopId); // <<< THÊM LOG
+            logger.debug("Processing new logo file for shop {}", shopId);
             // Xóa logo cũ nếu có
             if (StringUtils.hasText(shop.getLogo())) {
-                 try { // <<< THÊM TRY-CATCH
+                 try {
                     fileStorageService.delete(shop.getLogo());
                     logger.debug("Deleted old logo: {}", shop.getLogo());
                  } catch (Exception e) {
@@ -85,10 +83,10 @@ public class ShopServiceImpl implements ShopService {
 
         // Xử lý upload banner mới
         if (bannerFile != null && !bannerFile.isEmpty()) {
-            logger.debug("Processing new banner file for shop {}", shopId); // <<< THÊM LOG
+            logger.debug("Processing new banner file for shop {}", shopId);
             // Xóa banner cũ nếu có
             if (StringUtils.hasText(shop.getBanner())) {
-                 try { // <<< THÊM TRY-CATCH
+                 try {
                     fileStorageService.delete(shop.getBanner());
                     logger.debug("Deleted old banner: {}", shop.getBanner());
                  } catch (Exception e) {
@@ -105,11 +103,11 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    @Transactional
+    @Transactional // Đảm bảo toàn bộ quá trình là một transaction
     public Shop registerShop(ShopDto shopDto, Long userId) {
         logger.info("Registering new shop for userId: {}", userId);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + userId));
 
         // Kiểm tra xem user này đã có shop chưa
         if(shopRepository.findByUserId(userId).isPresent()) {
@@ -117,22 +115,45 @@ public class ShopServiceImpl implements ShopService {
             throw new RuntimeException("Người dùng này đã đăng ký shop rồi");
         }
 
+        // === BƯỚC 1: TẠO VÀ LƯU SHOP ===
         Shop shop = new Shop();
         shop.setName(shopDto.getShopName());
         shop.setDescription(shopDto.getShopDescription());
         shop.setContactEmail(shopDto.getContactEmail());
         shop.setContactPhone(shopDto.getContactPhone());
         shop.setUser(user);
-        shop.setStatus(ShopStatus.PENDING); // <<< GÁN TRẠNG THÁI PENDING KHI TẠO MỚI
-
-        // Liên kết ngược lại từ User tới Shop (quan trọng)
-        user.setShop(shop);
+        shop.setStatus(ShopStatus.PENDING); // Trạng thái chờ duyệt
 
         Shop savedShop = shopRepository.save(shop);
-        // userRepository.save(user); // Không cần save user nếu cascade hoạt động đúng
         logger.info("Shop {} registered successfully for user {} with status PENDING", savedShop.getId(), userId);
-        return savedShop;
+
+        // === BƯỚC 2: CẬP NHẬT ROLE CHO USER ===
+        try {
+            // Tìm Role VENDOR (giả sử bạn đã có Role này trong DB, nếu không cần tạo trước)
+            Role vendorRole = roleRepository.findByName(Role.RoleName.VENDOR)
+                    .orElseThrow(() -> {
+                        logger.error("FATAL: VENDOR role not found in database!");
+                        return new RuntimeException("Lỗi hệ thống: Không tìm thấy vai trò VENDOR.");
+                    });
+
+            // Cập nhật role cho user
+            user.setRole(vendorRole);
+            user.setShop(savedShop); // Liên kết shop vừa tạo với user
+
+            // Lưu lại user với role mới
+            userRepository.save(user);
+            logger.info("Updated user {} role to VENDOR successfully.", userId);
+
+        } catch (Exception e) {
+            // Nếu có lỗi khi cập nhật role, transaction sẽ rollback việc tạo shop
+            logger.error("Error updating user role to VENDOR for userId {}: {}", userId, e.getMessage(), e);
+            // Ném lại lỗi để transaction rollback
+            throw new RuntimeException("Không thể cập nhật vai trò người dùng sau khi đăng ký shop.", e);
+        }
+
+        return savedShop; // Trả về shop đã được lưu
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -143,73 +164,5 @@ public class ShopServiceImpl implements ShopService {
         // Hoặc giữ nguyên nếu trang liên hệ muốn hiển thị cả shop chờ duyệt
         return shopRepository.findAll(Sort.by("name"));
     }
- // ===>>> THÊM TRIỂN KHAI CÁC PHƯƠNG THỨC MỚI TỪ INTERFACE HOP NHẤT <<<===
 
-    @Override
-    @Transactional
-    public List<Shop> findAll() {
-        logger.debug("Fetching all shops with vendor info.");
-		// Giả định shopRepository.findAllWithVendor() tồn tại
-		// Vì không có ShopRepository để kiểm tra, giữ nguyên như code cũ
-		// Nếu không có, phải dùng shopRepository.findAll()
-		return shopRepository.findAllWithVendor(); 
-    }
-    
-    @Override
-    @Transactional
-    public Shop findById(Long shopId) {
-        logger.debug("Fetching shop by ID: {}", shopId);
-        // Thay đổi cách xử lý: dùng orElse(null) như code cũ
-        return shopRepository.findById(shopId).orElse(null); 
-    }
-
-    @Override
-    @Transactional
-    public List<Shop> getApprovedShops() {
-        logger.debug("Fetching all APPROVED shops.");
-        return shopRepository.findByStatus(ShopStatus.APPROVED);
-    }
-    
-    @Override
-    @Transactional
-    public Shop updateShopCommissionRate(Long shopId, BigDecimal newRate) {
-        logger.info("Updating commission rate for shop ID: {} to {}", shopId, newRate);
-        Optional<Shop> shopOpt = shopRepository.findById(shopId);
-
-        if (shopOpt.isPresent()) {
-            Shop shop = shopOpt.get();
-            
-            // 1. Cập nhật tỉ lệ chiết khấu
-            shop.setCommissionRate(newRate);
-            
-            // 2. Cập nhật cột lưu thời gian là thời điểm hiện tại
-            shop.setCommissionUpdatedAt(LocalDateTime.now());
-            
-            Shop updatedShop = shopRepository.save(shop);
-            logger.info("Commission rate updated successfully for shop ID: {}", shopId);
-            return updatedShop;
-        }
-        logger.warn("Shop with ID: {} not found for commission update.", shopId);
-        return null;
-    }
-    
-    @Override
-    @Transactional // <-- Thêm Transactional
-    public Shop updateShopStatus(Long shopId, ShopStatus newStatus) {
-        logger.info("Updating status for shop ID: {} to {}", shopId, newStatus);
-        Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> {
-                    logger.error("Shop not found with ID: {} for status update.", shopId);
-                    return new EntityNotFoundException("Không tìm thấy Shop với ID: " + shopId);
-                });
-
-        // Có thể thêm logic kiểm tra chuyển đổi trạng thái hợp lệ ở đây nếu cần
-        // Ví dụ: không cho chuyển từ REJECTED sang APPROVED trực tiếp
-
-        shop.setStatus(newStatus);
-        Shop updatedShop = shopRepository.save(shop);
-        logger.info("Shop ID: {} status updated successfully to {}", shopId, newStatus);
-        return updatedShop;
-    }
-    
 }

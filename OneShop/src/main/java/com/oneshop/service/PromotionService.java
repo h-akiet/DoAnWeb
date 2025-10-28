@@ -1,10 +1,8 @@
 package com.oneshop.service;
 
-import com.oneshop.dto.CartDto;
 import com.oneshop.dto.PromotionDto;
 import com.oneshop.entity.Promotion;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional; // Thêm Optional
 
@@ -19,6 +17,7 @@ public interface PromotionService {
     /** Tạo một khuyến mãi mới */
     Promotion createPromotion(PromotionDto promotionDto, Long shopId);
 
+    /** (Tùy chọn) Xóa một khuyến mãi */
     void deletePromotion(Long promotionId, Long shopId);
 
     /** Lấy danh sách các khuyến mãi còn hạn (phân trang). */
@@ -42,9 +41,4 @@ public interface PromotionService {
      */
     Promotion updatePromotion(Long promotionId, PromotionDto promotionDto, Long shopId);
     // --- KẾT THÚC PHẦN THÊM ---
-    List<Promotion> findApplicablePromotions(CartDto cart, String username);
-    CartDto applyVoucher(String username, String voucherCode) throws IllegalArgumentException;
-    CartDto removeVoucher(String username);
-    public BigDecimal calculateDiscountForOrder(CartDto cart, BigDecimal subtotal);
-    public Optional<Promotion> findByDiscountCode(String code);
 }

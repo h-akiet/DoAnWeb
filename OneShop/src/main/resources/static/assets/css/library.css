@@ -160,8 +160,8 @@ audio,
 canvas,
 video {
     display: inline-block;
-    *display: inline;
-    *zoom: 1;
+    /* display: inline; */ /* Gây lỗi ở một số trình duyệt */
+    zoom: 1;
     max-width: 100%;
 }
 
@@ -202,7 +202,7 @@ form {
     margin: 0;
 }
 
-x fieldset {
+fieldset {
     border: 1px solid #c0c0c0;
     margin: 0 2px;
     padding: 0.35em 0.625em 0.75em;
@@ -212,7 +212,7 @@ legend {
     border: 0;
     padding: 0;
     white-space: normal;
-    *margin-left: -7px;
+    /* margin-left: -7px; */ /* Gây lỗi ở một số trình duyệt */
 }
 
 button,
@@ -222,7 +222,7 @@ textarea {
     font-size: 100%;
     margin: 0;
     vertical-align: baseline;
-    *vertical-align: middle;
+    /* vertical-align: middle; */
 }
 
 button,
@@ -241,7 +241,7 @@ input[type="reset"],
 input[type="submit"] {
     -webkit-appearance: button;
     cursor: pointer;
-    *overflow: visible;
+    overflow: visible;
 }
 
 button[disabled],
@@ -253,8 +253,8 @@ input[type="checkbox"],
 input[type="radio"] {
     box-sizing: border-box;
     padding: 0;
-    *height: 13px;
-    *width: 13px;
+    /* height: 13px; */ /* Không nên gán cứng */
+    /* width: 13px; */
 }
 
 input[type="search"] {
@@ -459,6 +459,7 @@ textarea {
 
 /* >= Tablet */
 
+/* SỬA LỖI: Thêm { */
 @media (min-width: 740px) {
     .m-0 {
         display: none;
@@ -562,11 +563,12 @@ textarea {
     .m-o-11 {
         margin-left: 91.66667%;
     }
-}
+} /* Kết thúc @media (min-width: 740px) */
 
 
 /* PC medium resolution > */
 
+/* SỬA LỖI: Thêm { */
 @media (min-width: 1113px) {
     .l-0 {
         display: none;
@@ -671,20 +673,22 @@ textarea {
     .l-o-11 {
         margin-left: 91.66667%;
     }
-}
+} /* Kết thúc @media (min-width: 1113px) */
 
 
 /* Tablet - PC low resolution */
 
+/* SỬA LỖI: Thêm { */
 @media (min-width: 740px) and (max-width: 1023px) {
     .wide {
         width: 644px;
     }
-}
+} /* Kết thúc @media (min-width: 740px) and (max-width: 1023px) */
 
 
 /* > PC low resolution */
 
+/* SỬA LỖI: Thêm { */
 @media (min-width: 1024px) and (max-width: 1239px) {
     .wide {
         width: 984px;
@@ -792,4 +796,6 @@ textarea {
     .wide .l-o-11 {
         margin-left: 91.66667%;
     }
-}
+} /* Kết thúc @media (min-width: 1024px) and (max-width: 1239px) */
+
+/* SỬA LỖI: Bỏ dấu } thừa ở cuối file */

@@ -1,36 +1,24 @@
+// src/main/java/com/oneshop/service/ReviewService.java
 package com.oneshop.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; 
+import org.springframework.transaction.annotation.Transactional; // <<< THÊM IMPORT NÀY
 
 import com.oneshop.entity.ProductReview;
 import com.oneshop.entity.Order;
 import com.oneshop.entity.Product;
 import com.oneshop.entity.User;
-import com.oneshop.entity.OrderStatus;
-import com.oneshop.entity.ReviewMedia; // <<< THÊM IMPORT
-import com.oneshop.entity.MediaType; // <<< THÊM IMPORT
+import com.oneshop.entity.OrderStatus; // <<< THÊM IMPORT NÀY
+
 import com.oneshop.repository.ProductReviewRepository;
 import com.oneshop.repository.OrderRepository;
 import com.oneshop.repository.ProductRepository;
-import com.oneshop.repository.ReviewMediaRepository; // <<< CẦN REPOSITORY MỚI
 
-import org.springframework.web.multipart.MultipartFile; // <<< THÊM IMPORT
-import java.io.IOException; // <<< THÊM IMPORT
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-// Giả định bạn có ReviewService Interface, nhưng vì đây là file Service impl, 
-// tôi sẽ coi nó là class triển khai và sửa lại.
 
 @Service
-public class ReviewService { // <<< CẦN ĐỔI THÀNH INTERFACE (NẾU CÓ) hoặc là Impl
-
-    // Giả định: Service này là Implementation Class
+public class ReviewService {
 
     @Autowired
     private ProductReviewRepository reviewRepository;
@@ -40,37 +28,29 @@ public class ReviewService { // <<< CẦN ĐỔI THÀNH INTERFACE (NẾU CÓ) ho
 
     @Autowired
     private ProductRepository productRepository;
-    
-    // Giả định: Cần FileStorageService để lưu file và ReviewMediaRepository
-    @Autowired
-    private FileStorageService fileStorageService; 
-    
-    @Autowired
-    private ReviewMediaRepository reviewMediaRepository; 
 
-
-    /**
-     * Lưu đánh giá, bao gồm xử lý file ảnh/video.
-     * CẬP NHẬT CHỮ KÝ HÀM.
-     */
+    // Thêm @Transactional để đảm bảo lưu thành công
     @Transactional(rollbackFor = Exception.class) 
-    public void saveReview(Long orderId, Long productId, User user, Integer rating, String comment, List<MultipartFile> mediaFiles) {
-        
-        // 1. Kiểm tra cơ sở
+    public void saveReview(Long orderId, Long productId, User user, Integer rating, String comment) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Đơn hàng không tồn tại!"));
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại!"));
 
+        // Kiểm tra quyền: Chỉ người mua mới đánh giá
         if (!order.getUser().getUserId().equals(user.getUserId())) {
             throw new SecurityException("Bạn không có quyền đánh giá đơn hàng này!");
         }
 
+        // ===>>> SỬA LỖI KIỂM TRA TRẠNG THÁI <<<===
+        // So sánh Enum với Enum, không so sánh String với Enum
         if (order.getOrderStatus() != OrderStatus.DELIVERED) {
             throw new IllegalStateException("Đơn hàng chưa được giao, không thể đánh giá!");
         }
+        // ===>>> KẾT THÚC SỬA LỖI <<<===
 
+        // Kiểm tra có item product trong order
         boolean hasProduct = order.getOrderDetails().stream()
                 .anyMatch(item -> item.getProductVariant() != null && 
                                   item.getProductVariant().getProduct() != null &&
@@ -79,11 +59,12 @@ public class ReviewService { // <<< CẦN ĐỔI THÀNH INTERFACE (NẾU CÓ) ho
             throw new IllegalArgumentException("Sản phẩm không có trong đơn hàng này!");
         }
 
+        // Kiểm tra chưa có review cho product trong order này
         if (reviewRepository.findByOrderAndProduct(order, product).isPresent()) {
             throw new IllegalStateException("Sản phẩm này đã được đánh giá trong đơn hàng!");
         }
 
-        // 2. Tạo và lưu Review Entity
+        // Tạo review
         ProductReview review = new ProductReview();
         review.setUser(user);
         review.setProduct(product);
@@ -92,50 +73,17 @@ public class ReviewService { // <<< CẦN ĐỔI THÀNH INTERFACE (NẾU CÓ) ho
         review.setComment(comment);
         review.setReviewDate(LocalDateTime.now());
 
-        ProductReview savedReview = reviewRepository.save(review);
+        reviewRepository.save(review);
         
-        // 3. Xử lý và lưu Media Files
-        if (mediaFiles != null && !mediaFiles.isEmpty()) {
-            for (MultipartFile file : mediaFiles) {
-                if (file.isEmpty()) continue;
-                
-                try {
-                    // a. Lưu file vào hệ thống và lấy URL
-                    String fileUrl = fileStorageService.storeReviewFile(file);
-                    
-                    // b. Xác định loại media
-                    MediaType mediaType = determineMediaType(file.getContentType());
-                    
-                    // c. Tạo và lưu ReviewMedia Entity
-                    ReviewMedia media = new ReviewMedia();
-                    media.setReview(savedReview); // Gán khóa ngoại đến Review vừa lưu
-                    media.setMediaUrl(fileUrl);
-                    media.setMediaType(mediaType);
-                    
-                    reviewMediaRepository.save(media);
-                    
-                } catch (IOException e) {
-                    // Cân nhắc xử lý lỗi này: ví dụ: log và tiếp tục, hoặc rollback toàn bộ transaction
-                    throw new RuntimeException("Lỗi khi lưu tệp media cho đánh giá.", e);
-                }
-            }
-        }
-        
-        // (Tùy chọn): Cập nhật lại rating trung bình cho sản phẩm
-        // ...
-    }
-    
-    // --- Helper để xác định loại Media ---
-    private MediaType determineMediaType(String contentType) {
-        if (contentType == null) return MediaType.IMAGE; // Mặc định là ảnh
-        if (contentType.startsWith("video/")) {
-            return MediaType.VIDEO;
-        }
-        return MediaType.IMAGE;
+        // (Tùy chọn): Cập nhật lại rating trung bình cho sản phẩm ngay lập tức
+        // double avgRating = reviewRepository.findAverageRatingByProductId(productId);
+        // int reviewCount = reviewRepository.countReviewsByProductId(productId);
+        // product.setRating(avgRating);
+        // product.setReviewCount(reviewCount);
+        // productRepository.save(product); // Cần đảm bảo hàm này không kích hoạt logic gì khác
     }
 
-
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true) // Thêm @Transactional
     public boolean isProductReviewed(Long orderId, Long productId) {
         Order order = orderRepository.findById(orderId).orElse(null);
         Product product = productRepository.findById(productId).orElse(null);
@@ -144,6 +92,4 @@ public class ReviewService { // <<< CẦN ĐỔI THÀNH INTERFACE (NẾU CÓ) ho
         }
         return reviewRepository.findByOrderAndProduct(order, product).isPresent();
     }
-   
-   
 }
