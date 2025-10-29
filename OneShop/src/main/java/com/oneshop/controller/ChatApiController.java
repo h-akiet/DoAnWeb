@@ -10,6 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -19,24 +21,28 @@ public class ChatApiController {
     @Autowired private RoleRepository roleRepository;
     @Autowired private ChatMessageRepository chatMessageRepository;
 
-    // DTO rút gọn chỉ chứa thông tin cần cho danh sách chat
     public record ChatUserDto(Long id, String username, String fullName, String email) {}
 
     @GetMapping("/users")
     public List<ChatUserDto> getChatUsers(Authentication authentication) {
-        // Lấy username của vendor hiện tại
         String currentUsername = authentication.getName();
 
-        // Lấy vai trò USER
-        var userRole = roleRepository.findByName(RoleName.USER)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy role USER"));
-
-        // Lấy danh sách username của người dùng đã nhắn tin với vendor
+        // 1. Lấy danh sách username của tất cả người dùng đã nhắn tin với vendor/shipper
         List<String> chatParticipants = chatMessageRepository.findChatParticipants(currentUsername);
 
-        // Lấy thông tin người dùng có vai trò USER và nằm trong danh sách chatParticipants
-        return userRepository.findByRoleAndUsernameIn(userRole, chatParticipants)
-                .stream()
+        // Lọc chính người dùng hiện tại khỏi danh sách tham gia chat
+        List<String> targetUsernames = chatParticipants.stream()
+            .filter(name -> name != null && !name.equals(currentUsername))
+            .toList();
+
+        // 2. Lấy thông tin người dùng dựa trên danh sách username đó (Không cần lọc Role)
+        // Chúng ta sẽ giả định UserRepository có hàm findByUsernameIn(List<String>)
+        List<User> targetUsers = userRepository.findAll().stream()
+            .filter(u -> targetUsernames.contains(u.getUsername()) && u.isActivated())
+            .toList();
+
+
+        return targetUsers.stream()
                 .map(u -> new ChatUserDto(
                         u.getId(),
                         u.getUsername(),

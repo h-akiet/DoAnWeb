@@ -9,6 +9,24 @@
 <th:block layout:fragment="css">
 	<link rel="stylesheet" type="text/css" th:href="@{/assets/css/pay.css}">
 	<link rel="stylesheet" th:href="@{/assets/css/common.css}">
+	<style>
+        .shipping-cost-info {
+             font-size: 0.9em;
+             color: #6c757d;
+             font-style: italic;
+        }
+        .shipping-note {
+             text-align: right;
+             font-size: 0.8em;
+             color: #6c757d;
+             margin-top: -10px; /* Điều chỉnh để gần dòng VC hơn */
+             margin-bottom: 10px;
+        }
+         /* CSS cho label Tổng cộng */
+        .total-summary .main__pay-text {
+            /* font-weight: normal; /* Bỏ in đậm nếu cần */
+        }
+    </style>
 </th:block>
 </head>
 
@@ -88,16 +106,16 @@
 							th:unless="${selectedItems != null and !selectedItems.isEmpty()}">
 							<p>Không có sản phẩm nào được chọn.</p>
 						</div>
-						
+
 						<hr class="divider-light">
-						
+
 						<div class="pay-info">
 							<div class="main__pay-text">Tạm tính</div>
 							<div class="main__pay-price"
-								th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0
+								th:text="${#numbers.formatDecimal(subtotal ?: 0, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0
 								₫</div>
 						</div>
-						
+
 						<div class="pay-info"
 							th:if="${discountAmount != null and discountAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
 							style="color: #28a745; font-weight: bold;">
@@ -105,42 +123,39 @@
 							<div class="main__pay-price"
 								th:text="'-' + ${#numbers.formatDecimal(discountAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">-0 ₫</div>
 						</div>
-						
-						<div class="pay-info">
-							<div class="main__pay-text">Phí vận chuyển</div>
-							<div class="main__pay-price"
-								th:text="${#numbers.formatDecimal(shippingCost, 0, 'COMMA', 0, 'POINT')} + ' ₫'">30.000 ₫</div>
-						</div>
 
-						<div class="pay-info" th:if="${isFreeShipping != null and isFreeShipping}">
-							<div class="main__pay-text" style="font-style: italic; color: #17a2b8;">(Đã áp dụng mã Miễn phí vận chuyển)</div>
-							<div class="main__pay-price"></div>
+                        <div class="pay-info">
+							<div class="main__pay-text">Phí vận chuyển</div>
+							<div class="main__pay-price shipping-cost-info" id="pay-shipping-cost">
+                                <span th:if="${isFreeShipping != null and isFreeShipping}" style="color: #28a745; font-style: normal; font-weight: bold;">Được miễn phí</span>
+                                <span th:unless="${isFreeShipping != null and isFreeShipping}">(Tùy khu vực & ĐVVC)</span>
+                            </div>
 						</div>
-						
-						<div class="pay-info" 
+                        <div class="shipping-note" th:unless="${isFreeShipping != null and isFreeShipping}">
+                            Phí chính xác sẽ được người bán cập nhật.
+                        </div>
+                        <div class="pay-info"
 							th:if="${appliedVoucherCode != null}" style="font-size: 14px; margin-top: 5px;">
 							<div class="main__pay-text">Mã áp dụng:</div>
 							<div class="main__pay-price" style="font-weight: bold; color: #17a2b8;"
 								th:text="${appliedVoucherCode}">VoucherCode</div>
 						</div>
-						
+
 						<hr class="divider-light">
-						
+
 						<div class="pay-info total-summary">
-							<div class="main__pay-text">Tổng cộng</div>
-							<div class="main__pay-price final-price"
-								th:text="${#numbers.formatDecimal(grandTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0
+                            <div class="main__pay-text">Tổng cộng (Tạm tính)</div>
+                            <div class="main__pay-price final-price" id="pay-grand-total"
+								th:text="${#numbers.formatDecimal(grandTotal ?: 0, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0
 								₫</div>
 						</div>
-						
-						<form th:action="@{/placeOrder}" method="post" id="orderForm">
+                        <form th:action="@{/placeOrder}" method="post" id="orderForm">
 							<input type="hidden" name="selectedAddressId"
 								id="selectedAddressIdInput"
 								th:value="${defaultAddress?.addressId}" /> <input type="hidden"
 								name="paymentMethod" value="cod" id="paymentMethodInput" /> <input
 								type="hidden" name="variantIds"
-								th:value="${#strings.listJoin(selectedVariantIds, ',')}" />
-							<button type="submit" class="btn btn--default orange w-100 mt-20">ĐẶT
+								th:value="${selectedVariantIds != null ? #strings.listJoin(selectedVariantIds, ',') : ''}" /> <button type="submit" class="btn btn--default orange w-100 mt-20">ĐẶT
 								HÀNG</button>
 						</form>
 					</div>
@@ -156,6 +171,7 @@
 				</div>
 				<div class="address-list-container">
 					<div class="modal-body" id="addressListContent">
+                        <div th:if="${addresses == null or #lists.isEmpty(addresses)}" class="text-center p-3">Bạn chưa có địa chỉ nào.</div>
 						<div class="address-item" th:each="addr : ${addresses}"
 							th:data-id="${addr.addressId}"
 							th:classappend="${defaultAddress != null and addr.addressId == defaultAddress.addressId} ? 'selected' : ''">
@@ -235,7 +251,8 @@
                 // 1: Danh sách, 2: Form
                 let modalState = 1; 
                 
-                $paymentMethodInputHidden.val($paymentMethodInputs.filter(':checked').val());
+                const initialPaymentMethod = $paymentMethodInputs.filter(':checked').val() || 'cod'; // Mặc định là 'cod' nếu không có gì được check
+                $paymentMethodInputHidden.val(initialPaymentMethod);
 
 
                 // === HELPER FUNCTIONS ===

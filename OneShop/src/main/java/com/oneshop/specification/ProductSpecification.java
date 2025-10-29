@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.ArrayList;
 
+import com.oneshop.enums.ProductStatus;
+
 public class ProductSpecification {
 
     // --- CÁC HÀM CŨ GIỮ NGUYÊN ---
@@ -87,4 +89,8 @@ public class ProductSpecification {
                 criteriaBuilder.isTrue(root.get("published")); // Giả sử trường boolean tên là "published"
     }
     // --- >>> KẾT THÚC PHƯƠNG THỨC MỚI <<< ---
+    public static Specification<Product> isSelling() {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("status"), ProductStatus.SELLING); // Lọc theo status = SELLING
+    }
 }

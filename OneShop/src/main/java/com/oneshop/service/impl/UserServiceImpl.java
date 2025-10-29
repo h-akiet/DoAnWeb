@@ -1,6 +1,7 @@
 package com.oneshop.service.impl;
 
 import com.oneshop.dto.ProfileUpdateDto;
+import com.oneshop.dto.ShipperCreationDto;
 import com.oneshop.entity.Otp;
 import com.oneshop.entity.Role;
 import com.oneshop.entity.Role.RoleName;
@@ -11,6 +12,8 @@ import com.oneshop.repository.UserRepository;
 import com.oneshop.service.EmailService;
 import com.oneshop.service.OtpService;
 import com.oneshop.service.UserService;
+import com.oneshop.entity.ShippingCompany; 
+import com.oneshop.repository.ShippingCompanyRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +26,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Optional;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service("userService")
 public class UserServiceImpl implements UserService {
@@ -37,6 +44,7 @@ public class UserServiceImpl implements UserService {
     @Autowired @Lazy private PasswordEncoder passwordEncoder;
     @Autowired private EmailService emailService;
     @Autowired private OtpService otpService;
+    @Autowired private ShippingCompanyRepository shippingCompanyRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -194,6 +202,29 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
+    @Override
+    @Transactional
+    public User updateShipperProfile(String username, ProfileUpdateDto profileUpdateDto, Long shippingCompanyId) {
+        User user = findByUsername(username);
+        
+        // 1. Cập nhật thông tin cá nhân cơ bản (dùng lại logic cũ)
+        User updatedUser = updateUserProfile(username, profileUpdateDto);
+        
+        // 2. Cập nhật Đơn vị Vận chuyển
+        ShippingCompany company = null;
+        if (shippingCompanyId != null) {
+            company = shippingCompanyRepository.findById(shippingCompanyId)
+                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy Đơn vị Vận chuyển với ID: " + shippingCompanyId));
+            
+            if (!company.getIsActive()) {
+                 throw new IllegalArgumentException("Đơn vị Vận chuyển này hiện không hoạt động.");
+            }
+        }
+        
+        updatedUser.setShippingCompany(company);
+        return userRepository.save(updatedUser);
+    }
+
     @Scheduled(fixedRate = 600000)
     @Transactional
     public void cleanupExpiredOtpsAndUnactivatedUsers() {
@@ -229,5 +260,103 @@ public class UserServiceImpl implements UserService {
     public User findById(Long id) {
         logger.debug("Finding user by ID: {}", id);
         return userRepository.findById(id).orElse(null);
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public User createShipperAccountByAdmin(ShipperCreationDto dto) {
+        if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Tên đăng nhập đã tồn tại!");
+        }
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email đã được sử dụng bởi tài khoản khác!");
+        }
+
+        // 1. Tạo mật khẩu ngẫu nhiên
+        String rawPassword = generateRandomPassword();
+        
+        // 2. Tìm Role SHIPPER
+        Role shipperRole = roleRepository.findByName(RoleName.SHIPPER)
+                .orElseThrow(() -> new RuntimeException("Vai trò hệ thống SHIPPER không tồn tại."));
+
+        // 3. Tạo User
+        User newUser = new User();
+        newUser.setUsername(dto.getUsername().trim());
+        newUser.setFullName(dto.getFullName().trim());
+        newUser.setEmail(dto.getEmail().trim().toLowerCase());
+        newUser.setPhoneNumber(dto.getPhoneNumber().trim());
+        newUser.setPassword(passwordEncoder.encode(rawPassword));
+        newUser.setRole(shipperRole);
+        newUser.setActivated(true); // Kích hoạt ngay lập tức
+        
+        // 4. Lưu User
+        User savedUser = userRepository.save(newUser);
+        logger.info("Admin created Shipper account for: {}", savedUser.getUsername());
+
+        // 5. Gửi email chứa thông tin đăng nhập
+        try {
+            emailService.sendShipperCredentials(savedUser.getEmail(), savedUser.getUsername(), rawPassword);
+            logger.info("Sent credentials to Shipper email: {}", savedUser.getEmail());
+        } catch (Exception e) {
+            logger.error("Lỗi gửi email chứa thông tin đăng nhập Shipper cho {}: {}", savedUser.getEmail(), e.getMessage(), e);
+            throw new RuntimeException("Tạo tài khoản thành công nhưng LỖI GỬI EMAIL: " + e.getMessage(), e);
+        }
+
+        return savedUser;
+    }
+    
+    private String generateRandomPassword() {
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[8]; 
+        random.nextBytes(bytes);
+        String base64 = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        return base64.substring(0, 10); 
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateUserRole(Long userId, String newRoleName) {
+        logger.warn("ADMIN ACTION: Updating user role for ID {} to {}", userId, newRoleName);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng với ID: " + userId));
+
+        // 1. Chuyển đổi tên quyền thành Enum
+        RoleName roleNameEnum;
+        try {
+            roleNameEnum = RoleName.valueOf(newRoleName.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Quyền không hợp lệ: " + newRoleName);
+        }
+
+        // 2. Tìm Role entity
+        Role newRole = roleRepository.findByName(roleNameEnum)
+                .orElseThrow(() -> new EntityNotFoundException("Quyền hệ thống không tồn tại: " + newRoleName));
+
+        // 3. Không cho phép đổi quyền Admin chính
+        if (user.getRole().getName() == RoleName.ADMIN && roleNameEnum != RoleName.ADMIN) {
+             throw new SecurityException("Không được phép đổi quyền tài khoản ADMIN.");
+        }
+
+        // 4. Cập nhật quyền
+        user.setRole(newRole);
+        userRepository.save(user);
+        logger.info("ADMIN ACTION: User ID {} role successfully changed to {}", userId, newRoleName);
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void toggleUserStatus(Long userId) {
+        logger.warn("ADMIN ACTION: Toggling status for user ID {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng với ID: " + userId));
+
+        // Không cho phép khóa tài khoản Admin chính
+        if (user.getRole().getName() == RoleName.ADMIN) {
+             throw new SecurityException("Không được phép khóa/mở khóa tài khoản ADMIN.");
+        }
+
+        user.setActivated(!user.isActivated()); // Đảo ngược trạng thái
+        userRepository.save(user);
+        logger.info("ADMIN ACTION: User ID {} status toggled to {}", userId, user.isActivated() ? "Hoạt động" : "Khóa");
     }
 }

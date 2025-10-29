@@ -26,7 +26,7 @@
             <div class="col-12">
                  <form th:action="@{/admin/users}" method="get" class="d-flex justify-content-end">
                     <input type="text" name="keyword" class="form-control me-2" th:value="${keyword}"
-                        placeholder="Tìm kiếm theo tên hoặc email..." style="max-width: 350px;">
+                        placeholder="Tìm kiếm theo tên, username hoặc email..." style="max-width: 350px;">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-search me-1"></i> Tìm kiếm
                     </button>
@@ -55,8 +55,9 @@
                     <table class="table table-hover table-bordered align-middle">
                         <thead class="table-light text-center">
                             <tr>
-                                <th>ID</th>
-                                <th class="text-start">Tên đăng nhập</th> <th class="text-start">Email</th>
+                                <th style="width: 50px;">STT</th>
+                                <th class="text-start">Tên đăng nhập</th>
+                                <th class="text-start">Email</th>
                                 <th>Quyền</th>
                                 <th>Trạng thái</th>
                                 <th style="width: 120px;">Khóa/Mở khóa</th>
@@ -64,11 +65,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="user : ${users}">
-                                <td th:text="${user.id}" class="text-center">1</td>
-                                <td th:text="${user.username}">Nguyễn Văn A</td>
-                                <td th:text="${user.email}">user.a@example.com</td>
-                                <td class="text-center">
+                            <tr th:each="user, iterStat : ${users}">
+                                <td th:text="${iterStat.count}" class="text-center">1</td>
+                                <td th:text="${user.username}" class="text-start">Nguyễn Văn A</td> <td th:text="${user.email}" class="text-start">user.a@example.com</td> <td class="text-center">
                                      <span th:if="${user.role != null}" class="badge bg-info text-dark" th:text="${user.role.name.name()}">ROLE</span>
                                      <span th:unless="${user.role != null}" class="badge bg-secondary">N/A</span>
                                 </td>
@@ -76,7 +75,8 @@
                                     <span th:classappend="${user.activated ? 'status-active' : 'status-inactive'}"
                                           th:text="${user.activated ? 'Hoạt động' : 'Bị khóa'}"></span>
                                 </td>
-                                <td class="text-center action-btns"> <a th:href="@{'/admin/users/toggle-status/' + ${user.id}}"
+                                <td class="text-center action-btns">
+                                    <a th:href="@{'/admin/users/toggle-status/' + ${user.id}}"
                                         class="btn btn-sm"
                                         th:classappend="${user.activated ? 'btn-outline-danger' : 'btn-outline-success'}"
                                         th:title="${user.activated ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}"
@@ -84,7 +84,8 @@
                                         <i th:classappend="${user.activated ? 'fas fa-lock' : 'fas fa-lock-open'}"></i>
                                     </a>
                                 </td>
-                                <td class="text-center action-btns"> <button type="button" class="btn btn-sm btn-info text-white"
+                                <td class="text-center action-btns">
+                                    <button type="button" class="btn btn-sm btn-info text-white"
                                         data-bs-toggle="modal"
                                         th:data-bs-target="'#changeRoleModal-' + ${user.id}"
                                         title="Đổi quyền">
@@ -109,25 +110,30 @@
                     <form th:action="@{'/admin/users/change-role/' + ${user.id}}" method="post">
                         <div class="modal-header">
                             <h5 class="modal-title">
-                                Cấp/Đổi quyền cho <strong th:text="${user.username}"></strong> </h5>
+                                Cấp/Đổi quyền cho <strong th:text="${user.username}"></strong>
+                            </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <p>
                                 Quyền hiện tại:
-                                <strong th:if="${user.role != null}" class="badge bg-info text-dark" th:text="${user.role.name.name()}">ROLE</strong> <strong th:unless="${user.role != null}" class="badge bg-secondary">N/A</strong>
+                                <strong th:if="${user.role != null}" class="badge bg-info text-dark" th:text="${user.role.name.name()}">ROLE</strong>
+                                <strong th:unless="${user.role != null}" class="badge bg-secondary">N/A</strong>
                             </p>
                             <div class="form-group">
                                 <label th:for="'newRole-' + ${user.id}">Chọn quyền mới:</label>
                                 <select class="form-select form-select-sm" name="newRoleName" th:id="'newRole-' + ${user.id}" required>
-                                    <option th:each="roleName : ${T(com.oneshop.entity.Role.RoleName).values()}"
+                                    <option th:each="roleName : ${availableRoles}"
                                             th:value="${roleName.name()}"
                                             th:text="${roleName.name()}"
-                                            th:selected="${user.role != null and user.role.name == roleName}"></option> </select>
+                                            th:selected="${user.role != null and user.role.name == roleName}"></option>
+                                </select>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button> <button type="submit" class="btn btn-primary btn-sm">Lưu Thay Đổi</button> </div>
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-primary btn-sm">Lưu Thay Đổi</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -141,8 +147,20 @@
                 var alert = $('.alert');
                 if (alert.length) {
                     setTimeout(function() {
-                        alert.alert('close');
+                        try { // Thêm try-catch để an toàn hơn
+                            var bsAlert = bootstrap.Alert.getInstance(alert);
+                            if (bsAlert) { bsAlert.close(); } else { $(alert).alert('close'); }
+                        } catch (e) { console.error("Error closing alert:", e); $(alert).hide(); }
                     }, 5000);
+                }
+
+                // Xử lý mở lại modal tạo Shipper nếu có lỗi validation
+                /*[[ Thymeleaf sẽ render biến này nếu có lỗi ]]*/
+                var openModal = /*[[${openShipperModal == true}]]*/ false;
+                if (openModal) {
+                    var createShipperModal = new bootstrap.Modal(document.getElementById('createShipperModal')); // Đảm bảo ID modal đúng
+                    if(createShipperModal) { createShipperModal.show(); }
+                    else { console.error("Could not find modal with ID createShipperModal"); }
                 }
              });
          </script>

@@ -2,9 +2,10 @@
 package com.oneshop.service;
 
 import com.oneshop.dto.ProfileUpdateDto;
+import com.oneshop.dto.ShipperCreationDto;
 import com.oneshop.entity.Role.RoleName;
 import com.oneshop.entity.User;
-import org.springframework.security.core.userdetails.UserDetailsService; // <<< KẾ THỪA
+import org.springframework.security.core.userdetails.UserDetailsService; 
 import java.util.Optional;
 
 public interface UserService extends UserDetailsService {
@@ -30,4 +31,9 @@ public interface UserService extends UserDetailsService {
     User updateUserProfile(String username, ProfileUpdateDto profileUpdateDto);
     
     User findById(Long id);
+    User updateShipperProfile(String username, ProfileUpdateDto profileUpdateDto, Long shippingCompanyId);
+    User createShipperAccountByAdmin(ShipperCreationDto dto);
+    
+    void updateUserRole(Long userId, String newRoleName);
+    void toggleUserStatus(Long userId);
 }

@@ -18,16 +18,16 @@ public class OrderDetail {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", nullable = false)
-    private Order order; // Liên kết ngược lại Order cha
+    private Order order; 
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "variant_id", nullable = false)
-    private ProductVariant productVariant; // Liên kết tới sản phẩm (biến thể) đã mua
+    private ProductVariant productVariant; 
 
     @Column(nullable = false)
-    private int quantity; // Số lượng mua
+    private int quantity; 
 
     @Column(nullable = false)
-    private BigDecimal price; // Giá của sản phẩm TẠI THỜI ĐIỂM MUA
+    private BigDecimal price; 
 }
 

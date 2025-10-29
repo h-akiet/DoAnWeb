@@ -21,6 +21,8 @@ import java.util.Set;
 
 // Đây là Interface, chỉ khai báo phương thức
 public interface ProductService {
+	
+	String calculatePrimaryImageUrl(Product product);
 
     // --- Chức năng cho Vendor ---
     /**

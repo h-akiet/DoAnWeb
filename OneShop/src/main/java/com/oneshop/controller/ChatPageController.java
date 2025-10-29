@@ -21,11 +21,11 @@ public class ChatPageController {
     }
 
     /**
-     * Mở trang chat giữa USER ↔ VENDOR
+     * Mở trang chat giữa USER/SHIPPER ↔ VENDOR
      * URL: /chat/{targetId}
      */
     @GetMapping("/chat/{targetId}")
-    @PreAuthorize("hasAnyRole('USER', 'VENDOR')")
+    @PreAuthorize("hasAnyRole('USER', 'VENDOR', 'SHIPPER')")
     public String openChat(
             @PathVariable Long targetId,
             Authentication auth,
@@ -44,35 +44,45 @@ public class ChatPageController {
 
         // Không cho phép chat với chính mình
         if (currentUser.getId().equals(targetId)) {
+            // Chuyển hướng về Dashboard (hoặc orders) nếu là Vendor/Shipper
             if (currentUser.getRole().getName() == RoleName.VENDOR) {
                 return "redirect:/vendor/chat";
-            } else {
-                ra.addFlashAttribute("errorMessage", "Không thể chat với chính mình.");
-                return "redirect:/contact";
             }
-        }
-
-        // Nếu người đăng nhập là VENDOR, kiểm tra targetUser phải là USER
-        if (currentUser.getRole().getName() == RoleName.VENDOR) {
-            if (targetUser.getRole().getName() == RoleName.VENDOR) {
-                ra.addFlashAttribute("errorMessage", "Bạn chỉ có thể trò chuyện với khách hàng, không phải vendor khác.");
-                return "redirect:/contact";
+            if (currentUser.getRole().getName() == RoleName.SHIPPER) {
+                return "redirect:/shipper/orders"; 
             }
-            model.addAttribute("user", targetUser);
-            return "vendor/chat_vendor"; // Trả về giao diện chat của vendor
+            return "redirect:/contact";
         }
+        
+        RoleName currentUserRole = currentUser.getRole().getName();
+        RoleName targetUserRole = targetUser.getRole().getName();
 
-        // Nếu người đăng nhập là USER, targetUser phải là VENDOR
-        if (currentUser.getRole().getName() == RoleName.USER) {
-            if (targetUser.getRole().getName() != RoleName.VENDOR) {
+        // LOGIC CHAT: USER/SHIPPER (Chat với VENDOR)
+        if (currentUserRole == RoleName.USER || currentUserRole == RoleName.SHIPPER) {
+            if (targetUserRole != RoleName.VENDOR) {
                 ra.addFlashAttribute("errorMessage", "Bạn chỉ có thể trò chuyện với chủ shop.");
                 return "redirect:/contact";
             }
+            // Nếu người hiện tại là Shipper, hiển thị giao diện Shipper Chat
+            if (currentUserRole == RoleName.SHIPPER) {
+                 model.addAttribute("vendor", targetUser); // Dùng vendor làm target
+                 return "user/chat_user"; // Dùng chung giao diện chat của User/Shipper
+            }
+            // Nếu là User
             model.addAttribute("vendor", targetUser);
-            return "user/chat_user"; // Trả về giao diện chat của user
+            return "user/chat_user"; 
         }
 
-        // Trường hợp không xác định vai trò
+        // LOGIC CHAT: VENDOR (Chat với USER/SHIPPER)
+        if (currentUserRole == RoleName.VENDOR) {
+            if (targetUserRole != RoleName.USER && targetUserRole != RoleName.SHIPPER) {
+                ra.addFlashAttribute("errorMessage", "Bạn chỉ có thể trò chuyện với khách hàng hoặc shipper.");
+                return "redirect:/vendor/chat";
+            }
+            model.addAttribute("user", targetUser); // Dùng user làm target (dù là shipper/user)
+            return "vendor/chat_vendor"; 
+        }
+
         ra.addFlashAttribute("errorMessage", "Không thể mở chat, quyền hạn không hợp lệ.");
         return "redirect:/contact";
     }

@@ -22,13 +22,12 @@ public class Promotion {
     private String campaignName; 
 
     @Column(nullable = false, unique = true, columnDefinition = "nvarchar(100)")
-    private String discountCode; // Mã giảm giá
+    private String discountCode; 
 
     @ManyToOne(fetch = FetchType.EAGER) 
     @JoinColumn(name = "promotion_type_id", nullable = false)
     private PromotionTypeEntity type;
 
-    // Giá trị giảm (có thể là % hoặc số tiền, null nếu là free shipping)
     @Column(columnDefinition = "numeric(19, 2)")
     private BigDecimal value;
 
@@ -38,7 +37,6 @@ public class Promotion {
     @Column(nullable = false)
     private LocalDate endDate;
 
-    // Một khuyến mãi thuộc về một Shop
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = false)
     private Shop shop;

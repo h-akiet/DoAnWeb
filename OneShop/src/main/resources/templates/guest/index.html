@@ -10,49 +10,49 @@
 	<link th:href="@{/assets/css/home.css}" rel="stylesheet" />
 	<link rel="stylesheet" th:href="@{/assets/css/common.css}">
 	<style>
-/* CSS cho phần đánh giá và đã bán */
-.product__rating {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin-bottom: 8px;
-}
+		/* CSS cho phần đánh giá và đã bán */
+		.product__rating {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 8px;
+		}
 
-.rating-stars {
-	display: flex;
-	gap: 2px;
-}
+		.rating-stars {
+			display: flex;
+			gap: 2px;
+		}
 
-.rating-stars i {
-	font-size: 12px;
-	color: #ffa500;
-}
+		.rating-stars i {
+			font-size: 12px;
+			color: #ffa500;
+		}
 
-.rating-stars i.empty {
-	color: #ddd;
-}
+		.rating-stars i.empty {
+			color: #ddd;
+		}
 
-.rating-count {
-	font-size: 12px;
-	color: #666;
-	font-weight: 400;
-}
+		.rating-count {
+			font-size: 12px;
+			color: #666;
+			font-weight: 400;
+		}
 
-.product__sold {
-	font-size: 12px;
-	color: #666;
-	margin-bottom: 10px;
-	display: flex;
-	align-items: center;
-	gap: 4px;
-}
+		.product__sold {
+			font-size: 12px;
+			color: #666;
+			margin-bottom: 10px;
+			display: flex;
+			align-items: center;
+			gap: 4px;
+		}
 
-.product__sold i {
-	font-size: 11px;
-	color: #999;
-}
+		.product__sold i {
+			font-size: 11px;
+			color: #999;
+		}
 
-/* === CSS LÀM NỔI BẬT SỐ LƯỢNG ĐÃ BÁN === */
+		/* === CSS LÀM NỔI BẬT SỐ LƯỢNG ĐÃ BÁN === */
         .product__sold.has-sales span { /* Chỉ áp dụng khi có class 'has-sales' */
             font-weight: 600; /* Chữ đậm hơn */
             color: #28a745; /* Màu xanh lá cây */
@@ -61,7 +61,24 @@
              color: #28a745;
         }
         /* ========================================= */
-</style>
+
+        /* *** THÊM HOẶC SỬA LẠI CSS CHO POLICY BOXES *** */
+        /* Đảm bảo các lớp .bg-1, .bg-2, .bg-3, .bg-4 được định nghĩa */
+        /* Giả sử màu nền được định nghĩa trong home.css hoặc common.css */
+        /* Nếu không, bạn cần thêm chúng vào đây hoặc vào file CSS tương ứng */
+        /* Ví dụ (màu sắc có thể cần điều chỉnh cho phù hợp): */
+        .policy.bg-1 { background-color: #fadde1; /* Màu hồng nhạt */ }
+        .policy.bg-2 { background-color: #e6d4f0; /* Màu tím nhạt */ }
+        .policy.bg-3 { background-color: #d1b1e0; /* Màu tím đậm hơn */ }
+        .policy.bg-4 { background-color: #f8cdda; /* Màu hồng đậm hơn */ }
+
+        /* Đảm bảo chữ trong policy box dễ đọc */
+        .policy__info .policy__title,
+        .policy__info .policy__description {
+            color: #333; /* Hoặc màu chữ phù hợp với nền */
+        }
+        /* *** KẾT THÚC PHẦN CSS SỬA ĐỔI *** */
+	</style>
 </th:block>
 </head>
 
@@ -192,8 +209,8 @@
 											<span class="rating-count"
 												th:text="'(' + ${product.reviewCount} + ')'"></span>
 										</div>
-										<div class="product__sold">
-											<i class="fas fa-check-circle"></i> <span
+										<div class="product__sold"
+											 th:classappend="${product.soldCount > 0} ? 'has-sales' : ''"> <i class="fas fa-check-circle"></i> <span
 												th:text="'Đã bán ' + ${product.soldCount}"></span>
 										</div>
 										<div class="product__price">
@@ -242,8 +259,8 @@
 											<span class="rating-count"
 												th:text="'(' + ${product.reviewCount} + ')'"></span>
 										</div>
-										<div class="product__sold">
-											<i class="fas fa-check-circle"></i> <span
+										<div class="product__sold"
+											 th:classappend="${product.soldCount > 0} ? 'has-sales' : ''"> <i class="fas fa-check-circle"></i> <span
 												th:text="'Đã bán ' + ${product.soldCount}"></span>
 										</div>
 										<div class="product__price">
@@ -342,6 +359,9 @@
             });
 
             function circleIndicator() {
+                // Kiểm tra indicator có tồn tại không trước khi thêm
+                if (!indicator) return;
+                indicator.innerHTML = ''; // Xóa indicator cũ nếu có
                 for (let i = 0; i < slides.length; i++) {
                     const div = document.createElement('div');
                     div.setAttribute('onclick', 'indicateSlide(this)');
@@ -352,15 +372,23 @@
             }
             circleIndicator();
 
-            function indicateSlide(element) {
-                index = element.id; changeSlide(); updateCircleIndicator(); resetTimer();
-            }
+            // Đảm bảo indicator tồn tại trước khi truy cập children
             function updateCircleIndicator() {
+                if (!indicator) return;
                 for (let i = 0; i < indicator.children.length; i++) {
                     indicator.children[i].classList.remove('active');
                 }
-                indicator.children[index].classList.add('active');
+                // Kiểm tra index hợp lệ
+                if (indicator.children[index]) {
+                    indicator.children[index].classList.add('active');
+                }
             }
+
+            function indicateSlide(element) {
+                index = parseInt(element.id); // Chuyển id sang số
+                changeSlide(); updateCircleIndicator(); resetTimer();
+            }
+
             function prevSlide() {
                 index = (index == 0) ? slides.length - 1 : index - 1;
                 changeSlide();
@@ -375,7 +403,10 @@
                 for (let i = 0; i < slides.length; i++) {
                     slides[i].classList.remove('active');
                 }
-                slides[index].classList.add('active');
+                 // Kiểm tra index hợp lệ
+                if (slides[index]) {
+                    slides[index].classList.add('active');
+                }
             }
             let timer = setInterval(nextSlide, 5000);
             function resetTimer() {
@@ -392,26 +423,50 @@
 
             if (!tabs.length || !panes.length || !tabActive || !line) return;
 
-            line.style.left = tabActive.offsetLeft + 'px';
-            line.style.width = tabActive.offsetWidth + 'px';
+            // Hàm cập nhật vị trí line
+            function updateLinePosition(activeTab) {
+                try { // Thêm try-catch để bắt lỗi nếu activeTab không hợp lệ
+                     line.style.left = activeTab.offsetLeft + 'px';
+                     line.style.width = activeTab.offsetWidth + 'px';
+                } catch (e) {
+                    console.error("Error updating tab line position:", e);
+                }
+            }
+            updateLinePosition(tabActive); // Cập nhật vị trí ban đầu
 
             tabs.forEach((tab, index) => {
                 const pane = panes[index];
-                const tabContainer = tab.closest('a') || tab; // Handle if tab is inside <a>
-                tabContainer.onclick = function (event) {
-                    event.preventDefault(); // Prevent page reload
+                if (!pane) return; // Bỏ qua nếu không có pane tương ứng
+                // Sửa: Gắn sự kiện vào chính tab-item, không cần tìm thẻ a bên trong
+                tab.onclick = function (event) {
+                    // event.preventDefault(); // Bỏ preventDefault nếu không phải thẻ a
+
+                    // Chỉ xử lý nếu tab chưa active
                     if (!tab.classList.contains('active')) {
-                        document.querySelector('.tab-item.active').classList.remove('active');
-                        document.querySelector('.tab-pane.active').classList.remove('active');
-                        line.style.left = tab.offsetLeft + 'px';
-                        line.style.width = tab.offsetWidth + 'px';
+                        const currentActiveTab = document.querySelector('.tab-item.active');
+                        const currentActivePane = document.querySelector('.tab-pane.active');
+
+                        if (currentActiveTab) currentActiveTab.classList.remove('active');
+                        if (currentActivePane) currentActivePane.classList.remove('active');
+
+                        updateLinePosition(tab); // Cập nhật line
+
                         tab.classList.add('active');
                         pane.classList.add('active');
                     }
                 }
             });
+
+            // Cập nhật lại vị trí line khi resize cửa sổ
+            window.addEventListener('resize', () => {
+                const currentActiveTab = document.querySelector('.tab-item.active');
+                 if (currentActiveTab) {
+                    updateLinePosition(currentActiveTab);
+                 }
+            });
         }
         document.addEventListener('DOMContentLoaded', initializeTabs);
+        // Giữ lại pageshow để xử lý back/forward cache
         window.addEventListener('pageshow', (event) => { if (event.persisted) initializeTabs(); });
         </script>
 	</th:block>

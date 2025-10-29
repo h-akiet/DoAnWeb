@@ -11,54 +11,217 @@
 		th:href="@{/assets/css/cart.css}">
 	<link rel="stylesheet" th:href="@{/assets/css/common.css}">
 	<style>
-.btn[disabled] {
-	background-color: #ccc;
-	cursor: not-allowed;
-	opacity: 0.6;
+/* === Biến màu & Font (Lấy từ common) === */
+:root {
+	--primary-color: #E85A70;
+	--secondary-color: #f07b8d;
+	--text-dark: #333;
+	--text-muted: #666;
+	--bg-light: #f8f9fa;
+	--base-radius: 8px;
+	--shadow-medium: 0 4px 15px rgba(0, 0, 0, 0.1);
+	--border-color: #ddd;
 }
-/* Thêm style cho phần voucher */
+
+/* --- Tổng thể trang --- */
+.main {
+	padding-top: 30px;
+	padding-bottom: 50px;
+	background-color: var(--bg-light);
+}
+
+/* --- Bảng Sản phẩm (Table) --- */
+.main__cart .shop_table {
+	width: 100%;
+	border-collapse: separate; /* Quan trọng cho bo góc */
+	border-spacing: 0;
+	margin-bottom: 20px;
+	background-color: white;
+	border-radius: var(--base-radius);
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+	overflow: hidden;
+}
+
+.shop_table thead th {
+	background-color: var(--primary-color); /* Header màu Theme */
+	color: white;
+	font-size: 1.1rem;
+	font-weight: 600;
+	padding: 15px 10px;
+	text-align: center;
+	border: none; /* Xóa border mặc định */
+}
+
+.shop_table tbody td {
+	padding: 15px 10px;
+	vertical-align: middle;
+	font-size: 1rem;
+	border-bottom: 1px solid #eee;
+	color: var(--text-dark);
+}
+
+/* Hiệu ứng Hover cho từng hàng */
+.shop_table tbody tr:hover {
+	background-color: #fffafb;
+	box-shadow: inset 3px 0 0 0 var(--secondary-color);
+	transition: background-color 0.2s;
+}
+
+/* Ảnh sản phẩm */
+.product-thumbnail img {
+	width: 60px;
+	height: 60px;
+	object-fit: cover;
+	border-radius: 4px;
+}
+
+/* Tên sản phẩm */
+.product-name a {
+	color: var(--text-dark);
+	font-weight: 500;
+	transition: color 0.2s;
+}
+
+.product-name a:hover {
+	color: var(--primary-color);
+}
+
+/* Giá và Tổng tiền */
+.product-price, .product-subtotal {
+	text-align: center;
+	font-weight: 600;
+	color: #222;
+}
+
+.product-subtotal .main__cart-price {
+	color: var(--primary-color); /* Tổng tiền làm nổi bật */
+	font-weight: 700;
+}
+
+/* Nút xóa */
+.product-remove a {
+	color: #999;
+	font-size: 1.2rem;
+}
+
+.product-remove a:hover {
+	color: #dc3545;
+}
+
+/* Quantity Controls */
+.buttons_added input {
+	padding: 5px 8px;
+	height: 35px;
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+}
+
+/* --- Khối Thanh toán (Summary) --- */
+.main__pay {
+	background-color: white;
+	border-radius: var(--base-radius);
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+	padding: 25px;
+}
+
+.main__pay .main__pay-title {
+	font-size: 1.6rem;
+	font-weight: 700;
+	color: var(--text-dark);
+	border-bottom: 2px solid #eee;
+	padding-bottom: 10px;
+	margin-bottom: 15px;
+}
+
+.main__pay .pay-info {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 1.2rem; /* TĂNG KÍCH THƯỚC CHỮ */
+	padding: 8px 0;
+}
+
+.main__pay .main__pay-text {
+	color: var(--text-muted);
+}
+
+.main__pay .main__pay-price {
+	font-weight: 600;
+	color: #222;
+}
+
+/* Dòng Tổng cuối cùng */
+.main__pay .total-summary .main__pay-text {
+	font-weight: 800;
+	color: var(--text-dark);
+	font-size: 1.4rem;
+}
+
+.main__pay .final-price {
+	font-weight: 800;
+	color: var(--primary-color);
+	font-size: 1.8rem;
+}
+
+/* --- Voucher và Buttons --- */
+/* Nút Tiến hành Thanh toán */
+#checkoutBtn {
+	background-color: #E85A70;
+	border: 1px solid #E85A70;
+	color: white;
+	font-size: 1.3rem; /* TĂNG KÍCH THƯỚC CHỮ NÚT CHÍNH */
+	padding: 12px 10px;
+	width: 100%;
+	border-radius: 4px;
+	font-weight: 700;
+	transition: background-color 0.2s, transform 0.2s;
+	margin-top: 15px;
+}
+
+#checkoutBtn:hover {
+	background-color: #d6485e;
+	transform: translateY(-1px);
+}
+
+/* Voucher */
 .voucher-info {
 	margin-top: 10px;
-	font-size: 14px;
+	font-size: 1.2rem;
 }
 
 .applied-voucher {
-	color: green;
+	color: #28a745;
 	font-weight: bold;
 }
 
-.voucher-error {
-	color: red;
-	margin-top: 5px;
+/* Nút Bỏ chọn */
+#removeVoucherBtn {
+	padding: 6px 12px;
+	font-size: 1rem;
+	font-weight: 600;
+	border-radius: 4px;
+}
+/* Style cho select voucher */
+#voucherCodeSelect {
+    font-size: 1rem;
+    padding: 10px 12px;
+    border-color: var(--border-color);
+}
+/* Nút Áp dụng */
+#applyVoucherBtn {
+     font-size: 1.1rem;
+     padding: 8px 15px;
+     background-color: var(--secondary-color);
+     border-color: var(--secondary-color);
+     color: white;
+     font-weight: 600;
+     border-radius: 4px;
+     transition: background-color 0.2s;
+}
+#applyVoucherBtn:hover {
+    background-color: #c23e51;
 }
 
-.discount-row {
-	color: green;
-	font-weight: bold;
-}
-
-.ms-2 {
-	margin-left: 0.5rem !important;
-} /* Bootstrap margin helper */
-.mt-2 {
-	margin-top: 0.5rem !important;
-}
-
-.btn-sm {
-	padding: 0.25rem 0.5rem;
-	font-size: .875rem;
-	border-radius: 0.2rem;
-} /* Bootstrap small button */
-.btn-outline-danger {
-	color: #dc3545;
-	border-color: #dc3545;
-}
-
-.btn-outline-danger:hover {
-	color: #fff;
-	background-color: #dc3545;
-	border-color: #dc3545;
-}
 </style>
 </th:block>
 </head>
@@ -158,35 +321,35 @@
 							<div class="main__pay-text">Tổng phụ</div>
 							<div class="main__pay-price" id="cart-subtotal">0 đ</div>
 						</div>
-						<div class="pay-info">
-							<div class="main__pay-text">Giao hàng</div>
-							<div class="main__pay-price" id="cart-shipping-fee">0 đ</div>
-						</div>
 
-						<div class="pay-info discount-row" id="discount-row"
+						<div class="pay-info">
+							<div class="main__pay-text">Phí vận chuyển</div>
+							<div class="main__pay-price" id="cart-shipping-fee">
+                                (Tùy khu vực & ĐVVC) </div>
+						</div>
+                        <div class="pay-info discount-row" id="discount-row"
 							th:style="${cart == null or cart.discountAmount == null or cart.discountAmount.compareTo(T(java.math.BigDecimal).ZERO) <= 0} ? 'display: none;'">
 							<div class="main__pay-text">Giảm giá voucher</div>
 							<div class="main__pay-price" id="cart-discount">-0 đ</div>
 						</div>
 
-						<div class="pay-info">
-							<div class="main__pay-text">Tổng thành tiền</div>
-							<div class="main__pay-price" id="cart-grandtotal">0 đ</div>
-						</div>
+						<div class="pay-info total-summary">
+                            <div class="main__pay-text" id="cart-grandtotal-label">Tổng thành tiền (Chưa gồm VC)</div>
+							<div class="main__pay-price final-price" id="cart-grandtotal">0 đ</div>
+                            </div>
 						<button type="button" id="checkoutBtn"
-							class="btn btn--default orange" disabled>Tiến hành thanh
-							toán</button>
+							class="btn btn--default orange w-100" disabled>TIẾN HÀNH
+							THANH TOÁN</button>
 
-						<div class="main__pay-title">Phiếu ưu đãi</div>
+						<div class="main__pay-title" style="margin-top: 20px;">Phiếu
+							ưu đãi</div>
 						<div id="applied-voucher-info" class="voucher-info"
 							th:style="${cart == null or cart.appliedVoucherCode == null} ? 'display: none;'">
 							<span class="applied-voucher">Đã áp dụng: <span
 								id="applied-voucher-code" th:text="${cart?.appliedVoucherCode}"></span></span>
-							
+
 							<button id="removeVoucherBtn"
-								class="btn btn-outline-danger ms-2">Bỏ chọn</button>
-								
-						</div>
+								class="btn btn-outline-danger btn-sm ms-2">Bỏ chọn</button> </div>
 						<div id="voucher-selection-area"
 							th:style="${cart != null and cart.appliedVoucherCode != null} ? 'display: none;'">
 							<select class="form-control" style="margin-top: 15px;"
@@ -212,89 +375,86 @@
 		<script th:inline="javascript">
             /*<![CDATA[*/
             $(document).ready(function() {
-                const SHIPPING_FEE = 30000; // Phí ship mặc định
-                let currentCartData = /*[[${cart}]]*/ null;
-                
+            	let currentCartData = /*[[${cart}]]*/ null;
+
                 if (!currentCartData) {
-                    // Đảm bảo các trường mới tồn tại (Type Code và Value)
-                    currentCartData = { 
-                        items: {}, 
-                        subtotal: 0, 
-                        discountAmount: 0, 
-                        appliedVoucherCode: null, 
-                        appliedVoucherTypeCode: null, // <-- Cần thiết cho logic mới
-                        appliedVoucherValue: 0        // <-- Cần thiết cho logic mới
+                    currentCartData = {
+                        items: {},
+                        subtotal: 0,
+                        discountAmount: 0,
+                        appliedVoucherCode: null,
+                        appliedVoucherTypeCode: null,
+                        appliedVoucherValue: 0
                     };
                 }
 
                 function formatCurrency(number) {
-                    if (number === null || typeof number === 'undefined') return '0 đ';
+                    if (number === null || typeof number === 'undefined') return '0 ₫';
                     const numericValue = parseFloat(number);
-                    if (isNaN(numericValue)) return '0 đ';
+                    if (isNaN(numericValue)) return '0 ₫';
                     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(numericValue).replace('₫', 'đ');
                 }
 
 
                 // === LOGIC TÍNH TOÁN ĐÃ CẬP NHẬT (Sử dụng Type Code và Value) ===
                 function updateCartSummary() {
-                    // Đảm bảo CartDto có 4 trường voucher
                     const cartData = currentCartData || { items: {}, appliedVoucherTypeCode: null, appliedVoucherValue: 0 };
-                    
-                    let calculatedSubtotal = 0; // Tổng phụ dựa trên item được chọn
-                    let shipping = 0;
+
+                    let calculatedSubtotal = 0;
                     let selectedCount = 0;
-                    let effectiveDiscount = 0; // Giảm giá thực tế
+                    let effectiveDiscount = 0;
+                    let isFreeShippingVoucher = false; // Cờ kiểm tra voucher freeship
 
                     // 1. Tính tổng phụ (chỉ các item được check)
                     $('.item-checkbox:checked').each(function() {
                         selectedCount++;
-                        const variantId = $(this).val(); 
+                        const variantId = $(this).val();
                         const item = cartData.items ? cartData.items[variantId] : null;
                         if (item) {
                             calculatedSubtotal += parseFloat(item.subtotal || 0);
                         }
                     });
 
-                    // 2. Tính phí ship và giảm giá
+                    // 2. Tính giảm giá (KHÔNG tính phí ship ở đây nữa)
                     if (selectedCount > 0) {
-                        shipping = SHIPPING_FEE; // Phí ship mặc định
-                        
-                        const voucherType = cartData.appliedVoucherTypeCode; // Lấy Type Code (ví dụ: PERCENT, FIXED, FREESHIP)
-                        const voucherValue = parseFloat(cartData.appliedVoucherValue || 0); // Lấy Value (ví dụ: 10, 50000)
-                        
-                        // Khởi tạo effectiveDiscount
-                        effectiveDiscount = 0; 
+                        const voucherType = cartData.appliedVoucherTypeCode;
+                        const voucherValue = parseFloat(cartData.appliedVoucherValue || 0);
 
-                        // Kiểm tra loại voucher đã áp dụng
+                        effectiveDiscount = 0;
+
                         if (voucherType) {
-                            if (voucherType === 'PERCENTAGE') { // Giảm theo phần trăm
+                            if (voucherType === 'PERCENTAGE') {
                                 effectiveDiscount = calculatedSubtotal * (voucherValue / 100);
-                            } 
-                            else if (voucherType === 'FIXED_AMOUNT') { // Giảm số tiền cố định
-                                effectiveDiscount = voucherValue; 
-                            } 
-                            else if (voucherType === 'FREE_SHIPPING') { // Miễn phí vận chuyển
-                                shipping = 0; // Ghi đè phí ship về 0
-                                effectiveDiscount = 0; // Không có giảm giá bằng tiền
+                            } else if (voucherType === 'FIXED_AMOUNT') {
+                                effectiveDiscount = voucherValue;
+                            } else if (voucherType === 'FREE_SHIPPING') {
+                                isFreeShippingVoucher = true; // Đánh dấu là voucher freeship
+                                effectiveDiscount = 0; // Freeship không giảm vào subtotal
                             }
                         }
-                        
-                        // Giảm giá không bao giờ vượt quá tổng phụ
                         effectiveDiscount = Math.min(effectiveDiscount, calculatedSubtotal);
 
                     } else {
-                        // Nếu không chọn item nào
-                        shipping = 0;
                         effectiveDiscount = 0;
                     }
 
-                    // 3. Tính tổng thành tiền
-                    let grandTotal = (calculatedSubtotal - effectiveDiscount) + shipping;
-                    grandTotal = Math.max(0, grandTotal); // Đảm bảo tổng tiền không bao giờ âm
+                    // 3. Tính tổng thành tiền (CHỈ BAO GỒM SUBTOAL - DISCOUNT)
+                    let grandTotal = calculatedSubtotal - effectiveDiscount;
+                    grandTotal = Math.max(0, grandTotal);
 
                     // 4. Cập nhật UI
                     $('#cart-subtotal').text(formatCurrency(calculatedSubtotal));
-                    $('#cart-shipping-fee').text(formatCurrency(shipping)); // Phí ship đã tính (có thể là 0)
+
+                    // *** CẬP NHẬT HIỂN THỊ PHÍ SHIP ***
+                    const $shippingFeeElement = $('#cart-shipping-fee');
+                    if (isFreeShippingVoucher && selectedCount > 0) {
+                        $shippingFeeElement.text("Được miễn phí").css({'font-style': 'normal', 'color': '#28a745', 'font-weight': 'bold'}); // Màu xanh, in đậm
+                    } else if (selectedCount > 0) {
+                         $shippingFeeElement.text("(Tùy khu vực & ĐVVC)").css({'font-style': 'italic', 'color': '#6c757d', 'font-weight': 'normal'}); // Mặc định
+                    } else {
+                         $shippingFeeElement.text("(Tùy khu vực & ĐVVC)").css({'font-style': 'italic', 'color': '#6c757d', 'font-weight': 'normal'}); // Mặc định khi không chọn sp
+                    }
+                    // *** KẾT THÚC CẬP NHẬT PHÍ SHIP ***
 
                     if (effectiveDiscount > 0) {
                         $('#cart-discount').text('-' + formatCurrency(effectiveDiscount));
@@ -302,8 +462,12 @@
                     } else {
                         $('#discount-row').hide();
                     }
-                    
+
+                    // *** CẬP NHẬT TỔNG TIỀN (Chưa gồm VC) ***
                     $('#cart-grandtotal').text(formatCurrency(Math.round(grandTotal)));
+                    $('#cart-grandtotal-label').text(selectedCount > 0 ? "Tổng thành tiền (Chưa gồm VC)" : "Tổng thành tiền"); // Đổi label nếu có sp được chọn
+                    // *** KẾT THÚC CẬP NHẬT TỔNG TIỀN ***
+
                     $('#checkoutBtn').prop('disabled', selectedCount === 0);
                     updateVoucherUI(cartData.appliedVoucherCode);
                 }

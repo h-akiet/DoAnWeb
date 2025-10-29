@@ -17,11 +17,10 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 50) // Thêm length cho cột name
+    @Column(unique = true, nullable = false, length = 50) 
     @Enumerated(EnumType.STRING)
     private RoleName name;
 
-    // Enum định nghĩa các vai trò có thể có
     public enum RoleName {
         ADMIN,
         USER,
@@ -29,7 +28,6 @@ public class Role {
         SHIPPER
     }
 
-    // Constructor tiện ích (nếu cần)
     public Role(RoleName name) {
         this.name = name;
     }

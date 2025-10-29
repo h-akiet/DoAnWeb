@@ -34,9 +34,9 @@
             }
 
             .store-locator-grid {
-                display: grid;
                 grid-template-columns: 400px 1fr;
                 gap: 20px;
+                display: grid; 
             }
 
             .filter-area {
@@ -106,11 +106,12 @@
                 border-radius: 6px;
                 margin-bottom: 10px;
                 overflow: hidden;
-                transition: box-shadow 0.2s ease;
+                transition: box-shadow 0.2s ease, transform 0.2s ease;
             }
 
             .store-item:hover {
                 box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+                transform: translateY(-2px);
             }
 
             .store-item-header {
@@ -171,23 +172,36 @@
                 gap: 6px;
                 background-color: var(--primary-color);
                 color: white;
-                padding: 8px 14px;
-                border-radius: 6px;
-                font-size: 13px;
+                padding: 10px 18px;
+                border-radius: 8px;
+                font-size: 14px;
                 font-weight: 600;
                 text-decoration: none;
                 transition: all 0.2s ease;
-                margin-top: 8px;
+                margin-top: 12px;
+                box-shadow: 0 4px 10px rgba(232, 90, 112, 0.4);
             }
 
             .chat-btn:hover {
                 background-color: #d6485e;
-                transform: translateY(-1px);
-                box-shadow: 0 2px 6px rgba(232, 90, 112, 0.3);
+                transform: scale(1.02);
+                box-shadow: 0 6px 15px rgba(232, 90, 112, 0.6);
+            }
+            
+            /* LÀM NỔI BẬT ICON CHAT BÊN TRONG */
+            .chat-btn i {
+                font-size: 16px; /* Kích thước icon lớn hơn một chút */
+                /* Thêm hiệu ứng pulse cho icon */
+                animation: icon-pulse 1.5s infinite; 
+                /* Đổ bóng nhẹ cho icon để nổi bật */
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.7); 
+                color: white; /* Đảm bảo màu trắng */
             }
 
-            .chat-btn i {
-                font-size: 14px;
+            @keyframes icon-pulse {
+                0% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.1); opacity: 0.8; }
+                100% { transform: scale(1); opacity: 1; }
             }
 
             .map-area {
@@ -215,6 +229,9 @@
                     height: 400px;
                     position: static;
                     margin-bottom: 20px;
+                }
+                .store-list-container {
+                     grid-row: 2;
                 }
                 .store-scroll-list {
                     max-height: none;
@@ -251,6 +268,7 @@
         </div>
 
         <div class="store-locator-grid">
+            
             <div class="store-list-container">
                 <div class="store-list-area">
                     <i class="fas fa-map-marker-alt"></i>
@@ -261,17 +279,13 @@
                         <p>Hiện chưa có cửa hàng nào.</p>
                     </div>
 
-                    <!-- Mỗi cửa hàng -->
                     <div class="store-item" th:each="shop, iterStat : ${shops}" th:unless="${#lists.isEmpty(shops)}">
-                        <!-- Header: Click để mở/đóng -->
                         <div class="store-item-header" th:attr="onclick='toggleStoreItem(this)'">
                             <strong th:text="'CN ' + ${iterStat.count} + ': ' + ${shop.name}">Store Name</strong>
                             <i class="fas fa-chevron-down"></i>
                         </div>
 
-                        <!-- Body: Thông tin chi tiết -->
                         <div class="store-item-body">
-                            <!-- Địa chỉ -->
                             <p th:if="${shop.user?.address != null and !#strings.isEmpty(shop.user.address)}">
                                 <i class="fas fa-map-marker-alt"></i>
                                 <span th:text="${shop.user.address}">Store Address</span>
@@ -281,7 +295,6 @@
                                 <span>(Chưa cập nhật địa chỉ)</span>
                             </p>
 
-                            <!-- SĐT -->
                             <p th:if="${shop.contactPhone != null and !#strings.isEmpty(shop.contactPhone)}">
                                 <i class="fas fa-phone-alt"></i>
                                 <span th:text="${shop.contactPhone}">Store Phone</span>
@@ -291,27 +304,22 @@
                                 <span>(Chưa cập nhật SĐT)</span>
                             </p>
 
-                            <!-- NÚT TRÒ CHUYỆN – CHỈ HIỆN KHI CÓ VENDOR -->
-                            <div th:if="${shop.user?.id != null}" sec:authorize="isAuthenticated()">
+                            <div th:if="${shop.user?.id != null}">
 							    <a th:href="@{/chat/{id}(id=${shop.user.id})}"
 							       class="chat-btn"
+							       sec:authorize="isAuthenticated()"
 							       onclick="event.stopPropagation();">
 							        <i class="fas fa-comment-dots"></i>
 							        Trò chuyện ngay
 							    </a>
+                                <a href="#" class="chat-btn"
+                                   sec:authorize="!isAuthenticated()"
+                                   onclick="event.stopPropagation(); alert('Vui lòng đăng nhập để trò chuyện!'); return false;">
+                                    <i class="fas fa-comment-dots"></i>
+                                    Trò chuyện ngay
+                                </a>
 							</div>
 
-                                <!-- CHƯA ĐĂNG NHẬP -->
-                                <div sec:authorize="!isAuthenticated()">
-                                    <a href="#" class="chat-btn"
-                                       onclick="event.stopPropagation(); alert('Vui lòng đăng nhập để trò chuyện!'); return false;">
-                                        <i class="fas fa-comment-dots"></i>
-                                        Trò chuyện ngay
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Không có vendor -->
                             <div th:unless="${shop.user?.id != null}" class="text-muted small">
                                 <em>(Chưa liên kết chủ shop)</em>
                             </div>
@@ -320,7 +328,6 @@
                 </div>
             </div>
 
-            <!-- Bản đồ -->
             <div class="map-area">
                 <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.4843336040823!2d106.76933067469711!3d10.850720457814913!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752763f23816ab%3A0x282f711441b6916f!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBTxrAgcGjhuqFtIEvhu7kgdGh14bqtdCBUcC4gSOG7kyBDaMOtIE1pbmg!5e0!3m2!1svi!2s!4v1715077051991!5m2!1svi!2s"
                         allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
@@ -335,12 +342,15 @@
             const storeItem = headerElement.closest('.store-item');
             if (storeItem) {
                 document.querySelectorAll('.store-item.active').forEach(item => {
+                    // Đảm bảo chỉ đóng cái khác nếu cái đang mở không phải là cái vừa click
                     if (item !== storeItem) item.classList.remove('active');
                 });
                 storeItem.classList.toggle('active');
             }
         }
-
+        
+        // ... (Logic JavaScript khác giữ nguyên) ...
+        
         document.addEventListener('DOMContentLoaded', function() {
             const provinceSelect = document.getElementById('provinceSelect');
             const districtSelect = document.getElementById('districtSelect');
@@ -397,7 +407,11 @@
                     noResult.id = 'no-result-message';
                     noResult.className = 'text-center text-muted p-5';
                     noResult.style.display = 'none';
-                    document.querySelector('.store-scroll-list').appendChild(noResult);
+                    // Kiểm tra xem store-scroll-list có tồn tại không trước khi append
+                    const scrollList = document.querySelector('.store-scroll-list');
+                    if(scrollList) {
+                         scrollList.appendChild(noResult);
+                    }
                 }
 
                 items.forEach(item => {

@@ -28,30 +28,23 @@ public class ShippingRule {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "shipping_company_id", nullable = false)
-	private ShippingCompany company; // Liên kết 1-N với Nhà Vận Chuyển
+	private ShippingCompany company; 
 
-	@Column(length = 50)
-	private String ruleName; // Tên quy tắc (ví dụ: "Phí Nội Thành TPHCM", "Phí Hỏa Tốc Hà Nội")
+	@Column(length = 50, columnDefinition = "nvarchar(50)") 
+	private String ruleName;
 	
+	@Column(length = 50, columnDefinition = "nvarchar(50)") 
+	private String fromRegion;
+
+	@Column(length = 50, columnDefinition = "nvarchar(50)") 
+	private String toRegion;
 	
-
-	// --- CÁC TRƯỜNG ĐIỀU KIỆN ÁP DỤNG ---
-
-	// 1. Điều kiện theo Khu vực/Vùng:
-	@Column(length = 50)
-	private String fromRegion; // Khu vực/tỉnh/thành phố gửi
-
-	@Column(length = 50)
-	private String toRegion; // Khu vực/tỉnh/thành phố nhận
-	
-	// 3. Điều kiện Vận chuyển Hỏa tốc (Loại dịch vụ):
 	@Column(nullable = false)
-	private Boolean isExpress = false; // true nếu đây là dịch vụ giao hàng Hỏa tốc
+	private Boolean isExpress = false; 
 	
-	@Column(name = "estimated_delivery_time", length = 50)
+	@Column(name = "estimated_delivery_time", length = 50, columnDefinition = "nvarchar(50)") 
 	private String estimatedDeliveryTime;
-	// --- MỨC PHÍ TÍNH TOÁN ---
 
 	@Column(precision = 10, scale = 2, nullable = false)
-	private BigDecimal baseFee; // Phí cố định (Flat Rate) áp dụng khi thỏa mãn các điều kiện trên
+	private BigDecimal baseFee; 
 }

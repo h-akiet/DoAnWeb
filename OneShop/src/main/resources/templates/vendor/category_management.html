@@ -3,30 +3,21 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{vendor/layout/app}">
 <head>
-    <title>Quản lý Danh mục</title>
-    <style>
+    <title>Danh mục Sản phẩm</title> <style>
         .list-group-item span {
-            color: var(--text-dark); 
-            font-weight: 500; 
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+        /* Style để danh sách chiếm toàn bộ chiều rộng */
+        .category-list-container {
+            width: 100%;
         }
     </style>
 </head>
 <body>
 <div layout:fragment="content">
-    <h1 class="h3 mt-4 mb-3">Quản lý Danh mục Sản phẩm</h1>
-    <p class="lead mb-4">Thêm mới hoặc xóa các danh mục cho sản phẩm của bạn.</p>
-
-    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <span th:text="${successMessage}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <span th:text="${errorMessage}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-
-    <div class="row">
-        <div class="col-md-7">
+    <h1 class="h3 mt-4 mb-3">Danh mục Sản phẩm</h1> <p class="lead mb-4">Xem danh sách các danh mục sản phẩm hiện có trên hệ thống.</p> <div class="row">
+        <div class="col-12 category-list-container">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold">Danh sách Danh mục hiện có</h6>
@@ -36,37 +27,15 @@
                         Chưa có danh mục nào.
                     </div>
                     <ul th:unless="${#lists.isEmpty(categories)}" class="list-group list-group-flush">
-                        <li th:each="category : ${categories}" class="list-group-item d-flex justify-content-between align-items-center">
+                        <li th:each="category : ${categories}" class="list-group-item d-flex align-items-center">
                             <span th:text="${category.name}">Tên danh mục</span>
-                            <form th:action="@{/vendor/categories/delete/{id}(id=${category.id})}" method="post" class="d-inline"
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục \'' + [[$category.name]] + '\'? Hành động này không thể hoàn tác.');">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </li>
+                            </li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-5">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold">Thêm Danh mục mới</h6>
-                </div>
-                <div class="card-body">
-                    <form th:action="@{/vendor/categories/add}" th:object="${newCategory}" method="post">
-                        <div class="mb-3">
-                            <label for="categoryName" class="form-label">Tên danh mục mới</label>
-                            <input type="text" class="form-control" id="categoryName" th:field="*{name}" required placeholder="Ví dụ: Chăm sóc cơ thể">
-                            <div class="text-danger mt-1 small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Thêm mới</button>
-                    </form>
-                </div>
-            </div>
         </div>
-    </div> </div>
+</div>
 </body>
 </html>

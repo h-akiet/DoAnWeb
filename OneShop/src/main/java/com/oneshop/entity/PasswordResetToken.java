@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class PasswordResetToken {
 
-    private static final int EXPIRATION_MINUTES = 60; // Token hết hạn sau 60 phút
+    private static final int EXPIRATION_MINUTES = 60; 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

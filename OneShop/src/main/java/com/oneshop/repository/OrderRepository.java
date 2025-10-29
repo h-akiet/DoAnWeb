@@ -14,7 +14,6 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -26,7 +25,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     long countByShopIdAndOrderStatus(Long shopId, OrderStatus orderStatus);
     List<Order> findByShopIdAndOrderStatusIn(Long shopId, List<OrderStatus> statuses, Sort sort);
 
-    // ===>>> PHƯƠNG THỨC TÍNH DOANH THU <<<===
+    // === PHƯƠNG THỨC TÍNH DOANH THU ===
 
     @Query("SELECT SUM(o.total) FROM Order o WHERE o.shop.id = :shopId AND o.orderStatus = :status")
     BigDecimal calculateTotalRevenueByShopIdAndStatus(@Param("shopId") Long shopId, @Param("status") OrderStatus status);
@@ -40,22 +39,17 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /**
      * Lấy doanh thu theo từng tháng trong một khoảng thời gian (Ví dụ: 6 tháng gần nhất).
-     * SỬA: Dùng FORMAT thay vì TO_CHAR cho SQL Server.
+     * Sử dụng Native Query với FORMAT cho SQL Server.
      */
-    // ===>>> SỬA CÂU QUERY NÀY <<<===
     @Query(value = "SELECT FORMAT(o.created_at, 'yyyy-MM') as monthYear, SUM(o.total_amount) as monthlyRevenue " +
-                   "FROM ORDERS o " +
-                   "WHERE o.shop_id = :shopId AND o.order_status = :#{#status.name()} AND o.created_at >= :startDate " +
-                   "GROUP BY FORMAT(o.created_at, 'yyyy-MM') " + // Sửa GROUP BY
+                   "FROM orders o " +  // Sửa ORDERS thành orders (thường table name là lowercase)
+                   "WHERE o.shop_id = :shopId AND o.order_status = :status AND o.created_at >= :startDate " +
+                   "GROUP BY FORMAT(o.created_at, 'yyyy-MM') " +
                    "ORDER BY monthYear ASC", nativeQuery = true)
-    // ===>>> KẾT THÚC SỬA <<<===
     List<Object[]> findMonthlyRevenueByShopIdAndStatusSinceDate(
             @Param("shopId") Long shopId,
-            @Param("status") OrderStatus status,
+            @Param("status") String status,  // Sửa thành String để phù hợp với native query
             @Param("startDate") LocalDateTime startDate);
-
-    // ===>>> KẾT THÚC PHẦN DOANH THU <<<===
-
 
     // --- Cho User ---
     List<Order> findByUserIdOrderByCreatedAtDesc(Long userId);
@@ -72,9 +66,49 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByOrderStatus(OrderStatus orderStatus);
     List<Order> findByUserIdAndOrderStatus(Long userId, OrderStatus orderStatus);
 
-    @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.orderDetails i " +
-           "LEFT JOIN FETCH i.productVariant v " +
-           "LEFT JOIN FETCH v.product p " +
+    @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.orderDetails od " +
+           "LEFT JOIN FETCH od.productVariant pv " +
+           "LEFT JOIN FETCH pv.product p " +
            "WHERE o.id = :orderId")
     Optional<Order> findByIdWithItems(@Param("orderId") Long orderId);
+
+    // --- PHƯƠNG THỨC MỚI CHO BIỂU ĐỒ DOANH THU ---
+
+    /**
+     * Lấy tổng doanh thu theo từng sản phẩm cho một shop, chỉ tính các đơn hàng đã giao.
+     * Sắp xếp theo doanh thu giảm dần.
+     */
+    @Query("SELECT p.name, SUM(od.price * od.quantity) as totalRevenue " +
+           "FROM Order o JOIN o.orderDetails od JOIN od.productVariant pv JOIN pv.product p " +
+           "WHERE o.shop.id = :shopId AND o.orderStatus = :status " +
+           "GROUP BY p.productId, p.name " +
+           "ORDER BY totalRevenue DESC")
+    List<Object[]> findTopProductRevenueByShop(@Param("shopId") Long shopId, @Param("status") OrderStatus status, Pageable pageable);
+
+    /**
+     * Lấy tổng doanh thu theo từng danh mục sản phẩm cho một shop, chỉ tính các đơn hàng đã giao.
+     */
+    @Query("SELECT c.name, SUM(od.price * od.quantity) as totalRevenue " +
+           "FROM Order o JOIN o.orderDetails od JOIN od.productVariant pv JOIN pv.product p JOIN p.category c " +
+           "WHERE o.shop.id = :shopId AND o.orderStatus = :status " +
+           "GROUP BY c.id, c.name " +
+           "ORDER BY totalRevenue DESC")  // Sắp xếp theo doanh thu giảm dần
+    List<Object[]> findCategoryRevenueByShop(@Param("shopId") Long shopId, @Param("status") OrderStatus status);
+
+    // --- PHƯƠNG THỨC BỔ SUNG CHO BÁO CÁO ---
+    
+    /**
+     * Đếm số đơn hàng theo trạng thái cho một shop
+     */
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.shop.id = :shopId AND o.orderStatus = :status")
+    long countOrdersByShopAndStatus(@Param("shopId") Long shopId, @Param("status") OrderStatus status);
+
+    /**
+     * Lấy danh sách đơn hàng trong khoảng thời gian cho báo cáo
+     */
+    @Query("SELECT o FROM Order o WHERE o.shop.id = :shopId AND o.createdAt BETWEEN :startDate AND :endDate " +
+           "ORDER BY o.createdAt DESC")
+    List<Order> findOrdersByShopAndDateRange(@Param("shopId") Long shopId, 
+                                           @Param("startDate") LocalDateTime startDate, 
+                                           @Param("endDate") LocalDateTime endDate);
 }

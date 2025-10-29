@@ -17,7 +17,7 @@ public class Brand {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long brandId;
 
-    @Column(length = 150, nullable = false)
+    @Column(length = 150, nullable = false, columnDefinition = "nvarchar(150)") 
     private String name;
 
     @Column(name = "logo_url", length = 255)

@@ -1171,39 +1171,49 @@ textarea.form-control {
 
 .product__sale {
     position: absolute;
-    top: 0;
-    right: 0;
-    background-color: #f8d133;
-    width: 36px;
-    height: 32px;
+    right: 10px;
+    top: 10px;
+    /* width: 40px; */ /* Bỏ width cố định */
+    min-width: 45px; /* Đặt chiều rộng tối thiểu */
+    /* height: 36px; */ /* Bỏ height cố định */
     text-align: center;
-    border-top-right-radius: 2px;
+    background-color: rgba(255, 216, 64, 0.95); /* Giữ màu nền */
+    border-top-right-radius: 3px; /* Bo góc nhẹ */
+    border-bottom-right-radius: 3px;
+    padding: 3px 5px; /* Thêm padding (ít top/bottom, nhiều left/right hơn) */
+    display: flex; /* Dùng flexbox để căn chỉnh dễ hơn */
+    flex-direction: column; /* Xếp dọc % và chữ GIẢM */
+    align-items: center; /* Căn giữa ngang */
+    justify-content: center; /* Căn giữa dọc */
+    line-height: 1.1; /* Giảm nhẹ line-height tổng thể */
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.2); /* Thêm bóng đổ nhẹ */
 }
 
-.product__sale::after {
+.product__sale::before {
     content: "";
     position: absolute;
-    border-style: solid;
-    border-width: 0 18px 5px 18px;
-    border-color: transparent #f8d133;
-    bottom: -5px;
     left: 0;
+    bottom: -5px; /* Điều chỉnh vị trí tam giác nếu cần */
+    /* Điều chỉnh kích thước tam giác cho phù hợp min-width mới (45px/2 ~ 22px) */
+    border-width: 0 22px 5px;
+    border-style: solid;
+    border-color: transparent rgba(255, 216, 64, 0.95) transparent rgba(255, 216, 64, 0.95);
 }
 
 .product__sale-percent {
-    font-size: 1.3rem;
-    font-weight: 500;
-    color: red;
-    display: block;
-    padding: 2px 0;
+    color: #EE4D2D; /* Giữ màu đỏ */
+    font-weight: 700; /* Đậm hơn */
+    font-size: 1.3rem; /* Tăng nhẹ font size */
+    display: block; /* Giữ nguyên */
+    margin-bottom: -2px; /* Giảm khoảng cách dưới nếu cần */
 }
 
 .product__sale-text {
-    text-transform: uppercase;
-    font-weight: 500;
-    color: red;
-    line-height: 1.3rem;
-    font-stretch: ultra-expanded;
+    color: var(--white-cl, #fff); /* Giữ màu trắng */
+    font-size: 1.0rem; /* Giảm nhẹ font size chữ GIẢM */
+    font-weight: 700; /* Đậm hơn */
+    display: block; /* Giữ nguyên */
+    text-transform: uppercase; /* Viết hoa chữ GIẢM */
 }
 
 /*product Btn*/

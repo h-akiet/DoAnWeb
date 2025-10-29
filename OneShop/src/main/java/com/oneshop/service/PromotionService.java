@@ -20,6 +20,8 @@ public interface PromotionService {
     Promotion createPromotion(PromotionDto promotionDto, Long shopId);
 
     void deletePromotion(Long promotionId, Long shopId);
+    
+    Optional<Promotion> findPromotionById(Long promotionId);
 
     /** Lấy danh sách các khuyến mãi còn hạn (phân trang). */
     Page<Promotion> findActiveAndUpcomingPromotions(Pageable pageable);

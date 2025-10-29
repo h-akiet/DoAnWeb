@@ -136,8 +136,7 @@
                             <span th:if="${promo.value != null and promo.type.code == 'PERCENTAGE'}" th:text="' - Giảm ' + ${#numbers.formatDecimal(promo.value, 0, 'COMMA', 0, 'POINT')} + '%'"></span>
                             <span th:if="${promo.value != null and promo.type.code == 'FIXED_AMOUNT'}" th:text="' - Giảm ' + ${#numbers.formatCurrency(promo.value)}"></span>
                             <br>
-                            <span th:text="'Áp dụng tại cửa hàng: ' + ${promo.shop?.name ?: 'N/A'}"></span>.
-                        </p>
+                            </p>
                         <a th:href="@{/products}" class="btn btn--default">Săn Sale Ngay</a>
                     </div>
                 </div>

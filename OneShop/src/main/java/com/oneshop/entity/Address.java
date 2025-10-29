@@ -25,7 +25,7 @@ public class Address {
     @JsonBackReference
     private User user;
 
-    @Column(name = "full_name", length = 100)
+    @Column(name = "full_name", length = 100, columnDefinition = "nvarchar(100)") 
     private String fullName;
 
     @Column(name = "phone", length = 20)
@@ -35,7 +35,7 @@ public class Address {
     @Column(name = "is_default")
     private Boolean isDefault = false;
 
-    @Column(name = "address", columnDefinition = "NVARCHAR(MAX)")
-    private String address; // Trường lưu chuỗi địa chỉ đầy đủ
+    @Column(name = "address", columnDefinition = "NVARCHAR(MAX)") 
+    private String address; 
 }
  

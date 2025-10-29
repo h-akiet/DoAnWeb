@@ -6,21 +6,21 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference; // Dùng cho Address
+import com.fasterxml.jackson.annotation.JsonManagedReference; 
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 
-@Entity // Chỉ cần 1 @Entity
-@Table(name = "USERS") // Chỉ cần 1 @Table
+@Entity 
+@Table(name = "USERS") 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"addresses", "cart", "shop", "role"}) // Thêm role, shop vào exclude
-@ToString(exclude = {"addresses", "cart", "shop", "role"})      // Thêm role, shop vào exclude
+@EqualsAndHashCode(exclude = {"addresses", "cart", "shop", "role"}) 
+@ToString(exclude = {"addresses", "cart", "shop", "role"})     
 public class User implements UserDetails {
 
     @Id
@@ -28,55 +28,48 @@ public class User implements UserDetails {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100) // Thêm length
+    @Column(nullable = false, unique = true, length = 100) 
     private String username;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, unique = true, length = 150) // Thêm length
+    @Column(nullable = false, unique = true, length = 150) 
     private String email;
 
-    @Column(name = "full_name", columnDefinition = "nvarchar(255)") // Đổi tên cột và giữ nvarchar
+    @Column(name = "full_name", columnDefinition = "nvarchar(255)") 
     private String fullName;
 
-    @Column(name = "phone_number", length = 20) // Đổi tên cột và thêm length
+    @Column(name = "phone_number", length = 20) 
     private String phoneNumber;
 
-    @Column(columnDefinition = "nvarchar(500)") // Giữ nvarchar cho địa chỉ chung (nếu cần)
-    private String address; // Địa chỉ chung, có thể không cần thiết nếu dùng Address entity
+    @Column(columnDefinition = "nvarchar(500)") 
+    private String address; 
 
     @Column(nullable = false)
-    private boolean activated = false; // Trạng thái kích hoạt
+    private boolean activated = false; 
 
-    // --- SỬA QUAN HỆ ROLE ---
-    // Bỏ: private Set<Role> roles = new HashSet<>();
-    // Bỏ: @Enumerated(EnumType.STRING) @Column(nullable = false) private Role role;
-
-    // Thêm: Quan hệ ManyToOne tới Entity Role mới
-    @ManyToOne(fetch = FetchType.EAGER) // EAGER để dễ lấy role khi xác thực
+    @ManyToOne(fetch = FetchType.EAGER) 
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
-    // -------------------------
 
-    // --- CÁC QUAN HỆ KHÁC ---
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Cart cart;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference // Giữ lại để quản lý JSON two-way reference với Address
+    @JsonManagedReference 
     private Set<Address> addresses = new HashSet<>();
 
-    // Quan hệ OneToOne với Shop (Một User Vendor có một Shop)
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Shop shop; // Shop thuộc về User này (nếu là Vendor)
-
-    // --- IMPLEMENT UserDetails ---
+    private Shop shop; 
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipping_company_id") 
+    private ShippingCompany shippingCompany;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();
-        // Quan trọng: Thêm tiền tố "ROLE_" và lấy tên từ Enum RoleName
         if (this.role != null && this.role.getName() != null) {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + this.role.getName().name()));
         }
@@ -95,25 +88,24 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // Hoặc logic kiểm tra hết hạn tài khoản nếu có
+        return true; 
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // Hoặc logic kiểm tra khóa tài khoản
+        return true; 
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // Hoặc logic kiểm tra hết hạn mật khẩu
+        return true; 
     }
 
     @Override
     public boolean isEnabled() {
-        return this.activated; // Tài khoản chỉ enabled khi đã activated
+        return this.activated; 
     }
 
-    // --- GETTER/SETTER ID (Giữ lại để tương thích code cũ nếu cần) ---
     public Long getUserId() {
         return id;
     }

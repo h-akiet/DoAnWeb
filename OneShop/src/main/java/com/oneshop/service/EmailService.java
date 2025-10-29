@@ -30,4 +30,18 @@ public class EmailService {
                         "Cảm ơn quý khách đã mua sắm tại OneShop!");
         mailSender.send(message);
     }
+    public void sendShipperCredentials(String to, String username, String password) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Tài khoản Shipper OneShop đã được khởi tạo");
+        message.setText("Xin chào " + username + ",\n\n" +
+                        "Tài khoản Shipper của bạn trên OneShop đã được khởi tạo thành công.\n\n" +
+                        "Thông tin đăng nhập:\n" +
+                        "  - Tên đăng nhập: " + username + "\n" +
+                        "  - Mật khẩu: " + password + "\n\n" +
+                        "Bạn có thể đăng nhập tại trang web của chúng tôi và bắt đầu nhận đơn hàng.\n\n" +
+                        "Trân trọng,\n" +
+                        "Đội ngũ Quản trị OneShop.");
+        mailSender.send(message);
+    }
 }

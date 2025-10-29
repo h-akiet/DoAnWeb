@@ -26,7 +26,7 @@ public class ProductReview {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Thay đổi từ OneToOne thành ManyToOne để hỗ trợ nhiều review per order
+    @ManyToOne(fetch = FetchType.LAZY) 
     @JoinColumn(name = "order_id") 
     private Order order;
 
@@ -39,7 +39,6 @@ public class ProductReview {
     @Column(name = "review_date")
     private LocalDateTime reviewDate = LocalDateTime.now();
 
-    // Mối quan hệ: Một đánh giá có thể có nhiều media (ảnh/video)
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<ReviewMedia> media;
 }

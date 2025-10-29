@@ -30,4 +30,6 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
             LocalDate date2
         );
     Optional<Promotion> findByDiscountCode(String discountCode);
+    @Override
+    Optional<Promotion> findById(Long id);
 }

@@ -45,12 +45,9 @@ public class HomeController {
         try {
             List<Product> bestSellers = productService.findBestSellingProducts(limit);
             
-            // ===>>> SỬA LỖI LOGIC (Bạn đã gọi nhầm hàm) <<<===
-            // Sắp xếp cho "newest" phải là theo "productId" giảm dần
+            // Sửa lỗi logic: Gọi đúng hàm findNewestProducts
             Pageable newestPageable = PageRequest.of(0, otherLimit, Sort.by("productId").descending());
-            // Gọi đúng hàm findNewestProducts
-            List<Product> newest = productService.findNewestProducts(newestPageable).getContent(); 
-            // ===>>> KẾT THÚC SỬA <<<===
+            List<Product> newest = productService.findNewestProducts(newestPageable).getContent();
             
             List<Product> bestPrice = productService.findBestPriceProducts(otherLimit);
 
@@ -120,5 +117,12 @@ public class HomeController {
         }
 
         return "guest/news";
+    }
+
+    // Phương thức mới cho chính sách vận chuyển & đổi trả
+    @GetMapping("/shipping-policy")
+    public String shippingPolicy(Model model) {
+        logger.info("Accessing shipping and return policy page.");
+        return "guest/shipping-policy";
     }
 }

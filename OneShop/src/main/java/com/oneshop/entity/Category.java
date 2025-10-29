@@ -17,14 +17,13 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    @Column(nullable = false, columnDefinition = "nvarchar(255)") 
     private String name;
-    
-    // Một Danh mục có nhiều Sản phẩm
+
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     private List<Product> products;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id") // Column name for the foreign key
+    @JoinColumn(name = "parent_id") 
     private Category parentCategory;
 }

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Controller
 public class CheckoutController {
 
-    private static final BigDecimal DEFAULT_SHIPPING_FEE = new BigDecimal("30000");
+	private static final BigDecimal INITIAL_ESTIMATED_SHIPPING_FEE = new BigDecimal("30000");
 
     @Autowired
     private CartService cartService;
@@ -68,42 +68,34 @@ public class CheckoutController {
                 .map(CartItemDto::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         
-        BigDecimal shippingCost = DEFAULT_SHIPPING_FEE;
+        BigDecimal estimatedShippingCost = INITIAL_ESTIMATED_SHIPPING_FEE; // Phí ước tính ban đầu
         BigDecimal discountAmount = BigDecimal.ZERO;
-        boolean isFreeShipping = false;
-        
-        // --- LOGIC XỬ LÝ VOUCHER ĐA LOẠI ---
+        boolean isFreeShipping = false; // Cờ freeship
+
         String voucherCode = fullCart.getAppliedVoucherCode();
         String voucherType = fullCart.getAppliedVoucherTypeCode();
         BigDecimal voucherValue = fullCart.getAppliedVoucherValue();
 
         if (voucherCode != null && subtotal.compareTo(BigDecimal.ZERO) > 0) {
-            
             if ("PERCENTAGE".equalsIgnoreCase(voucherType) && voucherValue != null) {
-                // Tính giảm giá theo %
                 discountAmount = subtotal.multiply(voucherValue)
                                          .divide(new BigDecimal("100"), 0, RoundingMode.HALF_UP);
-                
             } else if ("FIXED_AMOUNT".equalsIgnoreCase(voucherType) && voucherValue != null) {
-                // Tính giảm giá tiền cố định (Không giảm quá subtotal)
                 discountAmount = voucherValue.min(subtotal);
-                
             } else if ("FREE_SHIPPING".equalsIgnoreCase(voucherType)) {
-                // Áp dụng miễn phí vận chuyển
-                shippingCost = BigDecimal.ZERO;
+                // Nếu là freeship, phí ước tính = 0
+                estimatedShippingCost = BigDecimal.ZERO;
                 isFreeShipping = true;
+                discountAmount = BigDecimal.ZERO; // Freeship không giảm vào subtotal
             }
-            
-            // Cần đảm bảo discountAmount không lớn hơn subtotal
             discountAmount = discountAmount.min(subtotal);
         }
-        
-        // Tính tổng tiền cuối cùng
-        BigDecimal grandTotal = subtotal
+
+        // Tính tổng tiền TẠM TÍNH (bao gồm phí ship ước tính)
+        BigDecimal estimatedGrandTotal = subtotal
                                 .subtract(discountAmount)
-                                .add(shippingCost);
-        // Đảm bảo không âm
-        grandTotal = grandTotal.max(BigDecimal.ZERO);
+                                .add(estimatedShippingCost); // Cộng phí ship ước tính
+        estimatedGrandTotal = estimatedGrandTotal.max(BigDecimal.ZERO);
 
 
         // 4. Add data to the model
@@ -114,8 +106,9 @@ public class CheckoutController {
         
         // --- THÔNG TIN TỔNG KẾT ĐÃ CẬP NHẬT ---
         model.addAttribute("subtotal", subtotal);
-        model.addAttribute("shippingCost", shippingCost); // Có thể là 0
-        model.addAttribute("grandTotal", grandTotal);
+        // ** KHÔNG truyền shippingCost cố định nữa **
+        // model.addAttribute("shippingCost", shippingCost);
+        model.addAttribute("grandTotal", estimatedGrandTotal);
         
         // --- THÔNG TIN VOUCHER ĐỂ HIỂN THỊ ---
         model.addAttribute("discountAmount", discountAmount); // Số tiền giảm

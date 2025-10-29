@@ -227,9 +227,21 @@
                     }, 5000);
                 });
                 console.log("Admin Categories page fully loaded and ready.");
+
+                // *** LOGIC TỪ categories.js ĐÃ ĐƯỢC CHUYỂN VÀO ĐÂY ***
+                // Khi modal chỉnh sửa đóng, chuyển hướng nếu cần
+                $('#editCategoryModal').on('hidden.bs.modal', function() {
+                    if (window.location.pathname.includes('/edit')) {
+                        window.location.href = '/admin/categories';
+                    }
+                });
+                // Khi modal xóa đóng (không cần làm gì, nhưng giữ lại)
+                $('#deleteCategoryModal').on('hidden.bs.modal', function() {
+                });
+                // *** KẾT THÚC LOGIC CHUYỂN VÀO ***
             });
 
-            // **** HÀM XỬ LÝ NÚT XÓA ****
+            // **** HÀM XỬ LÝ NÚT XÓA (Giữ nguyên) ****
             function handleCategoryDelete(buttonElement) {
                 console.log("handleCategoryDelete function called.", buttonElement);
 

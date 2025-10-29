@@ -15,8 +15,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"orderDetails", "user", "shop", "shipper", "promotion"}) // Thêm promotion
-@ToString(exclude = {"orderDetails", "user", "shop", "shipper", "promotion"})      // Thêm promotion
+@EqualsAndHashCode(exclude = {"orderDetails", "user", "shop", "shipper", "promotion", "shippingCompany"})
+@ToString(exclude = {"orderDetails", "user", "shop", "shipper", "promotion", "shippingCompany"})
 public class Order {
 
     @Id
@@ -26,9 +26,8 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // Import com.oneshop.entity.User
+    private User user; 
 
-    // --- Thông tin Người nhận (Lưu tại thời điểm đặt hàng) ---
     @Column(name = "recipient_name", nullable = false, columnDefinition = "nvarchar(255)")
     private String recipientName;
 
@@ -38,13 +37,12 @@ public class Order {
     @Column(name = "shipping_address", nullable = false, columnDefinition = "nvarchar(500)")
     private String shippingAddress; 
 
-    // --- Thông tin Đơn hàng ---
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "order_status", nullable = false, length=50)
-    private OrderStatus orderStatus; // Import com.oneshop.entity.OrderStatus
+    private OrderStatus orderStatus; 
 
     @Column(name = "payment_method", length = 50)
     private String paymentMethod;
@@ -55,38 +53,43 @@ public class Order {
     @Column(name = "shipping_cost", precision = 19, scale = 2)
     private BigDecimal shippingCost;
     
-    // === BẮT ĐẦU THAY ĐỔI: Thêm thông tin Voucher/Promotion ===
-
-    /**
-     * Số tiền thực tế đã được giảm giá (lưu lại để đảm bảo lịch sử).
-     */
     @Column(name = "discount_amount", precision = 19, scale = 2)
     private BigDecimal discountAmount;
 
-    /**
-     * Liên kết đến chương trình khuyến mãi đã áp dụng (nếu có).
-     * Giả sử bạn có entity tên là Promotion.
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "promotion_id") // Đây sẽ là cột promotion_id trong DB
-    private Promotion promotion; // Import com.oneshop.entity.Promotion (Hoặc tên entity tương ứng của bạn)
 
-    // === KẾT THÚC THAY ĐỔI ===
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "promotion_id") 
+    private Promotion promotion; 
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipping_company_id") 
+    private ShippingCompany shippingCompany;
 
     @Column(name = "total_amount", nullable = false, precision = 19, scale = 2)
-    private BigDecimal total; // Đây là tổng cuối cùng (subtotal + shipping - discount)
+    private BigDecimal total;
 
-    // --- Liên kết ---
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = false)
-    private Shop shop; // Import com.oneshop.entity.Shop
+    private Shop shop;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shipper_id") // nullable = true
-    private User shipper; // Shipper cũng là User
+    @JoinColumn(name = "shipper_id") 
+    private User shipper; 
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<OrderDetail> orderDetails = new ArrayList<>(); // Import com.oneshop.entity.OrderDetail
+    private List<OrderDetail> orderDetails = new ArrayList<>(); 
 
-    // Lombok sẽ tự động tạo getter/setter, không cần viết tay
+    public void recalculateTotal() {
+        BigDecimal calculatedTotal = BigDecimal.ZERO;
+        if (this.subtotal != null) {
+            calculatedTotal = calculatedTotal.add(this.subtotal);
+        }
+        if (this.shippingCost != null) {
+            calculatedTotal = calculatedTotal.add(this.shippingCost);
+        }
+        if (this.discountAmount != null) {
+            calculatedTotal = calculatedTotal.subtract(this.discountAmount);
+        }
+        this.total = calculatedTotal.max(BigDecimal.ZERO);
+    }
 }

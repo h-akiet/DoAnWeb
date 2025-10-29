@@ -6,8 +6,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.util.ArrayList; // Thêm import này
-import java.util.List;     // Thêm import này
+import java.util.ArrayList; 
+import java.util.List;     
 
 @Entity
 @Table(name = "SHIPPING_COMPANIES")
@@ -20,24 +20,20 @@ public class ShippingCompany {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long shippingId;
 
-    @Column(length = 150, nullable = false)
+    @Column(length = 150, nullable = false, columnDefinition = "nvarchar(150)") 
     private String name;
 
-    // --- SỬA ---
-    // Xóa trường fee không cần thiết
-    // @Column(precision = 10, scale = 2, nullable = false)
-    // private BigDecimal fee;
-
-    // --- THÊM CÁC TRƯỜNG CÒN THIẾU ---
-    @Column(length = 20) // Thêm độ dài cho phone
-    private String phone; // Thêm trường phone
+    @Column(length = 20) 
+    private String phone; 
 
     @Column(nullable = false)
-    private Boolean isActive = true; // Thêm trường trạng thái, mặc định là true
+    private Boolean isActive = true; 
 
-    // --- THÊM QUAN HỆ VỚI ShippingRule ---
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<ShippingRule> rules = new ArrayList<>(); // Thêm danh sách rules
-    // ------------- KẾT THÚC THÊM -----------
+    private List<ShippingRule> rules = new ArrayList<>(); 
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipping_company_id")
+    private ShippingCompany shippingCompany;
 
 }

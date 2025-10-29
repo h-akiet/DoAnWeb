@@ -68,20 +68,15 @@
                                 <td th:text="${company.name}"></td>
                                 <td th:text="${company.phone}" class="text-center"></td>
                                 <td class="text-center">
-                                    <form th:id="'form-' + ${company.shippingId}"
-                                        th:action="@{/admin/shipping-companies/{id}/toggle-status(id=${company.shippingId})}"
-                                        method="post" style="display: inline-block;"
-                                        class="status-toggle-form">
-                                        <input type="hidden" name="isActiveNew" th:value="${!company.isActive}">
-                                        <div class="form-check form-switch d-flex justify-content-center"> <input class="form-check-input traditional-status-toggle"
-                                                type="checkbox" th:id="'statusSwitch' + ${company.shippingId}"
-                                                th:checked="${company.isActive}"
-                                                th:data-id="${company.shippingId}"
-                                                th:data-current-active="${company.isActive}"
-                                                style="cursor: pointer;">
-                                            <label class="form-check-label visually-hidden" th:for="'statusSwitch' + ${company.shippingId}">Trạng thái</label>
-                                        </div>
-                                    </form>
+                                    <div class="form-check form-switch d-flex justify-content-center">
+                                        <input class="form-check-input traditional-status-toggle"
+                                               type="checkbox" th:id="'statusSwitch' + ${company.shippingId}"
+                                               th:checked="${company.isActive}"
+                                               th:data-id="${company.shippingId}"
+                                               th:data-current-active="${company.isActive}"
+                                               style="cursor: pointer;">
+                                        <label class="form-check-label visually-hidden" th:for="'statusSwitch' + ${company.shippingId}">Trạng thái</label>
+                                    </div>
                                 </td>
                                 <td class="text-center action-btns">
                                     <a th:href="@{/admin/shipping-companies/{id}/rules(id=${company.shippingId})}"
@@ -287,7 +282,7 @@
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="isExpress_{INDEX}" name="rules[{INDEX}].isExpress" value="true">
                         <label class="form-check-label" for="isExpress_{INDEX}">Hỏa tốc</label>
-                        <input type="hidden" name="rules[{INDEX}].isExpress" value="false" />
+                        <input type="hidden" th:name="'rules[' + ${'{INDEX}'} + '].isExpress'" value="false" />
                     </div>
                 </div>
             </div>
@@ -299,10 +294,48 @@
             // Biến này sẽ là true nếu nó được Flash Attribute từ showEditForm
             const openEditModal = /*[[${openEditModal == true}]]*/ false;
         </script>
-        <script th:src="@{/assets/js/admin/shipping_company.js}"></script>
+        
         <script>
+            // *** TOÀN BỘ LOGIC TỪ shipping_company.js ĐƯỢC CHUYỂN VÀO ĐÂY ***
+
+            // Hàm re-index các quy tắc
+            function reIndexRules(containerSelector, entryClass, idPrefix) {
+                $(containerSelector).children('.' + entryClass).each(function(newIndex) {
+                    const $ruleEntry = $(this);
+                    $ruleEntry.attr('data-index', newIndex);
+                    // Cập nhật tiêu đề quy tắc (ví dụ: "Quy tắc #1")
+                    $ruleEntry.find('h6.text-secondary').text('Quy tắc #' + (newIndex + 1));
+        
+                    $ruleEntry.find('[name]').each(function() {
+                        const $input = $(this);
+                        const oldName = $input.attr('name');
+                        if (oldName) {
+                            // Cập nhật name (ví dụ: rules[0].ruleName)
+                            const newName = oldName.replace(/rules\[\d+\]/g, 'rules[' + newIndex + ']');
+                            $input.attr('name', newName);
+                        }
+                    });
+                    
+                    // Cập nhật ID và 'for' cho checkbox 'isExpress'
+                    const $checkbox = $ruleEntry.find('input[type="checkbox"][id^="' + idPrefix + '"]');
+                    if ($checkbox.length) {
+                        const newId = idPrefix + newIndex;
+                        $checkbox.attr('id', newId);
+                        // Cập nhật label đi kèm
+                        $ruleEntry.find('label[for^="' + idPrefix + '"]').attr('for', newId);
+                    }
+
+                    // Cập nhật name cho hidden input (nếu có)
+                    const $hiddenInput = $ruleEntry.find('input[type="hidden"][name*="isExpress"]');
+                     if ($hiddenInput.length) {
+                         const newName = 'rules[' + newIndex + '].isExpress';
+                         $hiddenInput.attr('name', newName);
+                     }
+                });
+            }
+
             $(document).ready(function() {
-                 // Tự đóng alert sau 5 giây
+                // Tự đóng alert sau 5 giây (logic gốc)
                 $('.alert').each(function() {
                     const alert = this;
                     setTimeout(function() {
@@ -310,49 +343,105 @@
                     }, 5000);
                 });
 
-                // Xử lý toggle status bằng AJAX thay vì form submit
+                // Xử lý toggle status bằng AJAX (logic gốc, đã sửa lỗi)
                 $('.traditional-status-toggle').on('change', function() {
                     const checkbox = $(this);
                     const companyId = checkbox.data('id');
                     const currentActive = checkbox.data('current-active');
                     const isActiveNew = checkbox.is(':checked');
-                    const formAction = `/admin/shipping-companies/${companyId}/toggle-status`;
-
-                    // Đảo ngược trạng thái checkbox tạm thời để user thấy phản hồi ngay
-                    // checkbox.prop('checked', !isActiveNew); // Tạm thời comment dòng này để tránh nhấp nháy
-
-                    // Xác nhận trước khi gửi
+                    // Lấy URL đúng (giả sử bạn có context path, nhưng ở đây dùng đường dẫn tuyệt đối)
+                    const formAction = `/admin/shipping_company/${companyId}/toggle-status`; 
+                    
                     const actionText = isActiveNew ? 'kích hoạt' : 'vô hiệu hóa';
                     if (!confirm(`Bạn có chắc muốn ${actionText} nhà vận chuyển này?`)) {
                         checkbox.prop('checked', !isActiveNew); // Hoàn tác nếu hủy
                         return;
                     }
 
-                    // Gửi AJAX POST
-                    $.post(formAction, { isActiveNew: isActiveNew, _method: 'POST' }) // Gửi như form POST
+                    // Gửi AJAX POST (Đảm bảo Thymeleaf CSRF token được gửi nếu có)
+                    $.post(formAction, { isActiveNew: isActiveNew })
                         .done(function(data) {
-                            // Thành công, cập nhật lại data attribute và có thể hiển thị thông báo (hoặc reload trang nếu cần)
                             checkbox.data('current-active', isActiveNew);
-                             // Hiển thị thông báo thành công (ví dụ bằng cách thêm vào DOM)
                              const successMsg = `<div class="alert alert-success alert-dismissible fade show" role="alert">
                                                     Đã ${actionText} nhà vận chuyển thành công!
                                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                  </div>`;
-                             $('.lead.mb-4').after(successMsg); // Thêm thông báo sau dòng lead
-                             // Tự đóng thông báo
+                             $('.lead.mb-4').after(successMsg); 
                              setTimeout(() => { $('.alert-success').alert('close'); }, 3000);
                         })
                         .fail(function(xhr) {
-                            // Thất bại, hoàn tác checkbox và báo lỗi
                             checkbox.prop('checked', !isActiveNew);
                              const errorMsg = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
                                                   Lỗi khi ${actionText}: ${xhr.responseText || 'Vui lòng thử lại.'}
                                                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                </div>`;
                              $('.lead.mb-4').after(errorMsg);
+                             setTimeout(() => { $('.alert-danger').alert('close'); }, 5000);
                         });
                 });
 
+                // *** LOGIC TỪ shipping_company.js ***
+                // Mở modal Edit nếu biến openEditModal là true
+                if (typeof openEditModal !== 'undefined' && openEditModal) {
+                    const editModal = new bootstrap.Modal(document.getElementById('editShippingCompanyModal'));
+                    editModal.show();
+                }
+
+                // Logic cho modal Edit
+                const $editRulesContainer = $('#editRulesContainer');
+                let editRuleTemplate = '';
+                if ($("#ruleTemplate").length) {
+                    editRuleTemplate = $("#ruleTemplate").html()
+                        .replace(/{INDEX_DISPLAY}/g, 'TEMP_DISPLAY')
+                        .replace(/{INDEX}/g, 'TEMP_INDEX')
+                        .replace(/rule-entry/g, 'rule-entry-edit')
+                        .replace(/isExpress_/g, 'isExpressEdit_')
+                        .replace(/btnRemoveRule/g, 'btnRemoveRuleEdit');
+                }
+            
+                $('#btnAddRuleEdit').on('click', function() {
+                    if (!editRuleTemplate) return;
+                    const index = $editRulesContainer.children('.rule-entry-edit').length;
+                    let template = editRuleTemplate
+                        .replace(/TEMP_INDEX/g, index)
+                        .replace(/TEMP_DISPLAY/g, (index + 1));
+                        
+                    $editRulesContainer.append(template);
+                    // Đảm bảo ruleId mới là rỗng
+                    $editRulesContainer.find('.rule-entry-edit').last().find('input[name*="ruleId"]').val('');
+                    reIndexRules('#editRulesContainer', 'rule-entry-edit', 'isExpressEdit_');
+                });
+            
+                $editRulesContainer.on('click', '.btnRemoveRuleEdit', function() {
+                    $(this).closest('.rule-entry-edit').remove();
+                    reIndexRules('#editRulesContainer', 'rule-entry-edit', 'isExpressEdit_');
+                });
+            
+                // Logic cho modal Add
+                const $rulesContainer = $('#rulesContainer');
+                let addRuleTemplate = '';
+                if ($("#ruleTemplate").length) {
+                    addRuleTemplate = $("#ruleTemplate").html()
+                        .replace(/{INDEX_DISPLAY}/g, 'TEMP_DISPLAY')
+                        .replace(/{INDEX}/g, 'TEMP_INDEX');
+                }
+            
+                $('#btnAddRule').on('click', function() {
+                    if (!addRuleTemplate) return;
+                    const index = $rulesContainer.children('.rule-entry').length;
+                    let template = addRuleTemplate
+                        .replace(/TEMP_INDEX/g, index)
+                        .replace(/TEMP_DISPLAY/g, (index + 1));
+                        
+                    $rulesContainer.append(template);
+                    reIndexRules('#rulesContainer', 'rule-entry', 'isExpress_');
+                });
+            
+                $rulesContainer.on('click', '.btnRemoveRule', function() {
+                    $(this).closest('.rule-entry').remove();
+                    reIndexRules('#rulesContainer', 'rule-entry', 'isExpress_'); 
+                });
+                // *** KẾT THÚC LOGIC CHUYỂN VÀO ***
             });
         </script>
 	</th:block>

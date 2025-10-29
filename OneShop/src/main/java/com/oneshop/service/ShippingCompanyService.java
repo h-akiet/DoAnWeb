@@ -10,9 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.oneshop.entity.ShippingCompany;
 import com.oneshop.repository.ShippingCompanyRepository;
 
+import org.slf4j.Logger; 
+import org.slf4j.LoggerFactory;
+
 @Service
 @Transactional // Đảm bảo các thao tác database được thực hiện trong một transaction
 public class ShippingCompanyService {
+	
+	private static final Logger logger = LoggerFactory.getLogger(ShippingCompanyService.class);
 
 	@Autowired
 	private ShippingCompanyRepository shippingCompanyRepository;
@@ -29,5 +34,11 @@ public class ShippingCompanyService {
 	public ShippingCompany save(ShippingCompany company) {
 		return shippingCompanyRepository.save(company);
 	}
+	
+	@Transactional(readOnly = true)
+    public List<ShippingCompany> findActiveCompanies() {
+        logger.debug("Fetching active shipping companies.");
+        return shippingCompanyRepository.findByIsActiveTrueOrderByNameAsc();
+    }
 
 }
