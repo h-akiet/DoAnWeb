@@ -162,7 +162,7 @@ Hướng dẫn chi tiết để trải nghiệm đầy đủ các tính năng c�
 #### **Nhân viên giao hàng (Shipper)**
 1. Đăng nhập bằng tài khoản Shipper.
 2. Xem danh sách **đơn hàng cần giao**.
-3. Cập nhật trạng thái: **Đang lấy hàng → Đang giao → Đã giao**.
+3. Cập nhật trạng thái: **Đã giao**.
 
 ---
 
