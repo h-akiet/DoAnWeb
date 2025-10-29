@@ -29,6 +29,7 @@ Các chức năng chính được triển khai, phân chia rõ ràng theo vai tr
 
 ### 2. User (Khách hàng)
 
+* **Xem & Tìm kiếm sản phẩm:** Xem sản phẩm của các cửa hàng đang bày bán, tìm kiếm theo tên, danh mục, hãng, giá bán.
 * **Giỏ hàng & Thanh toán:** Quản lý giỏ hàng, đặt hàng. Lựa chọn thanh toán **COD** hoặc **VNPAY**.
 * **Khuyến mãi:** Áp dụng voucher/khuyến mãi trong quá trình đặt hàng.
 * **Đánh giá:** Đánh giá Sản phẩm (Bằng văn bản và hình ảnh đính kèm).
