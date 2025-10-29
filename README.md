@@ -8,12 +8,6 @@ OneShop là một trang web thương mại điện tử (E-commerce) chuyên cun
   <img src="https://raw.githubusercontent.com/h-akiet/DoAnWeb/main/trangchu.jpg" alt="Ảnh chụp màn hình trang chủ OneShop" width="700"/>
 </p>
 
-![Java](https://img.shields.io/badge/Java-22-orange?style=for-the-badge&logo=openjdk)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.x-green?style=for-the-badge&logo=spring-boot)
-![Thymeleaf](https://img.shields.io/badge/Thymeleaf-E04E00?style=for-the-badge&logo=thymeleaf&logoColor=white)
-![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)
-
-
 ## Mục lục (Table of Contents)
 
 1. [Tính năng nổi bật](#tính-năng-nổi-bật-)
