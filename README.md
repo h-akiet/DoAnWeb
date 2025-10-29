@@ -5,7 +5,7 @@ OneShop là một trang web thương mại điện tử chuyên cung cấp các 
 
 
 <p align="center">
-<img src="trangchu.png" alt="Ảnh chụp màn hình ứng dụng" width="600"/>
+<img src="trangchu.jpg" alt="Ảnh chụp màn hình ứng dụng" width="600"/>
 </p> 
 
 Mục lục (Table of Contents)
