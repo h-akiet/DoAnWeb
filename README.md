@@ -170,7 +170,7 @@ Hướng dẫn chi tiết để trải nghiệm đầy đủ các tính năng c�
 
 | Tính năng           | Cách trải nghiệm |
 |---------------------|------------------|
-| **Chat thời gian thực** | Mở trang sản phẩm → Nhấn biểu tượng chat → Gửi tin nhắn đến shop |
+| **Chat thời gian thực** | Mở trang liên hệ → Chọn shop → Nhấn biểu tượng chat → Gửi tin nhắn đến shop |
 | **Thanh toán VNPAY** | Chọn VNPAY khi thanh toán → Nhập thẻ (dùng tài khoản test) |
 | **Tải ảnh đánh giá** | Sau khi nhận hàng → Vào đơn hàng → Tải ảnh |
 
