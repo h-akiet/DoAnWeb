@@ -7,6 +7,8 @@ import com.oneshop.entity.Category;
 import com.oneshop.entity.Product;
 import com.oneshop.enums.ProductStatus;
 
+import jakarta.transaction.Transactional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -192,6 +194,9 @@ public interface ProductService {
      */
     List<Product> searchAndFilterPublic(String name, Long categoryId, Long brandId, BigDecimal minPrice, BigDecimal maxPrice); 
     
+   
+ 
+    
     void updateProductStockAndPriceFromVariants(Product product);
   //main 
     
@@ -227,6 +232,8 @@ public interface ProductService {
      * Cập nhật lại Category cho các sản phẩm khi Category cũ bị xóa/hợp nhất (ADMIN)
      */
     int updateCategoryForProducts(Long oldCategoryId, Long newCategoryId);
+
+	long countProductsByCategory(Long categoryId);
 
     // ===>>> KẾT THÚC HỢP NHẤT <<<===
 }

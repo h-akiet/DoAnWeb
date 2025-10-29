@@ -9,6 +9,7 @@ import java.text.NumberFormat;
 import java.util.HashSet; // Import HashSet
 import java.util.Locale;
 import java.util.Set;
+
 import com.oneshop.enums.ProductStatus;
 
 @Entity // Chỉ một @Entity
@@ -53,10 +54,6 @@ public class Product {
 
 	@Column(columnDefinition = "nvarchar(500)")
 	private String tags;
-//ADMIN
-	@Enumerated(EnumType.STRING) // Trạng thái duyệt đơn của admin
-	@Column(name = "status", nullable = false)
-	private ProductStatus status = ProductStatus.PENDING; // Mặc định là 'Chờ duyệt'
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "category_id", nullable = false)
@@ -119,4 +116,8 @@ public class Product {
 		NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 		return currencyFormatter.format(amount).replace("₫", "đ");
 	}
+	
+	@Enumerated(EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    private ProductStatus status = ProductStatus.PENDING;
 }

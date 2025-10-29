@@ -1,7 +1,9 @@
+// src/main/java/com/oneshop/service/ShopService.java
 package com.oneshop.service;
 
 import com.oneshop.dto.ShopDto;
 import com.oneshop.entity.Shop;
+import com.oneshop.enums.ShopStatus;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,28 +39,17 @@ public interface ShopService {
      */
     List<Shop> findAllActiveShops();
     // ===>>> KẾT THÚC <<<===
-    
- // ===>>> THÊM CÁC PHƯƠNG THỨC TỪ CLASS CŨ VÀO INTERFACE <<<===
+    List<Shop> findAll(); // <-- THÊM
 
-    /**
-     * Lấy tất cả shop, kèm theo thông tin Vendor (giả định có hàm findAllWithVendor trong repo)
-     */
-    List<Shop> findAll();
+    /** Tìm shop bằng ID */
+    Shop findById(Long shopId); // <-- THÊM
 
-    /**
-     * Tìm shop bằng ID
-     */
-    Shop findById(Long shopId);
+    /** Lấy danh sách shop đã duyệt */
+    List<Shop> getApprovedShops(); // <-- THÊM
 
-    /**
-     * Lấy danh sách các shop đã được duyệt
-     */
-    List<Shop> getApprovedShops();
+    /** Cập nhật tỉ lệ chiết khấu */
+    Shop updateShopCommissionRate(Long shopId, BigDecimal newRate); // <-- THÊM
 
-    /**
-     * Cập nhật tỉ lệ chiết khấu (commission rate) cho shop
-     */
-    Shop updateShopCommissionRate(Long shopId, BigDecimal newRate);
-
-    // ===>>> KẾT THÚC THÊM PHƯƠNG THỨC <<<===
+    /** Cập nhật trạng thái shop */
+    Shop updateShopStatus(Long shopId, ShopStatus newStatus); // <-- THÊM
 }

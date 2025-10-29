@@ -1,43 +1,107 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{vendor/layout/app}">
 <head>
     <meta charset="UTF-8">
     <title>Tin nhắn từ khách</title>
-    <link th:href="@{/webjars/bootstrap/5.3.2/css/bootstrap.min.css}" rel="stylesheet">
-    <style>
-        .chat-container { max-width: 1000px; margin: 30px auto; display: flex; gap: 20px; }
-        .user-list { width: 300px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-height: 600px; overflow-y: auto; }
-        .user-item { padding: 14px 16px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
-        .user-item:hover, .user-item.active { background: #f0f0f0; font-weight: 600; }
-        .chat-area { flex: 1; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-        .chat-header { background: #E85A70; color: white; padding: 16px; text-align: center; border-radius: 10px 10px 0 0; display: flex; align-items: center; justify-content: space-between; }
-        .chat-header a { color: white; text-decoration: none; font-size: 14px; }
-        .chat-header a:hover { text-decoration: underline; }
-        .chat-body { flex: 1; overflow-y: auto; padding: 20px; background: #f9f9f9; min-height: 500px; }
-        .msg { max-width: 70%; margin: 8px 0; padding: 10px 14px; border-radius: 18px; font-size: 14px; }
-        .sent { background: #E85A70; color: white; margin-left: auto; }
-        .received { background: #ddd; color: #333; }
-        .chat-footer { padding: 15px; background: white; border-top: 1px solid #eee; display: flex; }
-        .chat-footer input { flex: 1; padding: 10px 16px; border: 1px solid #ddd; border-radius: 25px; }
-        .chat-footer button { background: #E85A70; color: white; border: none; border-radius: 25px; padding: 0 22px; margin-left: 10px; }
-        .no-chat { display: flex; align-items: center; justify-content: center; height: 100%; color: #999; }
-    </style>
+
+    <th:block layout:fragment="css">
+        <style>
+            /* Sửa đổi CSS để phù hợp với khung nội dung chính (main content frame) */
+            .chat-container { 
+                max-width: 100%; /* Đảm bảo sử dụng toàn bộ chiều rộng của layout cha */
+                margin: 0; 
+                display: flex; 
+                gap: 20px; 
+            }
+            .user-list { 
+                width: 300px; 
+                background: white; 
+                border-radius: 10px; 
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+                /* Điều chỉnh max-height để tránh tràn */
+                max-height: 70vh; 
+                overflow-y: auto; 
+                flex-shrink: 0; 
+            }
+            .user-item { 
+                padding: 14px 16px; 
+                border-bottom: 1px solid #eee; 
+                cursor: pointer; 
+                transition: background 0.2s; 
+            }
+            .user-item:hover, .user-item.active { 
+                background: #f0f0f0; 
+                font-weight: 600; 
+            }
+            .chat-area {
+                flex: 1;
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                display: flex;
+                flex-direction: column;
+                /* ---> THÊM DÒNG NÀY <--- */
+                max-height: 70vh; /* Giới hạn chiều cao giống user-list */
+                /* ---> KẾT THÚC THÊM <--- */
+            }
+            /* Đã thay đổi một chút tiêu đề để trông như hình ảnh (tên nổi bật hơn) */
+            .chat-header { 
+                background: #E85A70; 
+                color: white; 
+                padding: 16px; 
+                text-align: left; /* Căn trái */
+                font-size: 1.25rem; /* Tiêu đề lớn */
+                font-weight: bold;
+                border-radius: 10px 10px 0 0; 
+                display: flex; 
+                align-items: center; 
+                /* Xóa justify-content: space-between nếu không có nút */
+            }
+            .chat-body { 
+                flex: 1; 
+                overflow-y: auto; 
+                padding: 20px; 
+                background: #f9f9f9; 
+                min-height: 450px; /* Chiều cao cố định tương đối */
+                display: flex; 
+                flex-direction: column; 
+            }
+            .msg { max-width: 70%; margin: 8px 0; padding: 10px 14px; border-radius: 18px; font-size: 14px; }
+            .sent { background: #E85A70; color: white; margin-left: auto; align-self: flex-end; }
+            .received { background: #ddd; color: #333; align-self: flex-start; }
+            .chat-footer { 
+                padding: 15px; background: white; border-top: 1px solid #eee; display: flex; flex-shrink: 0; 
+            }
+            .chat-footer input { flex: 1; padding: 10px 16px; border: 1px solid #ddd; border-radius: 25px; }
+            .chat-footer button { background: #E85A70; color: white; border: none; border-radius: 25px; padding: 0 22px; margin-left: 10px; }
+            .no-chat { display: flex; align-items: center; justify-content: center; height: 100%; color: #999; }
+        </style>
+    </th:block>
 </head>
-<body>
-<div class="chat-container">
-    <div class="user-list" id="userList">
-        <div class="text-center p-4 text-muted">Đang tải...</div>
+
+<div layout:fragment="content">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0">Tin nhắn từ khách hàng</h1>
     </div>
-    <div class="chat-area">
-        <div class="no-chat"><p>Chọn khách để chat</p></div>
+
+    <div class="chat-container">
+        <div class="user-list" id="userList">
+            <div class="text-center p-4 text-muted">Đang tải...</div>
+        </div>
+        
+        <div class="chat-area">
+            <div class="no-chat"><p>Chọn khách để chat</p></div>
+        </div>
     </div>
 </div>
 
-<script th:src="@{/webjars/sockjs-client/1.5.1/sockjs.min.js}"></script>
-<script th:src="@{/webjars/stomp-websocket/2.3.4/stomp.min.js}"></script>
+<th:block layout:fragment="js">
+    <script th:src="@{/webjars/sockjs-client/1.5.1/sockjs.min.js}"></script>
+    <script th:src="@{/webjars/stomp-websocket/2.3.4/stomp.min.js}"></script>
 
-<!-- Bật inline JavaScript -->
-<script th:inline="javascript">
+    <script th:inline="javascript">
     let stompClient = null;
     const currentUsername = /*[[${#authentication.principal.username}]]*/ '';
     let currentTarget = null;
@@ -86,7 +150,6 @@
         const area = document.querySelector('.chat-area');
         area.innerHTML = `
             <div class="chat-header">
-                <a href="/contact" class="back-link">Quay lại</a>
                 <h6>Chat với ${fullName}</h6>
                 <span></span>
             </div>
@@ -134,6 +197,6 @@
     }
 
     connect();
-</script>
-</body>
+    </script>
+</th:block>
 </html>

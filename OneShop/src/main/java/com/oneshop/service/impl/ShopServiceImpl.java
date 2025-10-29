@@ -1,19 +1,22 @@
-// src/main/java/com/oneshop/service/impl/ShopServiceImpl.java
 package com.oneshop.service.impl;
 
 import com.oneshop.dto.ShopDto;
+import com.oneshop.entity.Role;
 import com.oneshop.entity.Shop;
-import com.oneshop.enums.ShopStatus;
 import com.oneshop.entity.User;
+import com.oneshop.enums.ShopStatus;
+import com.oneshop.repository.RoleRepository;
 import com.oneshop.repository.ShopRepository;
 import com.oneshop.repository.UserRepository;
 import com.oneshop.service.FileStorageService;
 import com.oneshop.service.ShopService;
 
-import org.slf4j.Logger; // <<< THÊM IMPORT
-import org.slf4j.LoggerFactory; // <<< THÊM IMPORT
+import jakarta.persistence.EntityNotFoundException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort; // <<< THÊM IMPORT
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -21,14 +24,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List; // <<< THÊM IMPORT
-import java.util.Optional;
-import java.util.stream.Collectors; // <<< THÊM IMPORT
+import java.util.List;
 
 @Service
 public class ShopServiceImpl implements ShopService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ShopServiceImpl.class); // <<< THÊM LOGGER
+    private static final Logger logger = LoggerFactory.getLogger(ShopServiceImpl.class);
 
     @Autowired
     private ShopRepository shopRepository;
@@ -39,11 +40,13 @@ public class ShopServiceImpl implements ShopService {
     @Autowired
     private FileStorageService fileStorageService;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     @Override
-    @Transactional(readOnly = true) // <<< THÊM readOnly
+    @Transactional(readOnly = true)
     public Shop getShopByUserId(Long userId) {
-        logger.debug("Fetching shop by userId: {}", userId); // <<< THÊM LOG
-        // Sau này userId sẽ lấy từ user đang đăng nhập
+        logger.debug("Fetching shop by userId: {}", userId);
         return shopRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Người dùng này chưa có shop"));
     }
@@ -51,47 +54,40 @@ public class ShopServiceImpl implements ShopService {
     @Override
     @Transactional
     public Shop updateShop(Long shopId, ShopDto shopDto, MultipartFile logoFile, MultipartFile bannerFile) {
-        logger.info("Updating shop with ID: {}", shopId); // <<< THÊM LOG
+        logger.info("Updating shop with ID: {}", shopId);
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy shop"));
 
-        // Cập nhật thông tin cơ bản
         shop.setName(shopDto.getShopName());
         shop.setDescription(shopDto.getShopDescription());
         shop.setContactEmail(shopDto.getContactEmail());
         shop.setContactPhone(shopDto.getContactPhone());
 
-        // Xử lý upload logo mới
         if (logoFile != null && !logoFile.isEmpty()) {
-            logger.debug("Processing new logo file for shop {}", shopId); // <<< THÊM LOG
-            // Xóa logo cũ nếu có
+            logger.debug("Processing new logo file for shop {}", shopId);
             if (StringUtils.hasText(shop.getLogo())) {
-                 try { // <<< THÊM TRY-CATCH
+                 try {
                     fileStorageService.delete(shop.getLogo());
                     logger.debug("Deleted old logo: {}", shop.getLogo());
                  } catch (Exception e) {
                      logger.error("Error deleting old logo file {}: {}", shop.getLogo(), e.getMessage());
                  }
             }
-            // Lưu logo mới
             String logoFilename = fileStorageService.save(logoFile);
             shop.setLogo(logoFilename);
             logger.debug("Saved new logo as: {}", logoFilename);
         }
 
-        // Xử lý upload banner mới
         if (bannerFile != null && !bannerFile.isEmpty()) {
-            logger.debug("Processing new banner file for shop {}", shopId); // <<< THÊM LOG
-            // Xóa banner cũ nếu có
+            logger.debug("Processing new banner file for shop {}", shopId);
             if (StringUtils.hasText(shop.getBanner())) {
-                 try { // <<< THÊM TRY-CATCH
+                 try {
                     fileStorageService.delete(shop.getBanner());
                     logger.debug("Deleted old banner: {}", shop.getBanner());
                  } catch (Exception e) {
                       logger.error("Error deleting old banner file {}: {}", shop.getBanner(), e.getMessage());
                  }
             }
-            // Lưu banner mới
             String bannerFilename = fileStorageService.save(bannerFile);
             shop.setBanner(bannerFilename);
              logger.debug("Saved new banner as: {}", bannerFilename);
@@ -105,9 +101,8 @@ public class ShopServiceImpl implements ShopService {
     public Shop registerShop(ShopDto shopDto, Long userId) {
         logger.info("Registering new shop for userId: {}", userId);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + userId));
 
-        // Kiểm tra xem user này đã có shop chưa
         if(shopRepository.findByUserId(userId).isPresent()) {
             logger.warn("User {} already has a shop. Registration aborted.", userId);
             throw new RuntimeException("Người dùng này đã đăng ký shop rồi");
@@ -119,14 +114,29 @@ public class ShopServiceImpl implements ShopService {
         shop.setContactEmail(shopDto.getContactEmail());
         shop.setContactPhone(shopDto.getContactPhone());
         shop.setUser(user);
-        shop.setStatus(ShopStatus.PENDING); // <<< GÁN TRẠNG THÁI PENDING KHI TẠO MỚI
-
-        // Liên kết ngược lại từ User tới Shop (quan trọng)
-        user.setShop(shop);
+        shop.setStatus(ShopStatus.PENDING);
 
         Shop savedShop = shopRepository.save(shop);
-        // userRepository.save(user); // Không cần save user nếu cascade hoạt động đúng
         logger.info("Shop {} registered successfully for user {} with status PENDING", savedShop.getId(), userId);
+
+        try {
+            Role vendorRole = roleRepository.findByName(Role.RoleName.VENDOR)
+                    .orElseThrow(() -> {
+                        logger.error("FATAL: VENDOR role not found in database!");
+                        return new RuntimeException("Lỗi hệ thống: Không tìm thấy vai trò VENDOR.");
+                    });
+
+            user.setRole(vendorRole);
+            user.setShop(savedShop);
+
+            userRepository.save(user);
+            logger.info("Updated user {} role to VENDOR successfully.", userId);
+
+        } catch (Exception e) {
+            logger.error("Error updating user role to VENDOR for userId {}: {}", userId, e.getMessage(), e);
+            throw new RuntimeException("Không thể cập nhật vai trò người dùng sau khi đăng ký shop.", e);
+        }
+
         return savedShop;
     }
 
@@ -134,61 +144,51 @@ public class ShopServiceImpl implements ShopService {
     @Transactional(readOnly = true)
     public List<Shop> findAllActiveShops() {
         logger.debug("Finding all active (APPROVED) shops.");
-        // Cập nhật để chỉ lấy shop đã duyệt (nếu cần cho trang liên hệ)
-        // return shopRepository.findByStatus(ShopStatus.APPROVED, Sort.by("name"));
-        // Hoặc giữ nguyên nếu trang liên hệ muốn hiển thị cả shop chờ duyệt
+        return shopRepository.findByStatus(ShopStatus.APPROVED, Sort.by("name"));
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<Shop> findAll() {
+        logger.debug("Finding all shops.");
         return shopRepository.findAll(Sort.by("name"));
     }
- // ===>>> THÊM TRIỂN KHAI CÁC PHƯƠNG THỨC MỚI TỪ INTERFACE HOP NHẤT <<<===
 
     @Override
-    @Transactional
-    public List<Shop> findAll() {
-        logger.debug("Fetching all shops with vendor info.");
-		// Giả định shopRepository.findAllWithVendor() tồn tại
-		// Vì không có ShopRepository để kiểm tra, giữ nguyên như code cũ
-		// Nếu không có, phải dùng shopRepository.findAll()
-		return shopRepository.findAllWithVendor(); 
-    }
-    
-    @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Shop findById(Long shopId) {
-        logger.debug("Fetching shop by ID: {}", shopId);
-        // Thay đổi cách xử lý: dùng orElse(null) như code cũ
-        return shopRepository.findById(shopId).orElse(null); 
+        logger.debug("Finding shop by ID: {}", shopId);
+        return shopRepository.findById(shopId).orElse(null);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Shop> getApprovedShops() {
-        logger.debug("Fetching all APPROVED shops.");
-        return shopRepository.findByStatus(ShopStatus.APPROVED);
+        logger.debug("Finding all approved shops.");
+        return shopRepository.findByStatus(ShopStatus.APPROVED, Sort.by("name"));
     }
-    
+
     @Override
     @Transactional
     public Shop updateShopCommissionRate(Long shopId, BigDecimal newRate) {
         logger.info("Updating commission rate for shop ID: {} to {}", shopId, newRate);
-        Optional<Shop> shopOpt = shopRepository.findById(shopId);
-
-        if (shopOpt.isPresent()) {
-            Shop shop = shopOpt.get();
-            
-            // 1. Cập nhật tỉ lệ chiết khấu
-            shop.setCommissionRate(newRate);
-            
-            // 2. Cập nhật cột lưu thời gian là thời điểm hiện tại
-            shop.setCommissionUpdatedAt(LocalDateTime.now());
-            
-            Shop updatedShop = shopRepository.save(shop);
-            logger.info("Commission rate updated successfully for shop ID: {}", shopId);
-            return updatedShop;
+        Shop shop = findById(shopId);
+        if (shop == null) {
+            throw new EntityNotFoundException("Không tìm thấy Shop với ID: " + shopId);
         }
-        logger.warn("Shop with ID: {} not found for commission update.", shopId);
-        return null;
+        shop.setCommissionRate(newRate);
+        shop.setCommissionUpdatedAt(LocalDateTime.now());
+        return shopRepository.save(shop);
     }
-    
-    // ===>>> KẾT THÚC THÊM TRIỂN KHAI <<<===
-    
+
+    @Override
+    @Transactional
+    public Shop updateShopStatus(Long shopId, ShopStatus newStatus) {
+        logger.info("Updating status for shop ID: {} to {}", shopId, newStatus);
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy Shop với ID: " + shopId));
+        shop.setStatus(newStatus);
+        return shopRepository.save(shop);
+    }
+
 }

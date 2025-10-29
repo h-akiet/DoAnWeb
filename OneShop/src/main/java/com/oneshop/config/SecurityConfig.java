@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+// Bỏ import CustomOAuth2UserService
 import com.oneshop.service.UserService;
 import com.oneshop.service.AuthTokenFilter;
 
@@ -24,10 +25,19 @@ import com.oneshop.service.AuthTokenFilter;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    @Autowired private UserService userService;
-    @Autowired private AuthTokenFilter authTokenFilter;
-    @Autowired private CustomSuccessHandler customSuccessHandler;
-    @Autowired private CustomAuthenticationFailureHandler customFailureHandler;
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private AuthTokenFilter authTokenFilter;
+
+    // Bỏ inject CustomOAuth2UserService
+
+    @Autowired
+    private CustomSuccessHandler customSuccessHandler;
+
+    @Autowired
+    private CustomAuthenticationFailureHandler customFailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -52,26 +62,23 @@ public class SecurityConfig {
             "/", "/home", "/search", "/error", "/contact", "/news",
             "/products", "/product/**",
             "/login", "/register", "/verify-otp", "/forgot", "/reset-password",
+            // Bỏ /api/auth/** và /oauth2/**
             "/fragments/**"
-    };
-
-    private static final String[] AUTHENTICATED_URLS = {
-            "/chat/**", "/ws-chat/**", "/app/**", "/topic/**", "/queue/**"
     };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+            .sessionManagement(session ->
+                 session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+            )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(PUBLIC_URLS).permitAll()
-                .requestMatchers(AUTHENTICATED_URLS).authenticated()
                 .requestMatchers("/cart/**", "/pay", "/user/**", "/api/addresses/**", "/api/cart/**").authenticated()
                 .requestMatchers("/vendor/**").hasAuthority("ROLE_VENDOR")
                 .requestMatchers("/shipper/**").hasAuthority("ROLE_SHIPPER")
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers("/api/chat/**").hasAnyAuthority("ROLE_USER", "ROLE_VENDOR") // Cho phép cả USER và VENDOR
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -83,6 +90,7 @@ public class SecurityConfig {
                 .failureHandler(customFailureHandler)
                 .permitAll()
             )
+            // Bỏ khối oauth2Login
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
