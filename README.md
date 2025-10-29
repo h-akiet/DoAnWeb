@@ -122,7 +122,7 @@ Hướng dẫn chi tiết để trải nghiệm đầy đủ các tính năng c�
 |---------------|--------------------------------|-------------|--------|
 | **Admin**     | `admin@oneshop.com`            | `admin123`  | Quản trị toàn hệ thống |
 
-* Vai tròL User, Vendor: có thể đăng kí ở giao diện hệ thống. Đối với User có thể đăng kí Shop và nâng cấp role Vendor khi được duyệt bởi Admin
+**Vai trò User, Vendor:** có thể đăng kí ở giao diện hệ thống. Đối với User có thể đăng kí Shop và nâng cấp role Vendor khi được duyệt bởi Admin
 
 > **Lưu ý:** Đăng nhập bằng tài khoản tương ứng để trải nghiệm đúng chức năng.
 
