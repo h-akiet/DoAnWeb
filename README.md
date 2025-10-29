@@ -2,19 +2,17 @@
 
 ## Giới thiệu chung
 
-OneShop là một trang web thương mại điện tử (E-commerce) chuyên cung cấp các sản phẩm mỹ phẩm đa dạng, kết nối người bán và người mua. Dự án được thiết kế theo mô hình **đa gian hàng (Multi-vendor)**, bao gồm các chức năng quản lý sản phẩm, đơn hàng, người dùng, gian hàng, khuyến mãi, vận chuyển và tích hợp thanh toán (COD/VNPAY).
+OneShop là một trang web thương mại điện tử (E-commerce) chuyên cung cấp các sản phẩm mỹ phẩm đa dạng, kết nối người bán và người mua. Dự án được thiết kế theo mô hình **đa gian hàng (Multi-vendor)**, bao gồm các chức năng quản lý sản phẩm, đơn hàng, người dùng, gian hàng, khuyến mãi, vận chuyển và tích hợp thanh toán.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/h-akiet/DoAnWeb/main/trangchu.jpg" alt="Ảnh chụp màn hình trang chủ OneShop" width="700"/>
 </p>
 
-## Badges & Trạng thái
-
-![Java](https://img.shields.io/badge/Java-17+-orange?style=for-the-badge&logo=openjdk)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green?style=for-the-badge&logo=spring-boot)
+![Java](https://img.shields.io/badge/Java-22-orange?style=for-the-badge&logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.x-green?style=for-the-badge&logo=spring-boot)
 ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-E04E00?style=for-the-badge&logo=thymeleaf&logoColor=white)
 ![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)
-![Status](https://img.shields.io/badge/Status-Hoàn_Thành_Cơ_Bản-blue?style=for-the-badge)
+
 
 ## Mục lục (Table of Contents)
 
@@ -28,26 +26,33 @@ OneShop là một trang web thương mại điện tử (E-commerce) chuyên cun
 
 ## Tính năng nổi bật ✨
 
-Các chức năng chính được triển khai trong dự án OneShop:
+Các chức năng chính được triển khai, phân chia rõ ràng theo vai trò:
 
-### 1. User (Khách hàng)
+### 1. Tính năng chung
 
-* **Giỏ hàng & Thanh toán:** Quản lý giỏ hàng, đặt hàng, áp dụng khuyến mãi. Hỗ trợ thanh toán **COD** và **VNPAY**.
-* **Đánh giá:** Đánh giá Sản phẩm (Bằng văn bản và hình ảnh).
-* **Quản lý cá nhân:** Quản lý sổ địa chỉ, cập nhật thông báo (Voucher, sản phẩm mới).
+* **Xác thực & Phân quyền:** Quản lý Người dùng (Đăng ký, Đăng nhập). Phân quyền chi tiết: **Admin, Vendor, User, Shipper** (sử dụng Spring Security và JWT).
+* **Giao tiếp:** Tích hợp **Chat** thời gian thực giữa Khách hàng và Shop (sử dụng Spring WebSocket).
 
-### 2. Vendor (Gian hàng)
+### 2. User (Khách hàng)
 
-* **Quản lý sản phẩm:** Thêm/Sửa/Xóa sản phẩm, quản lý Biến thể (Variant), Danh mục, và Thương hiệu.
-* **Quản lý Đơn hàng:** Xem, cập nhật trạng thái đơn hàng.
-* **Quản lý Tài chính:** Quản lý Doanh thu của Shop.
+* **Giỏ hàng & Thanh toán:** Quản lý giỏ hàng, đặt hàng. Lựa chọn thanh toán **COD** hoặc **VNPAY**.
+* **Khuyến mãi:** Áp dụng voucher/khuyến mãi trong quá trình đặt hàng.
+* **Đánh giá:** Đánh giá Sản phẩm (Bằng văn bản và hình ảnh đính kèm).
+* **Quản lý cá nhân:** Quản lý sổ địa chỉ (nhiều địa chỉ nhận hàng).
 
-### 3. Admin (Quản trị viên)
+### 3. Vendor (Gian hàng)
+
+* **Quản lý Sản phẩm:** Thêm/Sửa/Xóa sản phẩm, quản lý Biến thể (Variant), Danh mục, và Thương hiệu.
+* **Quản lý Đơn hàng:** Xem, cập nhật trạng thái đơn hàng và lịch sử mua hàng.
+* **Quản lý Tài chính:** Quản lý Doanh thu.
+* **Thông tin Shop:** Quản lý Thương hiệu và Thông tin chung của cửa hàng.
+
+### 4. Admin (Quản trị viên)
 
 * **Quản lý Gian hàng:** Duyệt đăng ký Shop, kiểm duyệt Sản phẩm.
-* **Quản lý Hệ thống:** Quản lý Người dùng, Danh mục sản phẩm, Khuyến mãi/Chiết khấu App.
+* **Quản lý Hệ thống:** Quản lý Người dùng, Danh mục sản phẩm.
+* **Quản lý Khuyến mãi:** Quản lý Khuyến mãi/Chiết khấu App.
 * **Quản lý Vận chuyển:** Thêm/Sửa nhà vận chuyển và Quy tắc tính phí.
-* **Hệ thống:** Tích hợp **Chat** thời gian thực giữa Khách hàng và Shop.
 
 ---
 
@@ -57,10 +62,11 @@ Dự án sử dụng mô hình kiến trúc MVC (Model-View-Controller) với Sp
 
 | Khu vực | Công nghệ | Vai trò chính | Badge |
 | :--- | :--- | :--- | :--- |
-| **Backend Core** | **Spring Boot** | Khung phát triển ứng dụng (Core Framework) | ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green?style=flat-square&logo=spring-boot) |
-| **Bảo mật** | **Spring Security** | Xác thực & Phân quyền theo vai trò (Roles) | ![Spring Security](https://imgādges.io/badge/Spring_Security-6.x-blue?style=flat-square&logo=spring-security) |
+| **Backend Core** | **Spring Boot** | Khung phát triển ứng dụng (Core Framework) | ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.x-green?style=flat-square&logo=spring-boot) |
+| **Ngôn ngữ** | **Java 22** | Ngôn ngữ lập trình chính | ![Java](https://img.shields.io/badge/Java-22-orange?style=flat-square&logo=openjdk) |
+| **Bảo mật** | **Spring Security** | Xác thực & Phân quyền theo vai trò (Roles) | ![Spring Security](https://img.shields.io/badge/Spring_Security-6.x-blue?style=flat-square&logo=spring-security) |
 | **Bảo mật** | **JWT** | Xác thực người dùng qua Token (Auth Token) | ![JWT](https://img.shields.io/badge/JWT-black?style=flat-square&logo=jsonwebtokens) |
-| **Database** | **Spring Data JPA / Hibernate** | Tương tác với cơ sở dữ liệu (ORM) | ![JPA/Hibernate](https://img.shields.io/badge/JPA_/_Hibernate-orange?style=flat-square) |
+| **Database** | **Spring Data JPA / Hibernate** | Tương tác với CSDL (ORM) | ![JPA/Hibernate](https://img.shields.io/badge/JPA_/_Hibernate-orange?style=flat-square) |
 | **Database** | **SQL Server** | Hệ quản trị CSDL quan hệ | ![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=flat-square&logo=microsoft-sql-server&logoColor=white) |
 | **Realtime** | **Spring WebSocket** | Giao tiếp thời gian thực (Chat/Thông báo) | ![WebSocket](https://img.shields.io/badge/WebSocket-blue?style=flat-square&logo=websocket) |
 | **Frontend** | **Thymeleaf** | Template Engine (Render View từ Backend) | ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-E04E00?style=flat-square&logo=thymeleaf) |
@@ -84,17 +90,15 @@ Các bước cần thiết để khởi chạy dự án trên máy cục bộ c�
 2.  **Cấu hình Database:**
 
     * Tạo cơ sở dữ liệu mới trên SQL Server.
-    * Cập nhật thông tin kết nối trong file `src/main/resources/application.properties`:
+    * Cập nhật thông tin kết nối trong file `src/main/resources/application.properties` (đảm bảo thông tin JWT và CSDL là chính xác):
 
         ```properties
         # Cấu hình CSDL
-        spring.datasource.url=jdbc:sqlserver://[YourServer];databaseName=[YourDB];encrypt=true;trustServerCertificate=true;
-        spring.datasource.username=your_user
-        spring.datasource.password=your_password
-
-        # Cấu hình JWT (Bảo mật)
-        jwt.secret: [Khóa bí mật mạnh]
-        jwt.expirationMs: [Thời gian hết hạn JWT (ms)]
+        spring.datasource.url=jdbc:sqlserver://[YourServer];databaseName=[YourDB];integratedSecurity=true;encrypt=false;trustServerCertificate=true;characterEncoding=UTF-8
+       
+        # Cấu hình JWT (Ví dụ)
+        jwt.secret=[Khóa bí mật mạnh]
+        jwt.expirationMs=[Thời gian hết hạn JWT (ms)]
         ```
 
 3.  **Build và Chạy:**
@@ -108,18 +112,18 @@ Các bước cần thiết để khởi chạy dự án trên máy cục bộ c�
 
 ---
 
-## Cách sử dụng 🚀
-
-1.  **Truy cập:** Mở trình duyệt và truy cập `http://localhost:8080` (hoặc cổng bạn đã cấu hình).
-2.  **Đăng nhập Admin:** Đăng nhập bằng tài khoản admin mẫu để quản lý hệ thống.
-3.  **Đăng ký Shop (Vendor):** Đăng ký tài khoản User mới và đăng ký Shop (Vendor) để có quyền bán hàng.
-
----
-
 ## Liên hệ 📧
 
-* **Tác giả:** Nguyễn Hoàng Anh Kiệt
+* **Nhóm tác giả:**
+
+  | STT | Họ và tên              | MSSV     |
+  |-----|------------------------|----------|
+  | 1   | Nguyễn Hoàng Anh Kiệt  | 23110247 |
+  | 2   | Trần Thành Trung       | 23110351 |
+  | 3   | Nguyễn Trung Hậu       | 23110212 |
+  | 4   | Nguyễn Thị Thu Linh    | 23110254 |
 * **Email:** 23110247@student.hcmute.edu.vn
 * **Giáo viên hướng dẫn:** Nguyễn Hữu Trung
 
 Link dự án: <https://github.com/h-akiet/DoAnWeb.git>
+```eof
