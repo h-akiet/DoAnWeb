@@ -105,7 +105,76 @@ Các bước cần thiết để khởi chạy dự án trên máy cục bộ c�
     ```
 
 ---
+## Cách sử dụng 🚀
 
+Hướng dẫn chi tiết để trải nghiệm đầy đủ các tính năng của **OneShop** theo từng vai trò.
+
+### 1. Truy cập hệ thống
+
+- Mở trình duyệt và truy cập: `http://localhost:8080` (sau khi chạy dự án thành công).
+- Trang chủ sẽ hiển thị danh sách sản phẩm và các gian hàng.
+
+---
+
+### 2. Tài khoản mẫu (Demo Accounts)
+
+| Vai trò       | Email                          | Mật khẩu    | Ghi chú |
+|---------------|--------------------------------|-------------|--------|
+| **Admin**     | `admin@oneshop.com`            | `admin123`  | Quản trị toàn hệ thống |
+
+* Vai tròL User, Vendor: có thể đăng kí ở giao diện hệ thống. Đối với User có thể đăng kí Shop và nâng cấp role Vendor khi được duyệt bởi Admin
+
+> **Lưu ý:** Đăng nhập bằng tài khoản tương ứng để trải nghiệm đúng chức năng.
+
+---
+
+### 3. Hướng dẫn theo vai trò
+
+#### **Khách hàng (User)**
+1. **Đăng ký / Đăng nhập** → Nhấn nút **Đăng nhập** ở góc trên bên phải.
+2. **Duyệt sản phẩm** → Tìm kiếm, lọc theo danh mục, thương hiệu.
+3. **Thêm vào giỏ hàng** → Chọn biến thể (loại, số lượng) → **Thêm vào giỏ**.
+4. **Thanh toán**:
+   - Vào giỏ hàng → Kiểm tra sản phẩm.
+   - Nhập **mã khuyến mãi** (nếu có).
+   - **Thanh toán**:
+   - Chọn địa chỉ giao hàng → Phương thức thanh toán (**COD** hoặc **VNPAY**).
+5. **Theo dõi đơn hàng** → Xem trạng thái trong **Lịch sử mua hàng**.
+6. **Đánh giá sản phẩm** → Sau khi nhận hàng, vào đơn hàng → **Viết đánh giá + tải ảnh**.
+
+#### **Chủ shop (Vendor)**
+1. Đăng nhập bằng tài khoản Vendor.
+2. Vào **Dashboard Shop** → Quản lý:
+   - **Sản phẩm**: Thêm/sửa/xóa, quản lý biến thể.
+   - **Đơn hàng**: Xác nhận, bàn giao vận chuyển.
+   - **Doanh thu**: Xem báo cáo theo ngày/tháng.
+   - **Thông tin shop**: Cập nhật logo, banner, mô tả.
+
+#### **Quản trị viên (Admin)**
+1. Đăng nhập bằng tài khoản Admin.
+2. Vào **Admin Panel** (`/admin`) → Quản lý:
+   - **Người dùng**: Khóa/mở tài khoản.
+   - **Gian hàng**: Duyệt đơn đăng ký mở shop.
+   - **Sản phẩm**: Kiểm duyệt trước khi lên kệ.
+   - **Khuyến mãi**: Tạo mã giảm giá toàn hệ thống.
+   - **Vận chuyển**: Cấu hình phí theo khu vực.
+
+#### **Nhân viên giao hàng (Shipper)**
+1. Đăng nhập bằng tài khoản Shipper.
+2. Xem danh sách **đơn hàng cần giao**.
+3. Cập nhật trạng thái: **Đang lấy hàng → Đang giao → Đã giao**.
+
+---
+
+### 4. Tính năng nổi bật cần thử
+
+| Tính năng           | Cách trải nghiệm |
+|---------------------|------------------|
+| **Chat thời gian thực** | Mở trang sản phẩm → Nhấn biểu tượng chat → Gửi tin nhắn đến shop |
+| **Thanh toán VNPAY** | Chọn VNPAY khi thanh toán → Nhập thẻ (dùng tài khoản test) |
+| **Tải ảnh đánh giá** | Sau khi nhận hàng → Vào đơn hàng → Tải ảnh |
+
+---
 ## Liên hệ 📧
 
 * **Nhóm tác giả:**
