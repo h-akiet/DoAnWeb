@@ -260,7 +260,7 @@
 
         <div class="filter-area">
             <select id="provinceSelect">
-                <option value="0">Chọn tỉnh/thành phố</option>
+                <option value="0">Đang tải tỉnh/thành...</option>
             </select>
             <select id="districtSelect" disabled>
                 <option value="0">Chọn quận/huyện</option>
@@ -338,67 +338,94 @@
 
 <th:block layout:fragment="js">
     <script>
+        // Giữ lại hàm này
         function toggleStoreItem(headerElement) {
             const storeItem = headerElement.closest('.store-item');
             if (storeItem) {
                 document.querySelectorAll('.store-item.active').forEach(item => {
-                    // Đảm bảo chỉ đóng cái khác nếu cái đang mở không phải là cái vừa click
                     if (item !== storeItem) item.classList.remove('active');
                 });
                 storeItem.classList.toggle('active');
             }
         }
         
-        // ... (Logic JavaScript khác giữ nguyên) ...
-        
         document.addEventListener('DOMContentLoaded', function() {
             const provinceSelect = document.getElementById('provinceSelect');
             const districtSelect = document.getElementById('districtSelect');
+            
+            // API công cộng (miễn phí)
+            const provinceApiUrl = 'https://provinces.open-api.vn/api/p/';
+            const districtApiUrlBase = 'https://provinces.open-api.vn/api/p/';
 
-            const locationData = {
-                "Hồ Chí Minh": ["Quận 1", "Quận 3", "Quận 4", "Quận 5", "Quận 6", "Quận 7", "Quận 8", "Quận 10", "Quận 11", "Quận 12", "Bình Tân", "Bình Thạnh", "Gò Vấp", "Phú Nhuận", "Tân Bình", "Tân Phú", "Thủ Đức", "Bình Chánh", "Cần Giờ", "Củ Chi", "Hóc Môn", "Nhà Bè"],
-                "Hà Nội": ["Ba Đình", "Hoàn Kiếm", "Tây Hồ", "Long Biên", "Cầu Giấy", "Đống Đa", "Hai Bà Trưng", "Hoàng Mai", "Thanh Xuân", "Hà Đông", "Bắc Từ Liêm", "Nam Từ Liêm", "Sơn Tây", "Ba Vì", "Chương Mỹ", "Đan Phượng", "Đông Anh", "Gia Lâm", "Hoài Đức", "Mê Linh", "Mỹ Đức", "Phú Xuyên", "Phúc Thọ", "Quốc Oai", "Sóc Sơn", "Thạch Thất", "Thanh Oai", "Thanh Trì", "Thường Tín", "Ứng Hòa"],
-                "Đà Nẵng": ["Hải Châu", "Thanh Khê", "Sơn Trà", "Ngũ Hành Sơn", "Liên Chiểu", "Cẩm Lệ", "Hòa Vang"],
-                "Hải Phòng": ["Hồng Bàng", "Ngô Quyền", "Lê Chân", "Hải An", "Kiến An", "Đồ Sơn", "Dương Kinh", "An Dương", "An Lão", "Bạch Long Vĩ", "Cát Hải", "Kiến Thụy", "Thủy Nguyên", "Tiên Lãng", "Vĩnh Bảo"],
-                "Cần Thơ": ["Ninh Kiều", "Bình Thủy", "Cái Răng", "Ô Môn", "Thốt Nốt", "Cờ Đỏ", "Phong Điền", "Thới Lai", "Vĩnh Thạnh"],
-                "An Giang": ["Long Xuyên", "Châu Đốc", "Tân Châu", "An Phú", "Châu Phú", "Châu Thành", "Chợ Mới", "Phú Tân", "Thoại Sơn", "Tịnh Biên", "Tri Tôn"],
-                "Bà Rịa - Vũng Tàu": ["Vũng Tàu", "Bà Rịa", "Phú Mỹ", "Châu Đức", "Côn Đảo", "Đất Đỏ", "Long Điền", "Xuyên Mộc"]
-            };
-
-            // Load tỉnh
-            for (const province in locationData) {
-                const option = document.createElement('option');
-                option.value = province;
-                option.textContent = province;
-                provinceSelect.appendChild(option);
-            }
-            provinceSelect.disabled = false;
-
-            // Khi chọn tỉnh
-            provinceSelect.addEventListener('change', function() {
-                const selected = this.value;
-                districtSelect.innerHTML = '<option value="0">Chọn quận/huyện</option>';
-                if (selected !== "0" && locationData[selected]) {
-                    locationData[selected].forEach(d => {
-                        const opt = document.createElement('option');
-                        opt.value = d;
-                        opt.textContent = d;
-                        districtSelect.appendChild(opt);
+            // 1. Tải danh sách tỉnh/thành phố
+            fetch(provinceApiUrl)
+                .then(response => response.json())
+                .then(provinces => {
+                    provinceSelect.innerHTML = '<option value="0">Chọn tỉnh/thành phố</option>'; // Reset
+                    provinces.forEach(province => {
+                        const option = document.createElement('option');
+                        // Lưu mã tỉnh vào value để gọi API quận/huyện
+                        option.value = province.code; 
+                        option.textContent = province.name;
+                        provinceSelect.appendChild(option);
                     });
-                    districtSelect.disabled = false;
-                } else {
-                    districtSelect.disabled = true;
+                    provinceSelect.disabled = false; // Mở khóa select tỉnh
+                })
+                .catch(error => {
+                    console.error("Lỗi khi tải danh sách tỉnh/thành:", error);
+                    provinceSelect.innerHTML = '<option value="0">Lỗi tải dữ liệu</option>';
+                });
+
+            // 2. Xử lý khi chọn tỉnh/thành
+            provinceSelect.addEventListener('change', function() {
+                const selectedProvinceCode = this.value;
+                const selectedProvinceName = this.options[this.selectedIndex].text;
+                
+                // Reset quận/huyện
+                districtSelect.innerHTML = '<option value="0">Chọn quận/huyện</option>';
+                districtSelect.disabled = true;
+
+                if (selectedProvinceCode !== "0") {
+                    // Tải danh sách quận/huyện
+                    districtSelect.disabled = true; // Khóa trong khi tải
+                    districtSelect.innerHTML = '<option value="0">Đang tải...</option>';
+                    
+                    fetch(`${districtApiUrlBase}${selectedProvinceCode}/?depth=2`)
+                        .then(response => response.json())
+                        .then(data => {
+                            districtSelect.innerHTML = '<option value="0">Chọn quận/huyện</option>';
+                            if (data.districts) {
+                                data.districts.forEach(district => {
+                                    const opt = document.createElement('option');
+                                    // Lưu mã quận/huyện vào value
+                                    opt.value = district.code; 
+                                    opt.textContent = district.name;
+                                    districtSelect.appendChild(opt);
+                                });
+                                districtSelect.disabled = false; // Mở khóa
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Lỗi khi tải danh sách quận/huyện:", error);
+                            districtSelect.innerHTML = '<option value="0">Lỗi tải dữ liệu</option>';
+                        });
                 }
-                filterStores(provinceSelect.value, districtSelect.value);
+                
+                // Gọi hàm lọc (sử dụng TÊN tỉnh)
+                filterStores(selectedProvinceName, "0");
             });
 
-            // Khi chọn quận
+            // 3. Xử lý khi chọn quận/huyện
             districtSelect.addEventListener('change', function() {
-                filterStores(provinceSelect.value, this.value);
+                const selectedProvinceName = provinceSelect.options[provinceSelect.selectedIndex].text;
+                const selectedDistrictName = this.options[this.selectedIndex].text;
+                
+                // Gọi hàm lọc (sử dụng TÊN)
+                filterStores(selectedProvinceName, selectedDistrictName);
             });
 
-            // Lọc cửa hàng
-            function filterStores(province, district) {
+            // 4. Hàm lọc cửa hàng (Giữ nguyên logic lọc bằng TÊN)
+            function filterStores(provinceName, districtName) {
                 const items = document.querySelectorAll('.store-item');
                 let visible = 0;
                 let noResult = document.querySelector('#no-result-message');
@@ -407,7 +434,6 @@
                     noResult.id = 'no-result-message';
                     noResult.className = 'text-center text-muted p-5';
                     noResult.style.display = 'none';
-                    // Kiểm tra xem store-scroll-list có tồn tại không trước khi append
                     const scrollList = document.querySelector('.store-scroll-list');
                     if(scrollList) {
                          scrollList.appendChild(noResult);
@@ -415,16 +441,20 @@
                 }
 
                 items.forEach(item => {
-                    const addrSpan = item.querySelector('.store-item-body span');
+                    const addrSpan = item.querySelector('.store-item-body span[th\\:text*="shop.user.address"]');
                     const addr = addrSpan ? addrSpan.textContent.toLowerCase() : '';
                     const name = item.querySelector('.store-item-header strong').textContent.toLowerCase();
 
-                    let pMatch = province === "0" || addr.includes(province.toLowerCase()) || name.includes(province.toLowerCase());
-                    let dMatch = district === "0";
+                    // Chuẩn hóa tên tỉnh (ví dụ: "Tỉnh Thừa Thiên Huế" -> "thừa thiên huế")
+                    let pLower = provinceName.toLowerCase().replace("tỉnh ", "").replace("thành phố ", "");
+                    let dLower = districtName.toLowerCase().replace("quận ", "").replace("huyện ", "").replace("thị xã ", "");
 
-                    if (pMatch && district !== "0") {
-                        const dLower = district.toLowerCase();
-                        const alts = [dLower, dLower.replace("quận ", "q."), dLower.replace("huyện ", "h.")];
+                    let pMatch = (provinceName === "0") || addr.includes(pLower) || name.includes(pLower);
+                    let dMatch = (districtName === "0");
+
+                    if (pMatch && districtName !== "0") {
+                        // Cung cấp các biến thể (ví dụ: "q.1", "quận 1")
+                        const alts = [dLower, "q." + dLower, "h." + dLower];
                         dMatch = alts.some(a => addr.includes(a) || name.includes(a));
                     }
 
@@ -448,6 +478,6 @@
             }
         });
     </script>
-</th:block>
+    </th:block>
 </body>
 </html>

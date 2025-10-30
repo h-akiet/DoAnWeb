@@ -74,10 +74,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // --- PHƯƠNG THỨC MỚI CHO BIỂU ĐỒ DOANH THU ---
 
-    /**
-     * Lấy tổng doanh thu theo từng sản phẩm cho một shop, chỉ tính các đơn hàng đã giao.
-     * Sắp xếp theo doanh thu giảm dần.
-     */
     @Query("SELECT p.name, SUM(od.price * od.quantity) as totalRevenue " +
            "FROM Order o JOIN o.orderDetails od JOIN od.productVariant pv JOIN pv.product p " +
            "WHERE o.shop.id = :shopId AND o.orderStatus = :status " +
@@ -85,30 +81,21 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
            "ORDER BY totalRevenue DESC")
     List<Object[]> findTopProductRevenueByShop(@Param("shopId") Long shopId, @Param("status") OrderStatus status, Pageable pageable);
 
-    /**
-     * Lấy tổng doanh thu theo từng danh mục sản phẩm cho một shop, chỉ tính các đơn hàng đã giao.
-     */
     @Query("SELECT c.name, SUM(od.price * od.quantity) as totalRevenue " +
            "FROM Order o JOIN o.orderDetails od JOIN od.productVariant pv JOIN pv.product p JOIN p.category c " +
            "WHERE o.shop.id = :shopId AND o.orderStatus = :status " +
            "GROUP BY c.id, c.name " +
            "ORDER BY totalRevenue DESC")  // Sắp xếp theo doanh thu giảm dần
     List<Object[]> findCategoryRevenueByShop(@Param("shopId") Long shopId, @Param("status") OrderStatus status);
-
-    // --- PHƯƠNG THỨC BỔ SUNG CHO BÁO CÁO ---
     
-    /**
-     * Đếm số đơn hàng theo trạng thái cho một shop
-     */
     @Query("SELECT COUNT(o) FROM Order o WHERE o.shop.id = :shopId AND o.orderStatus = :status")
     long countOrdersByShopAndStatus(@Param("shopId") Long shopId, @Param("status") OrderStatus status);
 
-    /**
-     * Lấy danh sách đơn hàng trong khoảng thời gian cho báo cáo
-     */
     @Query("SELECT o FROM Order o WHERE o.shop.id = :shopId AND o.createdAt BETWEEN :startDate AND :endDate " +
-           "ORDER BY o.createdAt DESC")
-    List<Order> findOrdersByShopAndDateRange(@Param("shopId") Long shopId, 
-                                           @Param("startDate") LocalDateTime startDate, 
-                                           @Param("endDate") LocalDateTime endDate);
+            "ORDER BY o.createdAt DESC")
+     List<Order> findOrdersByShopAndDateRange(@Param("shopId") Long shopId, 
+                                            @Param("startDate") LocalDateTime startDate, 
+                                            @Param("endDate") LocalDateTime endDate);
+    
+    long countByPromotionId(Long promotionId);
 }

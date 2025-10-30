@@ -46,7 +46,6 @@
 
     <p class="lead mb-4">Xem, duyệt, chỉnh sửa hoặc xóa sản phẩm của gian hàng đã chọn.</p>
 
-    <!-- Bộ lọc -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold">Bộ lọc Sản phẩm</h6>
@@ -99,7 +98,6 @@
         </div>
     </div>
 
-    <!-- Danh sách sản phẩm -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold">Danh sách Sản phẩm</h6>
@@ -138,12 +136,10 @@
                                                   (${product.status?.name() == 'REJECTED'} ? 'bg-danger' : 'bg-secondary'))">
                                 <span th:case="'PENDING'">Chờ Duyệt</span>
                                 <span th:case="'SELLING'">Đang Bán</span>
-                                <span th:case="'REJECTED'">Bị Từ Chối</span>
-                                <span th:case="*">Không xác định</span>
+                                <span th:case="'REJECTED'">Từ Chối</span> <span th:case="*">Không xác định</span>
                             </span>
-                        </td>
+                            </td>
                         <td class="text-center action-btns">
-                            <!-- Duyệt / Từ chối -->
                             <th:block th:if="${product.status?.name() == 'PENDING'}">
                                 <a th:href="@{/admin/products/updateStatus(productId=${product.productId}, newStatus='SELLING', shopId=${currentShopId})}"
                                    class="btn btn-sm btn-outline-success" title="Duyệt">
@@ -155,7 +151,6 @@
                                 </a>
                             </th:block>
 
-                            <!-- Chuyển về chờ duyệt -->
                             <th:block th:if="${product.status?.name() == 'SELLING' or product.status?.name() == 'REJECTED'}">
                                 <a th:href="@{/admin/products/updateStatus(productId=${product.productId}, newStatus='PENDING', shopId=${currentShopId})}"
                                    class="btn btn-sm btn-outline-warning text-dark" title="Chuyển về Chờ Duyệt">
@@ -163,7 +158,6 @@
                                 </a>
                             </th:block>
 
-                            <!-- Nút chỉnh sửa -->
                             <button type="button" class="btn btn-sm btn-info text-white edit-product-btn"
                                     th:data-product-id="${product.productId}"
                                     th:data-product-name="${product.name}"
@@ -173,7 +167,6 @@
                                 <i class="fas fa-pencil-alt"></i>
                             </button>
 
-                            <!-- Xóa -->
                             <a th:href="@{/admin/products/delete/{id}(id=${product.productId}, shopId=${currentShopId})}"
                                class="btn btn-sm btn-danger"
                                onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')"
@@ -191,7 +184,6 @@
         </div>
     </div>
 
-    <!-- Modal Chỉnh sửa Sản phẩm -->
     <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">

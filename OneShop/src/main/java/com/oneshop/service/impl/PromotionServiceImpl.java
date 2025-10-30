@@ -5,6 +5,7 @@ import com.oneshop.dto.PromotionDto;
 import com.oneshop.entity.Promotion;
 import com.oneshop.entity.PromotionTypeEntity;
 import com.oneshop.entity.Shop;
+import com.oneshop.repository.OrderRepository; // <<< THÊM IMPORT
 import com.oneshop.repository.PromotionRepository;
 import com.oneshop.repository.PromotionTypeRepository;
 import com.oneshop.repository.ShopRepository;
@@ -47,6 +48,8 @@ public class PromotionServiceImpl implements PromotionService {
     @Autowired private ShopRepository shopRepository;
     @Autowired private PromotionTypeRepository promotionTypeRepository;
     @Autowired private CartService cartService;
+    
+    @Autowired private OrderRepository orderRepository; // <<< THÊM INJECT
 
     @Override
     @Transactional(readOnly = true)
@@ -143,7 +146,6 @@ public class PromotionServiceImpl implements PromotionService {
         if (promo == null || cart == null || cart.getSubtotal() == null) {
             return false;
         }
-        // Thêm các quy tắc kiểm tra điều kiện áp dụng ở đây
         return true; 
     }
 
@@ -185,6 +187,13 @@ public class PromotionServiceImpl implements PromotionService {
             logger.warn("Security violation: Shop {} tried to delete promotion {} of shop {}",
                         shopId, promotionId, promotion.getShop() != null ? promotion.getShop().getId() : "null");
             throw new SecurityException("Bạn không có quyền xóa khuyến mãi này");
+        }
+
+        long orderUsageCount = orderRepository.countByPromotionId(promotionId);
+        
+        if (orderUsageCount > 0) {
+            logger.warn("Cannot delete promotion ID {}: It is used by {} order(s).", promotionId, orderUsageCount);
+            throw new RuntimeException("Không thể xóa khuyến mãi này. Nó đã được sử dụng trong " + orderUsageCount + " đơn hàng.");
         }
 
         promotionRepository.delete(promotion);
@@ -283,10 +292,10 @@ public class PromotionServiceImpl implements PromotionService {
         return promotionRepository.findByDiscountCode(code);
     }
 
-    // Thêm phương thức findPromotionById bị thiếu
     @Override
     @Transactional(readOnly = true)
     public Optional<Promotion> findPromotionById(Long promotionId) {
         return promotionRepository.findById(promotionId);
     }
+    
 }

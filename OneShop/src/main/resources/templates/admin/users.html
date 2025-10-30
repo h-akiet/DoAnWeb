@@ -154,13 +154,17 @@
                     }, 5000);
                 }
 
-                // Xử lý mở lại modal tạo Shipper nếu có lỗi validation
-                /*[[ Thymeleaf sẽ render biến này nếu có lỗi ]]*/
-                var openModal = /*[[${openShipperModal == true}]]*/ false;
+                var openModal = false;
+                
                 if (openModal) {
-                    var createShipperModal = new bootstrap.Modal(document.getElementById('createShipperModal')); // Đảm bảo ID modal đúng
-                    if(createShipperModal) { createShipperModal.show(); }
-                    else { console.error("Could not find modal with ID createShipperModal"); }
+                    var createShipperModalEl = document.getElementById('createShipperModal');
+                    if(createShipperModalEl) { 
+                        var createShipperModal = new bootstrap.Modal(createShipperModalEl);
+                        createShipperModal.show(); 
+                    }
+                    else { 
+                        console.warn("Không tìm thấy modal '#createShipperModal' trong file users.html."); 
+                    }
                 }
              });
          </script>

@@ -8,7 +8,7 @@ public enum ProductStatus {
     SELLING("Đang Bán"), 
 
 //Sản phẩm đã bị Admin từ chối do vi phạm quy tắc, không được hiển thị công khai.
-    REJECTED("Bị Từ Chối"); 
+    REJECTED("Từ Chối"); 
 
     private final String displayName;
     ProductStatus(String displayName) {

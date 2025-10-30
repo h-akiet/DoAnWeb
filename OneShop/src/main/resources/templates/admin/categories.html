@@ -64,7 +64,6 @@
                         <thead class="table-light">
                             <tr>
                                 <th scope="col" style="width: 50px;">STT</th>
-                                <th scope="col" style="width: 100px;">Mã</th>
                                 <th scope="col">Tên Danh Mục</th>
                                 <th scope="col">Danh Mục Cha</th>
                                 <th scope="col" class="text-center" style="width: 120px;">Thao tác</th>
@@ -73,7 +72,6 @@
                         <tbody>
                             <tr th:each="node, iterStat : ${categoryNodes}">
                                 <td th:text="${iterStat.count}" class="text-center"></td>
-                                <td th:text="${node.category.id}" class="text-center"></td>
                                 <td>
                                     <span class="category-name-indent" th:style="'padding-left: ' + (${node.level} * 25) + 'px;'">
                                         <span th:if="${node.level > 0}" style="margin-right: 5px; color: #ccc;">&#x2514;&#x2500;</span>
@@ -97,7 +95,7 @@
                                 </td>
                                 </tr>
                              <tr th:if="${#lists.isEmpty(categoryNodes)}">
-                                <td colspan="5" class="text-center text-muted py-4">Chưa có danh mục nào.</td>
+                                <td colspan="4" class="text-center text-muted py-4">Chưa có danh mục nào.</td>
                              </tr>
                         </tbody>
                     </table>
@@ -134,6 +132,7 @@
 				</div>
 			</div>
 		</div>
+        
         <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
              <div class="modal-dialog">
 				<div class="modal-content">
@@ -164,6 +163,7 @@
 				</div>
 			</div>
 		</div>
+
         <div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true" th:if="${isDeleting == true}">
              <div class="modal-dialog">
 				<div class="modal-content">

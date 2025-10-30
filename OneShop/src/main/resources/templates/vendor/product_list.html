@@ -25,6 +25,26 @@
         .action-buttons a, .action-buttons form button {
             margin: 0 3px; /* Khoảng cách giữa các nút */
         }
+        
+        /* === CSS CHO TRẠNG THÁI === */
+        .status-badge { 
+            font-size: 0.8em; 
+            padding: .3em .6em; 
+            color: white; /* Đảm bảo chữ trắng trên nền màu */
+        }
+        .bg-warning { 
+            background-color: #f6c23e !important; 
+            color: #5a5c69 !important; /* Chữ tối màu cho nền vàng */
+        }
+        .bg-success { 
+            background-color: #1cc88a !important; 
+        }
+        .bg-danger { 
+            background-color: #e74a3b !important; 
+        }
+         .bg-secondary {
+            background-color: #858796 !important;
+        }
     </style>
 </head>
 <body>
@@ -78,12 +98,24 @@
 								<td class="text-center" th:text="${product.category?.name ?: 'N/A'}">Danh mục</td>
 								<td class="text-center" th:text="${#numbers.formatCurrency(product.price)}">Giá bán</td>
 								<td class="text-center" th:text="${product.stock}">Tồn kho</td>
-								<td class="text-center">
-                                    <span th:if="${product.published and product.stock > 0}" class="badge bg-success">Đang bán</span>
-                                     <span th:if="${product.published and product.stock <= 0}" class="badge bg-warning text-dark">Hết hàng</span>
-                                     <span th:unless="${product.published}" class="badge bg-secondary">Đã ẩn</span>
+								
+                                <td class="text-center">
+                                    <span th:switch="${product.status?.name()}" class="badge status-badge"
+                                          th:classappend="${product.status?.name() == 'PENDING'} ? 'bg-warning' :
+                                                          (${product.status?.name() == 'SELLING'} ? 'bg-success' :
+                                                          (${product.status?.name() == 'REJECTED'} ? 'bg-danger' : 'bg-secondary'))">
+                                        
+                                        <span th:if="${product.status?.name() == 'SELLING' and product.stock <= 0}" 
+                                              class="badge status-badge bg-warning text-dark">Hết hàng</span>
+                                        
+                                        <span th:unless="${product.status?.name() == 'SELLING' and product.stock <= 0}">
+                                            <span th:case="'PENDING'">Chờ Duyệt</span>
+                                            <span th:case="'SELLING'">Đang Bán</span>
+                                            <span th:case="'REJECTED'">Bị Từ Chối</span> <span th:case="*">Không xác định</span>
+                                        </span>
+                                    </span>
                                 </td>
-								<td class="text-center action-buttons">
+                                <td class="text-center action-buttons">
                                     <a th:href="@{/vendor/products/edit/{id}(id=${product.productId})}" class="btn btn-sm btn-info" title="Sửa">
                                         <i class="fas fa-edit"></i>
                                     </a>

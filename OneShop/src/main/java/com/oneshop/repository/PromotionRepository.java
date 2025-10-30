@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import com.oneshop.entity.Promotion;
 
-import java.time.LocalDate; // <<< THÊM IMPORT NÀY
+import java.time.LocalDate; 
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +21,6 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
     List<Promotion> findByShopId(Long shopId);
 
     Page<Promotion> findByEndDateAfter(LocalDate date, Pageable pageable);
-    // ===>>> KẾT THÚC <<<===
     @Query("SELECT p FROM Promotion p WHERE p.startDate <= :date AND p.endDate >= :date")
     List<Promotion> findActivePromotions(@Param("date") LocalDate date);
     Optional<Promotion> findByDiscountCodeAndStartDateLessThanEqualAndEndDateGreaterThanEqual(

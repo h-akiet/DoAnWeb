@@ -249,46 +249,47 @@
 				</div>
 			</div>
 		</div>
-	</div>
 
-	<script type="text/template" id="ruleTemplate">
-        <div class="rule-entry mb-3 p-3 border rounded bg-light" data-index="{INDEX}">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-                <h6 class="text-secondary mb-0">Quy tắc #{INDEX_DISPLAY}</h6>
-                <input type="hidden" name="rules[{INDEX}].ruleId" value=""> <button type="button" class="btn btn-sm btn-outline-danger btnRemoveRule" title="Xóa quy tắc này"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="row g-2">
-                <div class="col-12 mb-2">
-                    <label class="form-label form-label-sm visually-hidden">Tên quy tắc</label>
-                    <input type="text" class="form-control form-control-sm" name="rules[{INDEX}].ruleName" required placeholder="Tên quy tắc (VD: Nội thành HCM)">
-                </div>
-                <div class="col-md-6 mb-2">
-                     <label class="form-label form-label-sm visually-hidden">TG Giao hàng</label>
-                    <input type="text" class="form-control form-control-sm" name="rules[{INDEX}].estimatedDeliveryTime" required placeholder="TG Giao hàng (VD: 1-2 ngày)">
-                </div>
-                <div class="col-md-6 mb-2">
-                    <label class="form-label form-label-sm visually-hidden">Phí</label>
-                    <input type="number" step="1000" min="0" class="form-control form-control-sm" name="rules[{INDEX}].baseFee" required placeholder="Phí (VNĐ)">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label form-label-sm visually-hidden">Vùng Gửi</label>
-                    <input type="text" class="form-control form-control-sm" name="rules[{INDEX}].fromRegion" required placeholder="Vùng Gửi (VD: HCM)">
-                </div>
-                <div class="col-md-4">
-                     <label class="form-label form-label-sm visually-hidden">Vùng Nhận</label>
-                    <input type="text" class="form-control form-control-sm" name="rules[{INDEX}].toRegion" required placeholder="Vùng Nhận (VD: Hà Nội)">
-                </div>
-                <div class="col-md-4 d-flex align-items-center">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="isExpress_{INDEX}" name="rules[{INDEX}].isExpress" value="true">
-                        <label class="form-check-label" for="isExpress_{INDEX}">Hỏa tốc</label>
-                        <input type="hidden" th:name="'rules[' + ${'{INDEX}'} + '].isExpress'" value="false" />
-                    </div>
-                </div>
-            </div>
-        </div>
-    </script>
-
+		<script type="text/template" id="ruleTemplate">
+			<div class="rule-entry mb-3 p-3 border rounded bg-light" data-index="{INDEX}">
+				<div class="d-flex justify-content-between align-items-start mb-2">
+					<h6 class="text-secondary mb-0">Quy tắc #{INDEX_DISPLAY}</h6>
+					<input type="hidden" name="rules[{INDEX}].ruleId" value="">
+					<button type="button" class="btn btn-sm btn-outline-danger btnRemoveRule" title="Xóa quy tắc này"><i class="fas fa-times"></i></button>
+				</div>
+				<div class="row g-2">
+					<div class="col-12 mb-2">
+						<label class="form-label form-label-sm visually-hidden">Tên quy tắc</label>
+						<input type="text" class="form-control form-control-sm" name="rules[{INDEX}].ruleName" required placeholder="Tên quy tắc (VD: Nội thành HCM)">
+					</div>
+					<div class="col-md-6 mb-2">
+						 <label class="form-label form-label-sm visually-hidden">TG Giao hàng</label>
+						<input type="text" class="form-control form-control-sm" name="rules[{INDEX}].estimatedDeliveryTime" required placeholder="TG Giao hàng (VD: 1-2 ngày)">
+					</div>
+					<div class="col-md-6 mb-2">
+						<label class="form-label form-label-sm visually-hidden">Phí</label>
+						<input type="number" step="1000" min="0" class="form-control form-control-sm" name="rules[{INDEX}].baseFee" required placeholder="Phí (VNĐ)">
+					</div>
+					<div class="col-md-4">
+						<label class="form-label form-label-sm visually-hidden">Vùng Gửi</label>
+						<input type="text" class="form-control form-control-sm" name="rules[{INDEX}].fromRegion" required placeholder="Vùng Gửi (VD: HCM)">
+					</div>
+					<div class="col-md-4">
+						 <label class="form-label form-label-sm visually-hidden">Vùng Nhận</label>
+						<input type="text" class="form-control form-control-sm" name="rules[{INDEX}].toRegion" required placeholder="Vùng Nhận (VD: Hà Nội)">
+					</div>
+					<div class="col-md-4 d-flex align-items-center">
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" role="switch" id="isExpress_{INDEX}" name="rules[{INDEX}].isExpress" value="true">
+							<label class="form-check-label" for="isExpress_{INDEX}">Hỏa tốc</label>
+							
+							<input type="hidden" name="rules[{INDEX}].isExpress" value="false" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</script>
+		</div>
 	<th:block layout:fragment="js">
         <script th:inline="javascript">
             // Biến này sẽ là true nếu nó được Flash Attribute từ showEditForm
@@ -326,6 +327,7 @@
                     }
 
                     // Cập nhật name cho hidden input (nếu có)
+                    // Cú pháp $(this).attr('name') sẽ lấy name, không phải th:name
                     const $hiddenInput = $ruleEntry.find('input[type="hidden"][name*="isExpress"]');
                      if ($hiddenInput.length) {
                          const newName = 'rules[' + newIndex + '].isExpress';
@@ -338,10 +340,18 @@
                 // Tự đóng alert sau 5 giây (logic gốc)
                 $('.alert').each(function() {
                     const alert = this;
-                    setTimeout(function() {
-                        $(alert).alert('close');
-                    }, 5000);
+                    // Sử dụng try-catch để an toàn hơn
+                    try {
+                        setTimeout(function() {
+                            var bsAlert = bootstrap.Alert.getInstance(alert);
+                            if (bsAlert) { bsAlert.close(); } else { $(alert).alert('close'); }
+                        }, 5000);
+                    } catch (e) {
+                         console.error("Error closing alert:", e);
+                         $(alert).hide(); 
+                    }
                 });
+
 
                 // Xử lý toggle status bằng AJAX (logic gốc, đã sửa lỗi)
                 $('.traditional-status-toggle').on('change', function() {
@@ -359,18 +369,26 @@
                     }
 
                     // Gửi AJAX POST (Đảm bảo Thymeleaf CSRF token được gửi nếu có)
+                    // Lưu ý: Nếu bạn dùng Spring Security và CSRF, bạn cần thêm token vào request.
+                    // Vì đây là form submit truyền thống (dù qua AJAX), nên có thể cần cấu hình CSRF.
+                    // Tạm thời giả định CSRF đã được xử lý hoặc vô hiệu hóa cho /admin/**
                     $.post(formAction, { isActiveNew: isActiveNew })
                         .done(function(data) {
+                            // Cập nhật trạng thái data-
                             checkbox.data('current-active', isActiveNew);
+                             // Hiển thị thông báo thành công (thêm vào sau .lead)
                              const successMsg = `<div class="alert alert-success alert-dismissible fade show" role="alert">
                                                     Đã ${actionText} nhà vận chuyển thành công!
                                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                  </div>`;
                              $('.lead.mb-4').after(successMsg); 
+                             // Tự đóng thông báo
                              setTimeout(() => { $('.alert-success').alert('close'); }, 3000);
                         })
                         .fail(function(xhr) {
+                            // Thất bại, trả lại checkbox
                             checkbox.prop('checked', !isActiveNew);
+                             // Hiển thị thông báo lỗi
                              const errorMsg = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
                                                   Lỗi khi ${actionText}: ${xhr.responseText || 'Vui lòng thử lại.'}
                                                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -383,8 +401,12 @@
                 // *** LOGIC TỪ shipping_company.js ***
                 // Mở modal Edit nếu biến openEditModal là true
                 if (typeof openEditModal !== 'undefined' && openEditModal) {
-                    const editModal = new bootstrap.Modal(document.getElementById('editShippingCompanyModal'));
-                    editModal.show();
+                    var editModal = new bootstrap.Modal(document.getElementById('editShippingCompanyModal'));
+                    if(editModal) {
+                        editModal.show();
+                    } else {
+                        console.error("Không tìm thấy #editShippingCompanyModal để mở.");
+                    }
                 }
 
                 // Logic cho modal Edit
@@ -392,15 +414,20 @@
                 let editRuleTemplate = '';
                 if ($("#ruleTemplate").length) {
                     editRuleTemplate = $("#ruleTemplate").html()
-                        .replace(/{INDEX_DISPLAY}/g, 'TEMP_DISPLAY')
-                        .replace(/{INDEX}/g, 'TEMP_INDEX')
-                        .replace(/rule-entry/g, 'rule-entry-edit')
-                        .replace(/isExpress_/g, 'isExpressEdit_')
-                        .replace(/btnRemoveRule/g, 'btnRemoveRuleEdit');
+                        .replace(/{INDEX_DISPLAY}/g, 'TEMP_DISPLAY') // Thay thế placeholder
+                        .replace(/{INDEX}/g, 'TEMP_INDEX')       // Thay thế placeholder
+                        .replace(/rule-entry/g, 'rule-entry-edit') // Đổi class
+                        .replace(/isExpress_/g, 'isExpressEdit_') // Đổi id/for
+                        .replace(/btnRemoveRule/g, 'btnRemoveRuleEdit'); // Đổi class nút xóa
+                } else {
+                     console.error("#ruleTemplate không tồn tại!");
                 }
             
                 $('#btnAddRuleEdit').on('click', function() {
-                    if (!editRuleTemplate) return;
+                    if (!editRuleTemplate) {
+                         console.error("editRuleTemplate rỗng, không thể thêm quy tắc.");
+                         return;
+                    }
                     const index = $editRulesContainer.children('.rule-entry-edit').length;
                     let template = editRuleTemplate
                         .replace(/TEMP_INDEX/g, index)
@@ -408,7 +435,7 @@
                         
                     $editRulesContainer.append(template);
                     // Đảm bảo ruleId mới là rỗng
-                    $editRulesContainer.find('.rule-entry-edit').last().find('input[name*="ruleId"]').val('');
+                    $editRulesContainer.find('.rule-entry-edit').last().find('input[name*="ruleId"]').val('0'); // Gán là 0
                     reIndexRules('#editRulesContainer', 'rule-entry-edit', 'isExpressEdit_');
                 });
             
@@ -424,24 +451,29 @@
                     addRuleTemplate = $("#ruleTemplate").html()
                         .replace(/{INDEX_DISPLAY}/g, 'TEMP_DISPLAY')
                         .replace(/{INDEX}/g, 'TEMP_INDEX');
+                } else {
+                     console.error("#ruleTemplate không tồn tại!");
                 }
             
                 $('#btnAddRule').on('click', function() {
-                    if (!addRuleTemplate) return;
+                    if (!addRuleTemplate) {
+                        console.error("addRuleTemplate rỗng, không thể thêm quy tắc.");
+                        return;
+                    }
                     const index = $rulesContainer.children('.rule-entry').length;
                     let template = addRuleTemplate
                         .replace(/TEMP_INDEX/g, index)
                         .replace(/TEMP_DISPLAY/g, (index + 1));
                         
                     $rulesContainer.append(template);
-                    reIndexRules('#rulesContainer', 'rule-entry', 'isExpress_');
+                    $rulesContainer.find('.rule-entry').last().find('input[name*="ruleId"]').val('0'); // Gán là 0
+                    reIndexRules('#rulesContainer', 'rule-entry', 'isExpress_'); 
                 });
             
                 $rulesContainer.on('click', '.btnRemoveRule', function() {
                     $(this).closest('.rule-entry').remove();
                     reIndexRules('#rulesContainer', 'rule-entry', 'isExpress_'); 
                 });
-                // *** KẾT THÚC LOGIC CHUYỂN VÀO ***
             });
         </script>
 	</th:block>
