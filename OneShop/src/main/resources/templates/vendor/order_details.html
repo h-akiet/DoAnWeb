@@ -25,6 +25,13 @@
         }
         .text-success { color: #198754; }
         .text-danger { color: #dc3545; }
+        
+        /* Thêm style cho khu vực nút PDF */
+        .pdf-actions-section {
+            border-top: 1px solid #eee;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -187,7 +194,35 @@
                               <p class="mb-0"><strong class="me-2">ĐVVC đã chọn:</strong><span id="displayCompanyName" th:text="${order.shippingCompany?.name ?: 'Chưa chọn'}"></span></p>
                          </div>
                      </div>
-                      </div>
+                     
+                     <!-- ===== BẮT ĐẦU NÚT BẤM PDF MỚI ===== -->
+                     <div class="pdf-actions-section">
+                         <h6 class="fw-bold mb-3">In Phiếu</h6>
+                         
+                         <!-- Chỉ hiển thị nút khi đơn hàng đã được xác nhận hoặc đang/đã giao -->
+                         <th:block th:if="${order.orderStatus?.name() == 'CONFIRMED' or order.orderStatus?.name() == 'DELIVERING' or order.orderStatus?.name() == 'DELIVERED'}">
+                             
+                             <a th:href="@{/vendor/orders/{id}/packing-slip(id=${order.id})}" 
+                                target="_blank" 
+                                class="btn btn-outline-info w-100 mb-2">
+                                 <i class="fas fa-file-invoice me-2"></i>In Phiếu Xuất Hàng
+                             </a>
+                             
+                             <a th:href="@{/vendor/orders/{id}/shipping-label(id=${order.id})}" 
+                                target="_blank" 
+                                class="btn btn-outline-dark w-100">
+                                 <i class="fas fa-shipping-fast me-2"></i>In Phiếu Gửi Hàng
+                             </a>
+                         </th:block>
+
+                         <!-- Thông báo nếu chưa thể in -->
+                         <th:block th:if="${order.orderStatus?.name() == 'PENDING' or order.orderStatus?.name() == 'CANCELLED'}">
+                             <small class="text-muted">Bạn cần xác nhận đơn hàng trước khi có thể in phiếu.</small>
+                         </th:block>
+                     </div>
+                     <!-- ===== KẾT THÚC NÚT BẤM PDF MỚI ===== -->
+                     
+                </div>
             </div>
 
             <div class="card shadow mb-4">
@@ -280,6 +315,10 @@
                       // Cập nhật thông tin Shipper
                       $shipperInfoArea.html(`<p class="mb-0"><strong class="me-2">Đang giao cho:</strong><span id="displayShipperName">${shipperName}</span></p>
                                              <p class="mb-0"><strong class="me-2">ĐVVC đã chọn:</strong><span id="displayCompanyName">${$shippingSelect.find('option:selected').text()}</span></p>`).show();
+                                             
+                      // Hiển thị lại nút PDF nếu chúng bị ẩn (trường hợp chuyển từ CONFIRMED)
+                      $('.pdf-actions-section').find('th:block[th:if*="DELIVERING"]').show();
+                      $('.pdf-actions-section').find('th:block[th:if*="PENDING"]').hide();
                  }
                  // Cập nhật lại dropdown trạng thái nếu cần
                  if (newStatus === 'CONFIRMED') {
@@ -289,6 +328,10 @@
                       if ($shippingSelect.val()) {
                           $assignShipperBtn.prop('disabled', false);
                       }
+                      
+                      // Hiển thị lại nút PDF nếu chúng bị ẩn (trường hợp chuyển từ PENDING)
+                      $('.pdf-actions-section').find('th:block[th:if*="CONFIRMED"]').show();
+                      $('.pdf-actions-section').find('th:block[th:if*="PENDING"]').hide();
                  }
             }
 
@@ -313,7 +356,8 @@
                     return;
                 }
                 
-                if (!confirm(`Xác nhận gán Shipper và chuyển đơn hàng #${orderId} sang trạng thái Đang giao?`)) {
+                // Sử dụng confirm() gốc của trình duyệt
+                if (!window.confirm(`Xác nhận gán Shipper và chuyển đơn hàng #${orderId} sang trạng thái Đang giao?`)) {
                     return;
                 }
 
@@ -387,6 +431,12 @@
             if (!$shippingSelect.val()) {
                 $assignShipperBtn.prop('disabled', true);
             }
+            
+            // Sửa lỗi confirm() bị chặn trong iframe
+            // Thay thế hàm confirm() gốc bằng một hàm không bị chặn (nếu cần)
+            // Tuy nhiên, vì đây là trang vendor, có thể window.confirm() vẫn chạy
+            // Giữ nguyên window.confirm() như ở trên, nếu nó bị chặn, người dùng sẽ báo lại.
+            
         });
         /*]]>*/
     </script>

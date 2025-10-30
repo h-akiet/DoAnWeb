@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.MediaType;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -57,6 +59,9 @@ public class VendorController {
     @Autowired private BrandService brandService;
     @Autowired private ShippingCompanyService shippingCompanyService;
     @Autowired private RoleRepository roleRepository;
+    @Autowired private PdfGenerationService pdfGenerationService; 
+
+    
 
     // --- Helper methods (getAuthenticatedUserEntity, getAndValidateVendorShop, getAuthenticatedShopId) ---
     private User getAuthenticatedUserEntity(Authentication authentication) {
@@ -572,6 +577,8 @@ public class VendorController {
             return "redirect:/vendor/orders";
         }
     }
+    
+    
     // *** KẾT THÚC SỬA LỖI ***
 
     // updateOrderStatus remains the same
@@ -1032,4 +1039,84 @@ public class VendorController {
     public static class ValidationException extends RuntimeException {
         public ValidationException(String message) { super(message); }
     }
+    
+    // pdf
+    @GetMapping("/orders/{id}/packing-slip")
+    public ResponseEntity<byte[]> downloadPackingSlip(@PathVariable("id") Long orderId, 
+                                                    Authentication authentication) {
+        String username = authentication.getName();
+        logger.info("User {} requesting packing slip for orderId: {}", username, orderId);
+        try {
+            // 1. Xác thực vendor và shop
+            Long shopId = getAuthenticatedShopId(authentication); 
+            
+            // 2. Lấy đơn hàng (dùng hàm đã có sẵn check quyền sở hữu)
+            Order order = orderService.getOrderDetails(orderId, shopId); 
+            
+            // 3. Tạo PDF
+            byte[] pdfContents = pdfGenerationService.generatePackingSlip(order);
+
+            // 4. Chuẩn bị Response Headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            String filename = "phieu-xuat-hang-" + order.getId() + ".pdf";
+            headers.setContentDispositionFormData(filename, filename);
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfContents);
+                    
+        } catch (ShopNotApprovedException e) {
+            logger.warn("User {} cannot download packing slip, shop not approved. Status: {}", username, e.getShopStatus());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (SecurityException | EntityNotFoundException e) {
+            logger.warn("Access denied or order not found for user {} on orderId {}: {}", username, orderId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            logger.error("Error generating packing slip for orderId {} by user {}: {}", orderId, username, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Endpoint để tạo và tải về Phiếu Gửi Hàng (Shipping Label)
+     * URL: /vendor/orders/{id}/shipping-label
+     */
+    @GetMapping("/orders/{id}/shipping-label")
+    public ResponseEntity<byte[]> downloadShippingLabel(@PathVariable("id") Long orderId, 
+                                                      Authentication authentication) {
+        String username = authentication.getName();
+        logger.info("User {} requesting shipping label for orderId: {}", username, orderId);
+        try {
+            // 1. Xác thực vendor và shop
+            Long shopId = getAuthenticatedShopId(authentication); 
+            
+            // 2. Lấy đơn hàng (dùng hàm đã có sẵn check quyền sở hữu)
+            Order order = orderService.getOrderDetails(orderId, shopId); 
+            
+            // 3. Tạo PDF
+            byte[] pdfContents = pdfGenerationService.generateShippingLabel(order);
+
+            // 4. Chuẩn bị Response Headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            String filename = "phieu-gui-hang-" + order.getId() + ".pdf";
+            headers.setContentDispositionFormData(filename, filename);
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfContents);
+
+        } catch (ShopNotApprovedException e) {
+            logger.warn("User {} cannot download shipping label, shop not approved. Status: {}", username, e.getShopStatus());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (SecurityException | EntityNotFoundException e) {
+            logger.warn("Access denied or order not found for user {} on orderId {}: {}", username, orderId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            logger.error("Error generating shipping label for orderId {} by user {}: {}", orderId, username, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
 }
