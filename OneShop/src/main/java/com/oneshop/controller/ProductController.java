@@ -194,7 +194,7 @@ public class ProductController {
             @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
             // Pagination/Sorting
             @RequestParam(name = "page", defaultValue = "1") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size, // Tăng size
+            @RequestParam(name = "size", defaultValue = "10") int size, // Tăng size
             @RequestParam(name = "sort", defaultValue = "productId,desc") String sort, // Mặc định mới nhất
             HttpServletRequest request) {
 

@@ -140,6 +140,28 @@ public class VnPayConfig {
         }
         return ipAddress;
     }
+    public boolean validateVnPayHash(Map<String, String> vnp_Params, String vnp_SecureHash) {
+        try {
+            // Lấy hashSecret từ thuộc tính của class
+            String secret = this.hashSecret; 
+            
+            // Tái tạo chuỗi hash data từ vnp_Params
+            // Phương thức hashAllFields (private static) đã có sẵn logic
+            // sắp xếp, nối chuỗi và URL-encode giá trị.
+            String calculatedHash = hashAllFields(vnp_Params, secret);
+            
+            // So sánh chữ ký tính toán được với chữ ký VNPAY gửi về
+            return calculatedHash.equals(vnp_SecureHash);
+            
+        } catch (UnsupportedEncodingException e) {
+            // Log lỗi nếu cần
+            System.err.println("Error validating VNPAY hash: " + e.getMessage());
+            return false;
+        } catch (Exception e) {
+            System.err.println("Error validating VNPAY hash: " + e.getMessage());
+            return false;
+        }
+    }
 
     // === CÁC PHƯƠNG THỨC HELPER (PRIVATE STATIC) ===
     

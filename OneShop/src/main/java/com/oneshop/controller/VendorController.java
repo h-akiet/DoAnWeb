@@ -615,10 +615,9 @@ public class VendorController {
 
 
     // --- Revenue Management ---
-    // revenueManagement remains the same (as updated previously)
     @GetMapping("/revenue")
     public String revenueManagement(Model model, Authentication authentication) {
-        model.addAttribute("currentPage", "revenue");
+    	model.addAttribute("currentPage", "revenue");
         String username = authentication.getName();
         logger.info("Accessing revenue management for user: {}", username);
         try {
@@ -722,11 +721,10 @@ public class VendorController {
 
 
     // --- Category Management ---
-    // categoryManagement, addCategory, deleteCategory remain the same
-        @GetMapping("/categories")
+    @GetMapping("/categories")
     public String categoryManagement(Model model, Authentication authentication) {
         String username = authentication.getName();
-        model.addAttribute("currentPage", "categories");
+        model.addAttribute("currentPage", "categories"); // <<< THÊM DÒNG NÀY
         try {
             getAndValidateVendorShop(authentication); // Kiểm tra shop hợp lệ
             List<Category> categories = categoryService.findAll(); // Lấy tất cả danh mục
@@ -808,16 +806,15 @@ public class VendorController {
 
 
     // --- Brand Management ---
-    // brandManagement, addBrand, deleteBrand remain the same
     @GetMapping("/brands")
     public String brandManagement(Model model, Authentication authentication) {
         String username = authentication.getName();
-        model.addAttribute("currentPage", "brands");
+        model.addAttribute("currentPage", "brands"); 
         try {
             getAndValidateVendorShop(authentication); // Kiểm tra shop
             List<Brand> brands = brandService.findAll(); // Lấy tất cả brands
             model.addAttribute("brands", brands);
-            model.addAttribute("newBrand", new Brand()); // DTO cho form thêm mới
+            model.addAttribute("newBrand", new Brand()); 
             return "vendor/brand_management";
         } catch (ShopNotApprovedException e) {
             model.addAttribute("shopStatus", e.getShopStatus());

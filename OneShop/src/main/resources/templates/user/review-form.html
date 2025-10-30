@@ -29,10 +29,12 @@
         }
 
         .product__name {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-        }
-
+    font-size: 3rem;
+    margin-bottom: 30px;
+    overflow: visible;   /* Hiển thị toàn bộ nội dung */
+    text-overflow: clip; /* Không cắt chữ */
+    word-wrap: break-word; /* Tự xuống dòng nếu từ quá dài */
+}
         .product__rating {
             display: flex;
             align-items: center;
@@ -175,21 +177,7 @@
                 <div class="col-md-9">
                     <h3 class="product__name" th:text="${reviewInfo.product.name}"></h3>
 
-                    <div class="product__rating">
-                        <div class="rating-stars">
-                            <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, 5)}"
-                               th:classappend="${i <= reviewInfo.product.rating} ? 'filled' : ''"></i>
-                        </div>
-                        <span class="rating-count"
-                              th:text="'(' + ${reviewInfo.product.reviewCount} + ')'"></span>
-                    </div>
-
-                    <div class="product__sold">
-                        <i class="fas fa-check-circle"></i>
-                        <span th:text="'Đã bán ' + ${reviewInfo.product.soldCount}"></span>
-                    </div>
-
-                    <div th:if="${reviewInfo.reviewed}">
+                  <div th:if="${reviewInfo.reviewed}">
                         <p class="text-success" style="font-size: 16px;">Đã đánh giá sản phẩm này.</p>
                     </div>
 
@@ -222,7 +210,7 @@
                             <textarea class="form-control" name="comment" rows="4"></textarea> </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Thêm ảnh/video (Tùy chọn)</label>
+                            <label class="form-label">Thêm ảnh (Tùy chọn)</label>
                             <input type="file" class="form-control" name="mediaFiles" multiple 
                                    accept="image/*,video/*"> </div>
 

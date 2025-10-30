@@ -56,8 +56,7 @@
 
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                 <h6 class="m-0 font-weight-bold">Cây Danh mục</h6>
-            </div>
+                 <h6 class="m-0 font-weight-bold">Danh sách Danh mục</h6> </div>
              <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover table-bordered align-middle">
@@ -65,37 +64,34 @@
                             <tr>
                                 <th scope="col" style="width: 50px;">STT</th>
                                 <th scope="col">Tên Danh Mục</th>
-                                <th scope="col">Danh Mục Cha</th>
                                 <th scope="col" class="text-center" style="width: 120px;">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="node, iterStat : ${categoryNodes}">
+                            <tr th:each="category, iterStat : ${allCategories}">
                                 <td th:text="${iterStat.count}" class="text-center"></td>
                                 <td>
-                                    <span class="category-name-indent" th:style="'padding-left: ' + (${node.level} * 25) + 'px;'">
-                                        <span th:if="${node.level > 0}" style="margin-right: 5px; color: #ccc;">&#x2514;&#x2500;</span>
-                                        <span th:text="${node.category.name}"></span>
+                                    <span class="category-name-indent">
+                                        <span th:text="${category.name}"></span>
                                     </span>
                                 </td>
-                                <td th:text="${node.category.parentCategory != null ? node.category.parentCategory.name : '—'}"></td>
                                 <td class="text-center action-btns">
-                                    <a th:href="@{/admin/categories/{id}/edit(id=${node.category.id})}"
+                                    <a th:href="@{/admin/categories/{id}/edit(id=${category.id})}"
                                        class="btn btn-sm btn-info text-white" title="Chỉnh sửa">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <button type="button"
                                             class="btn btn-sm btn-danger delete-category-btn"
-                                            th:title="'Xóa danh mục: ' + ${node.category.name}"
-                                            th:data-category-name="${node.category.name}"
-                                            th:data-delete-url="@{/admin/categories/{id}/delete(id=${node.category.id})}"
+                                            th:title="'Xóa danh mục: ' + ${category.name}"
+                                            th:data-category-name="${category.name}"
+                                            th:data-delete-url="@{/admin/categories/{id}/delete(id=${category.id})}"
                                             onclick="handleCategoryDelete(this)">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
                                 </tr>
-                             <tr th:if="${#lists.isEmpty(categoryNodes)}">
-                                <td colspan="4" class="text-center text-muted py-4">Chưa có danh mục nào.</td>
+                             <tr th:if="${#lists.isEmpty(allCategories)}">
+                                <td colspan="3" class="text-center text-muted py-4">Chưa có danh mục nào.</td>
                              </tr>
                         </tbody>
                     </table>
@@ -116,13 +112,9 @@
 								<label for="categoryName" class="form-label">Tên Danh Mục <span class="text-danger">*</span></label>
 								<input type="text" class="form-control" id="categoryName" th:field="*{name}" required placeholder="Nhập tên danh mục...">
 							</div>
-							<div class="mb-3">
-								<label for="parentCategory" class="form-label">Danh Mục Cha (Tùy chọn)</label>
-								<select class="form-select" id="parentCategory" th:field="*{parentCategory.id}">
-									<option value="">-- Không chọn --</option>
-                                    <option th:each="cat : ${allCategories}" th:value="${cat.id}" th:text="${cat.name}"></option>
-								</select>
-							</div>
+							
+							<input type="hidden" name="parentCategory.id" value="" />
+
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -147,13 +139,9 @@
 								<label for="editCategoryName" class="form-label">Tên Danh Mục <span class="text-danger">*</span></label>
 								<input type="text" class="form-control" id="editCategoryName" th:field="*{name}" required>
 							</div>
-							<div class="mb-3">
-								<label for="editParentCategory" class="form-label">Danh Mục Cha (Tùy chọn)</label>
-								<select class="form-select" id="editParentCategory" th:field="*{parentCategory.id}">
-									<option value="">-- Không chọn --</option>
-									<option th:each="cat : ${eligibleParentCategories}" th:value="${cat.id}" th:text="${cat.name}"></option>
-								</select>
-							</div>
+							
+							<input type="hidden" name="parentCategory.id" value="" />
+
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -175,9 +163,9 @@
 						<div class="modal-body">
 							<input type="hidden" name="categoryId" th:value="${categoryToDelete.id}" />
 							<p class="mb-3">
-								Danh mục <strong class="text-danger" th:text="${categoryToDelete.name}"></strong> có chứa danh mục con hoặc sản phẩm.
+								Danh mục <strong class="text-danger" th:text="${categoryToDelete.name}"></strong> có chứa sản phẩm.
                                 <br>
-                                Vui lòng chọn một danh mục khác để chuyển các mục con/sản phẩm sang trước khi xóa.
+                                Vui lòng chọn một danh mục khác để chuyển sản phẩm sang trước khi xóa.
 							</p>
 							<div class="mb-3">
                                 <label for="replacementCategory" class="form-label">Chọn danh mục thay thế <span class="text-danger">*</span></label>
@@ -264,7 +252,8 @@
                          return;
                     }
 
-                    if (confirm(`Bạn có chắc chắn muốn xóa danh mục '${categoryName}' không? Hành động này có thể cần bạn chọn danh mục thay thế nếu nó có chứa mục con hoặc sản phẩm.`)) {
+                    // Sửa lại câu confirm
+                    if (confirm(`Bạn có chắc chắn muốn xóa danh mục '${categoryName}' không? Hành động này có thể cần bạn chọn danh mục thay thế nếu nó có chứa sản phẩm.`)) {
                         console.log("User confirmed deletion. Redirecting to:", deleteUrl);
                         window.location.href = deleteUrl;
                     } else {

@@ -3,6 +3,7 @@ package com.oneshop.controller;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,9 +20,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.oneshop.config.VnPayConfig; // Đảm bảo import đúng
 import com.oneshop.dto.PlaceOrderRequest;
 import com.oneshop.entity.Order;
+import com.oneshop.entity.OrderStatus;
 import com.oneshop.service.OrderService;
 
+import org.springframework.ui.Model;
+
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller // <<< Đổi thành @Controller
 public class OrderController {
@@ -31,6 +38,74 @@ public class OrderController {
 
     @Autowired
     private VnPayConfig vnPayConfig;
+    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
+    
+    @GetMapping("/vnpay_return")
+    public String vnpayReturn(HttpServletRequest request, Model model) {
+        
+        // 1. Lấy tất cả tham số VNPAY
+        Map<String, String> vnp_Params = new HashMap<>();
+        Enumeration<String> params = request.getParameterNames();
+        while (params.hasMoreElements()) {
+            String fieldName = (String) params.nextElement();
+            String fieldValue = request.getParameter(fieldName);
+            if (fieldValue != null && !fieldName.equals("vnp_SecureHash")) {
+                vnp_Params.put(fieldName, fieldValue);
+            }
+        }
+
+        String vnp_SecureHash = request.getParameter("vnp_SecureHash");
+
+        // 2. Kiểm tra tính hợp lệ của dữ liệu (Checksum)
+        if (vnPayConfig.validateVnPayHash(vnp_Params, vnp_SecureHash)) {
+            
+            String vnp_ResponseCode = request.getParameter("vnp_ResponseCode");
+            String vnp_TxnRef = request.getParameter("vnp_TxnRef"); // Order ID
+            
+            if ("00".equals(vnp_ResponseCode)) {
+                // THANH TOÁN THÀNH CÔNG
+                try {
+                    Long orderId = Long.parseLong(vnp_TxnRef);
+                  
+                    // ===>>> LOGIC THAY ĐỔI <<<===
+                    
+                    // 3. Lấy thông tin đơn hàng để tìm shopId
+                    // (Giả định bạn có hàm getOrderById trong OrderService)
+                    Order order = orderService.getOrderById(orderId);
+                    if (order == null || order.getShop() == null) {
+                        logger.error("VNPAY success, but Order {} or its Shop is null.", orderId);
+                        throw new EntityNotFoundException("Không tìm thấy đơn hàng hoặc Shop liên kết.");
+                    }
+                    
+                    Long shopId = order.getShop().getId();
+
+                    // 4. Gọi hàm updateOrderStatus với shopId đã tìm được
+                    orderService.updateOrderStatus(orderId, OrderStatus.CONFIRMED, shopId); 
+
+                    // ===>>> KẾT THÚC THAY ĐỔI <<<===
+
+                    model.addAttribute("message", "Thanh toán thành công. Đơn hàng #" + orderId + " đã được xác nhận.");
+                    model.addAttribute("orderId", orderId); // Sửa lỗi: Thêm addAttribute(String, Long)
+                    return "user/order-success"; // Trang thông báo thành công cho VNPAY
+                    
+                } catch (Exception e) {
+                    logger.error("Error confirming order {} after VNPAY success: {}", vnp_TxnRef, e.getMessage());
+                    model.addAttribute("message", "Thanh toán thành công nhưng lỗi xử lý đơn hàng. Vui lòng liên hệ hỗ trợ.");
+                    return "user/vnpay-error";
+                }
+            } else {
+                // THANH TOÁN THẤT BẠI
+                logger.warn("VNPAY payment failed for Order ID: {}. Response code: {}", vnp_TxnRef, vnp_ResponseCode);
+                model.addAttribute("message", "Thanh toán thất bại. Mã lỗi VNPAY: " + vnp_ResponseCode);
+                return "user/vnpay-error";
+            }
+        } else {
+            // LỖI CHECKSUM
+            logger.error("VNPAY response failed integrity check (Checksum).");
+            model.addAttribute("message", "Lỗi bảo mật khi xác thực kết quả thanh toán.");
+            return "user/vnpay-error";
+        }
+    }
 
     @PostMapping("/placeOrder")
     @ResponseBody // Giữ @ResponseBody cho phương thức API này
